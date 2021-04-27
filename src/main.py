@@ -16,7 +16,7 @@ from .assembly import TranscriptAssembly, CompareTranscripts
 from .master import Archives
 from .database import Database
 from .postprocess import PostPercolator
-from .pyteogenomics.postsearch import DecoyVoid
+from .sequtils.postsearch import DecoyVoid
 
 
 pypath = sys.path[0]
