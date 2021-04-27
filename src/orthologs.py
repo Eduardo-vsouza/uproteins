@@ -1,10 +1,10 @@
 import os
 import sys
-import main
+from . import main
 import pandas as pd
 from Bio.Blast import NCBIXML
 from Bio import SeqIO
-from results_new_approach import find_nth
+from .results_new_approach import find_nth
 
 path = sys.path[0]
 

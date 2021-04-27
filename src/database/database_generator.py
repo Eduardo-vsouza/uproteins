@@ -4,7 +4,7 @@ import sys
 from Bio import SeqIO
 from Bio.Blast import NCBIXML
 
-from translate import GenomeReader as tr
+from ..translate import GenomeReader as tr
 
 
 path = sys.path[0]

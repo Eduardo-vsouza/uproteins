@@ -1,9 +1,9 @@
 import os
 import pandas as pd
 
-from pyteogenomics.postsearch import SequenceFinder, LinkData
-from pyteogenomics.utilities import PercolatorConverter
-from pyteogenomics import StringTieGFF, GenomeCoordinates, RefSeqGFF, GenomeCoordinatesRNA, PercolatorUTP, StillCounting, Enrichment
+from ..pyteogenomics.postsearch import SequenceFinder, LinkData
+from ..pyteogenomics.utilities import PercolatorConverter
+from ..pyteogenomics import StringTieGFF, GenomeCoordinates, RefSeqGFF, GenomeCoordinatesRNA, PercolatorUTP, StillCounting, Enrichment
 
 
 class PostPercolator(object):

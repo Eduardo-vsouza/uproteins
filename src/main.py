@@ -1,23 +1,22 @@
 import os
 import sys
-import database_generator as dg
-import peptide_search as ps
-import results_new_approach as pms
-import the_visualizer as vis
-import orthologs as phylo
-import f_translation as trans
-from working_runs import MinimalRuns, OrganizePlot
-from Digestion_sets import Digestion, Digested, PlotData
-import prowser.gene_organizer as gorg
-import prowser.browser_gui_v16 as prsr
-import uProteins_testing as test
-from percolator import Decoy, PercolatorProcessing
-from assembly import ReadMapper, TranscriptAssembly, CompareTranscripts
-from master import Archives
-from database import Database
-from postms import TSVConverter
-from postprocess import PostPercolator
-from pyteogenomics.postsearch import DecoyVoid
+from src.database import database_generator as dg
+from . import peptide_search as ps
+from . import results_new_approach as pms
+from . import the_visualizer as vis
+from . import orthologs as phylo
+from . import f_translation as trans
+from .working_runs import OrganizePlot
+from .Digestion_sets import Digestion, Digested, PlotData
+# import prowser.gene_organizer as gorg
+# import prowser.browser_gui_v16 as prsr
+from . import uProteins_testing as test
+from .percolator import Decoy
+from .assembly import TranscriptAssembly, CompareTranscripts
+from .master import Archives
+from .database import Database
+from .postprocess import PostPercolator
+from .pyteogenomics.postsearch import DecoyVoid
 
 
 pypath = sys.path[0]

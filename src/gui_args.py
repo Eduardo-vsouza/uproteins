@@ -1,14 +1,9 @@
 import os
-import sys
 
-import database_generator as dg
+from src.database import database_generator as dg
 import peptide_search as ps
 import results_new_approach as pms
-import the_visualizer as vis
-import orthologs as phylo
-import f_translation as trans
-from working_runs import MinimalRuns, OrganizePlot
-from Digestion_sets import Digestion, Digested, PlotData
+
 
 class Arguments(object):
     def __init__(self, args_dic):

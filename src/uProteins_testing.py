@@ -1,11 +1,9 @@
 import os
 import sys
 
-import database_generator as dg
-import peptide_search as ps
-import results_new_approach as pms
-import orthologs as phylo
-import f_translation as trans
+from src.database import database_generator as dg
+from . import peptide_search as ps
+from . import results_new_approach as pms
 
 
 class MSArgs(object):

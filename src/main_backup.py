@@ -1,18 +1,17 @@
 import os
 import sys
-import database_generator as dg
 import peptide_search as ps
 import results_new_approach as pms
 import the_visualizer as vis
 import orthologs as phylo
 import f_translation as trans
-from working_runs import MinimalRuns, OrganizePlot
+from working_runs import OrganizePlot
 from Digestion_sets import Digestion, Digested, PlotData
 import prowser.gene_organizer as gorg
 import prowser.browser_gui_v16 as prsr
 import uProteins_testing as test
 from percolator import Decoy, PercolatorProcessing
-from assembly import ReadMapper, TranscriptAssembly, CompareTranscripts
+from assembly import TranscriptAssembly, CompareTranscripts
 from master import Archives
 from database import Database
 

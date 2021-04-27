@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import sys
 import pandas as pd
 import numpy as np
-import f_translation as trt
-import adjacent_biopy as adj
+from . import f_translation as trt
+from . import adjacent_biopy as adj
 from dna_features_viewer import GraphicFeature, GraphicRecord
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QInputDialog, QFormLayout
 from PyQt5.QtWidgets import QMainWindow, QLabel, QGridLayout, QDesktopWidget

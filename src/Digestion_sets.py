@@ -3,7 +3,7 @@ import glob
 import numpy as np
 import os
 import time
-import main
+from . import main
 from matplotlib import pyplot as plt
 from Bio import SeqIO
 from tqdm import tqdm

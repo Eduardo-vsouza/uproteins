@@ -3,7 +3,7 @@ import os
 from tqdm import tqdm
 from Bio import SeqIO
 
-from f_translation_biopy import Translator
+from .f_translation_biopy import Translator
 
 
 # class Translator(object):

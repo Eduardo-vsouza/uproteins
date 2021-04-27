@@ -1,4 +1,4 @@
-from pyteogenomics import TranscriptomeTranslator, GenomeTranslator, ORFCollection, DatabaseGenerator
+from ..pyteogenomics import TranscriptomeTranslator, GenomeTranslator, ORFCollection, DatabaseGenerator
 from Bio import SeqIO
 
 class Database(object):
