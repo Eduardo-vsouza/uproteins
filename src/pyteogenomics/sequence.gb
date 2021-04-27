@@ -1,0 +1,72 @@
+LOCUS       NC_000962            4411532 bp    DNA     linear   CON 14-DEC-2017
+DEFINITION  Mycobacterium tuberculosis H37Rv, complete genome.
+ACCESSION   NC_000962
+VERSION     NC_000962.3
+DBLINK      BioProject: PRJNA57777
+            Assembly: GCF_000195955.2
+KEYWORDS    RefSeq; complete genome.
+SOURCE      Mycobacterium tuberculosis H37Rv
+  ORGANISM  Mycobacterium tuberculosis H37Rv
+            Bacteria; Actinobacteria; Corynebacteriales; Mycobacteriaceae;
+            Mycobacterium; Mycobacterium tuberculosis complex.
+REFERENCE   1
+  AUTHORS   Lew,J.M., Kapopoulou,A., Jones,L.M. and Cole,S.T.
+  TITLE     TubercuList--10 years after
+  JOURNAL   Tuberculosis (Edinb) 91 (1), 1-7 (2011)
+   PUBMED   20980199
+REFERENCE   2
+  AUTHORS   Camus,J.C., Pryor,M.J., Medigue,C. and Cole,S.T.
+  TITLE     Re-annotation of the genome sequence of Mycobacterium tuberculosis
+            H37Rv
+  JOURNAL   Microbiology (Reading, Engl.) 148 (PT 10), 2967-2973 (2002)
+   PUBMED   12368430
+REFERENCE   3
+  AUTHORS   Cole,S.T., Brosch,R., Parkhill,J., Garnier,T., Churcher,C.,
+            Harris,D., Gordon,S.V., Eiglmeier,K., Gas,S., Barry,C.E. III,
+            Tekaia,F., Badcock,K., Basham,D., Brown,D., Chillingworth,T.,
+            Connor,R., Davies,R., Devlin,K., Feltwell,T., Gentles,S.,
+            Hamlin,N., Holroyd,S., Hornsby,T., Jagels,K., Krogh,A., McLean,J.,
+            Moule,S., Murphy,L., Oliver,K., Osborne,J., Quail,M.A.,
+            Rajandream,M.A., Rogers,J., Rutter,S., Seeger,K., Skelton,J.,
+            Squares,R., Squares,S., Sulston,J.E., Taylor,K., Whitehead,S. and
+            Barrell,B.G.
+  TITLE     Deciphering the biology of Mycobacterium tuberculosis from the
+            complete genome sequence
+  JOURNAL   Nature 393 (6685), 537-544 (1998)
+   PUBMED   9634230
+  REMARK    Erratum:[Nature 1998 Nov 12;396(6707):190]
+REFERENCE   4  (bases 1 to 4411532)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (06-FEB-2013) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   5  (bases 1 to 4411532)
+  AUTHORS   Lew,J.M.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (18-DEC-2012) Lew J., Ecole Polytechnique Federale de
+            Lausanne, CH-1015, Lausanne, Switzerland, and the Swiss Institute
+            of Bioinformatics, CMU - Rue Michel-Servet 1, 1211 Geneva 4,
+            SWITZERLAND
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence is identical to AL123456.
+            On Feb 6, 2013 this sequence version replaced NC_000962.2.
+            RefSeq Category: Reference Genome
+                        FGS: First Genome sequenced
+                        MOD: Model Organism
+                        TYS: Designated Type Strain
+                        UPR: UniProt Genome
+            Note:
+            This annotation is from the TubercuList website, Release 26, Dec
+            2012 (URL: http://tuberculist.epfl.ch) (email:
+            tuberculist@epfl.ch).
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..4411532
+                     /organism="Mycobacterium tuberculosis H37Rv"
+                     /mol_type="genomic DNA"
+                     /strain="H37Rv"
+                     /type_material="type strain of Mycobacterium tuberculosis"
+                     /db_xref="taxon:83332"
+CONTIG      join(AL123456.3:1..4411532)
+//
+
