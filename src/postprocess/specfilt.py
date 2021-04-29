@@ -61,9 +61,19 @@ class PostPercolator(object):
         link.filter_msgf(f'{self.percDir}/{self.filetype}_linked')
 
     def protein_seqs(self):
+        """
+        Adds protein seqs to the output.
+        """
         seq = SequenceFinder(f'{self.percDir}/{self.filetype}_linked.tsv', f'{self.filetype}_database.fasta')
         seq.df_proteins().save(f'{self.percDir}/{self.filetype}_proteined')
 
+    def protein_threshold(self):
+        """
+        Applies a protein FDR to the results.
+        """
+        protein = ProteinFDR(folder=self.folder, filetype=self.filetype)
+        protein.protein_cutoff()
+        protein.apply_to_psm()
 
 
 class AnnoFilter(object):
@@ -73,4 +83,56 @@ class AnnoFilter(object):
     def remove_annotated(self, output):
         df = self.df[self.df["proteinIds"].str.contains('ANNO') == False]
         df.to_csv(output, sep='\t', index=False)
+
+
+class ProteinFDR(object):
+    def __init__(self, folder, filetype, fdr=0.01):
+        self.folder = folder
+        self.filetype = filetype
+        self.fdr = fdr
+        self.percDir = f'{self.folder}/post_perc'
+        self.filteredProtein = None
+        self.__cat_protein_results()
+
+    def __cat_protein_results(self):
+        self.catProteinFile = f'{self.percDir}/{self.filetype}_cat_protein_results.txt'
+        os.system(f'cat {self.folder}/Percolator/*protein_results* > {self.catProteinFile}')
+        return self
+
+
+    def protein_cutoff(self):
+        df = pd.read_csv(self.catProteinFile, sep='\t')
+        df = df[df["q-value"] != "q-value"]
+        # df["q-value"] = df["q-value"].astype(float).fillna(1, 1)
+        new_q = [float(i) for i in df["q-value"].tolist()]
+        df = df.drop(columns="q-value")
+        df.insert(3, "q-value", new_q)
+        df = df[df['q-value'] <= self.fdr]
+        self.filteredProtein = df
+
+    def apply_to_psm(self):
+        """ filters {filetype}_proteined based on proteins present in self.filteredProtein. Must define this attribute
+        with self.protein_cutoff() before calling this function. """
+        protein_df = self.filteredProtein[self.filteredProtein["ProteinId"].str.contains('ANNO') == False]
+        names = protein_df["ProteinId"].tolist()
+        results = pd.read_csv(f'{self.percDir}/{self.filetype}_proteined.tsv', sep='\t')
+        filtered_results = pd.DataFrame(columns=results.columns)
+        for i in names:
+            # print(i)
+            df = results[results["Protein"].str.contains(i) == True]
+            filtered_results = filtered_results.append(df)
+        filtered_results = filtered_results.drop_duplicates()
+        self.ProteinPSMFiltered = f'{self.percDir}/{self.filetype}_psm_protein_filtered.txt'
+        filtered_results.to_csv(self.ProteinPSMFiltered, sep='\t', index=False)
+
+
+
+
+
+
+
+
+
+
+
 
