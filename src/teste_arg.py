@@ -4,4 +4,5 @@
 
 arg = [1, 1, 1, 1, 2, 3, 4]
 
-for i in arg:
+name = 'blilibli.mzML'
+print(name[:-5])
