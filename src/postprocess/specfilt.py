@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from Bio import SeqIO
 
 from ..sequtils.postsearch import SequenceFinder, LinkData
 from ..sequtils.utilities import PercolatorConverter
@@ -72,8 +73,10 @@ class PostPercolator(object):
         Applies a protein FDR to the results.
         """
         protein = ProteinFDR(folder=self.folder, filetype=self.filetype)
-        protein.protein_cutoff()
-        protein.apply_to_psm()
+        # protein.protein_cutoff()
+        # protein.apply_to_psm()
+        # protein.filter_from_utp()
+        protein.add_proteins(f'{self.percDir}/{self.filetype}_results_02.txt')
 
 
 class AnnoFilter(object):
@@ -92,7 +95,7 @@ class ProteinFDR(object):
         self.fdr = fdr
         self.percDir = f'{self.folder}/post_perc'
         self.filteredProtein = None
-        self.__cat_protein_results()
+        # self.__cat_protein_results()
 
     def __cat_protein_results(self):
         self.catProteinFile = f'{self.percDir}/{self.filetype}_cat_protein_results.txt'
@@ -124,6 +127,90 @@ class ProteinFDR(object):
         filtered_results = filtered_results.drop_duplicates()
         self.ProteinPSMFiltered = f'{self.percDir}/{self.filetype}_psm_protein_filtered.txt'
         filtered_results.to_csv(self.ProteinPSMFiltered, sep='\t', index=False)
+
+    def __get_utp_prots_and_coords(self):
+        utps = f'{self.percDir}/{self.filetype}_utps.txt'
+        utp_df = pd.read_csv(utps, sep='\t')
+        prots_utp = utp_df["proteinIds"].tolist()
+        coords_utp = utp_df["Genome Coordinates"].tolist()
+        prots = []
+        coords = []
+        for prot_list, coord_list in zip(prots_utp, coords_utp):
+            splat_prot = prot_list.split(",")
+            splat_coords = coord_list.split(",")
+            # if len(splat_prot) > 1:
+            for prot, coord in zip(splat_prot, splat_coords):
+                prots.append(prot)
+                coords.append(coord)
+            # else:
+            #     prots.append(splat_prot)
+            #     coords.append(splat_coords)
+        return prots, coords
+
+    def __rename_orfs(self):
+        """ Removes the (...) from ORFs entries inside psm_protein_filtered.txt"""
+        df = pd.read_csv(f'{self.percDir}/{self.filetype}_psm_protein_filtered.txt', sep='\t')
+        names = df["Protein"].tolist()
+        renamed = []
+        for name in names:
+            renamed.append(name.split("(")[0])
+        df = df.drop(columns="Protein")
+        df.insert(8, "Protein", renamed)
+        return df
+
+
+    def filter_from_utp(self):
+        """
+        Filters protein FDR results, checking if they are inside the filetype_utps.txt. Also adds coordinates to the
+        filtered protein results.
+        """
+        prots, coords = self.__get_utp_prots_and_coords()
+        renamed_protein_filtered_df = self.__rename_orfs()
+        df = renamed_protein_filtered_df[renamed_protein_filtered_df["Protein"].isin(prots)]
+        filtered_df = pd.DataFrame(columns=df.columns)
+        filtered_df.insert(5, "Genome Coordinates", [])
+        for prot, coord in zip(prots, coords):
+            ndf = df[df["Protein"] == prot]
+            ncoords = []
+            for i in range(len(ndf["Protein"].tolist())):
+                ncoords.append(coord)
+            ndf.insert(5, "Genome Coordinates", ncoords)
+            filtered_df = filtered_df.append(ndf)
+        filtered_df = filtered_df.drop_duplicates()
+        filtered_df.to_csv(f"{self.percDir}/{self.filetype}_results_01.txt", sep='\t', index=False)
+        return self
+
+    def __read_db(self):
+        protein_dict = {}
+        db = f'{self.filetype}_database.fasta'
+        records = SeqIO.parse(db, 'fasta')
+        for record in records:
+            if str(record.description) not in protein_dict:
+                protein_dict[str(record.description)] = str(record.seq)
+        return protein_dict
+
+    def add_proteins(self, output):
+        db_proteins = self.__read_db()
+        results = pd.read_csv(f"{self.percDir}/{self.filetype}_results_01.txt", sep='\t')
+        results = results.drop(columns="ORF Sequence")
+        fixed_seqs = []
+        entries = results["Protein"].tolist()
+        for entry in entries:
+            fixed_seqs.append(db_proteins[entry])
+        results.insert(9, "db entry", fixed_seqs)
+        results.to_csv(output, sep='\t', index=False)
+        return self
+
+
+
+
+
+
+
+
+
+
+
 
 
 

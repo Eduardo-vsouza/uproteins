@@ -157,6 +157,7 @@ def run_workflow(args):
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
         genome_filter.protein_threshold()
+
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
             transcriptome_filter.convert_output()
