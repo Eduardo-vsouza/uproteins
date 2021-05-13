@@ -13,6 +13,7 @@ class ORF(object):
         self.chromosome = chromosome
         self.transcript = transcript
         self.origin = origin
+        self.start_codon = None
 
         self.MSPeptides = []
 
@@ -87,6 +88,10 @@ class ORFCollection(object):
         for orf in orfs:
             self.orfs.append(orf)
         return self
+
+    def add_orf(self, orf):
+        """ Add a single ORF to collection."""
+        self.orfs.append(orf)
 
     def __len__(self):
         return len(self.orfs)
