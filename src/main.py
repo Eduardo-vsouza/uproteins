@@ -17,6 +17,7 @@ from .master import Archives
 from .database import Database
 from .postprocess import PostPercolator
 from .sequtils.postsearch import DecoyVoid
+from .sequtils.orflib import AltCodons
 
 
 pypath = sys.path[0]
@@ -156,7 +157,11 @@ def run_workflow(args):
         # genome_filter.unique_peptides()
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
-        genome_filter.protein_threshold()
+        # genome_filter.protein_threshold()
+        alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome)
+        alts_pre_rf.extend_orfs(args=args)
+        alts_pre_rf.sort_by_coordinates()
+        alts_pre_rf.sort_by_atg()
 
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')

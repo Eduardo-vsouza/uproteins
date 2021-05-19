@@ -73,9 +73,9 @@ class PostPercolator(object):
         Applies a protein FDR to the results.
         """
         protein = ProteinFDR(folder=self.folder, filetype=self.filetype)
-        # protein.protein_cutoff()
-        # protein.apply_to_psm()
-        # protein.filter_from_utp()
+        protein.protein_cutoff()
+        protein.apply_to_psm()
+        protein.filter_from_utp()
         protein.add_proteins(f'{self.percDir}/{self.filetype}_results_02.txt')
 
 
