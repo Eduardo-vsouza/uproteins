@@ -18,6 +18,7 @@ from .database import Database
 from .postprocess import PostPercolator
 from .sequtils.postsearch import DecoyVoid
 from .sequtils.orflib import AltCodons
+from .upstream import SDInspection
 
 
 pypath = sys.path[0]
@@ -158,10 +159,13 @@ def run_workflow(args):
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
         # genome_filter.protein_threshold()
-        alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome)
-        alts_pre_rf.extend_orfs(args=args)
-        alts_pre_rf.sort_by_coordinates()
-        alts_pre_rf.sort_by_atg()
+        if args.rrna is not None:
+            genome_rbs = SDInspection(args, filetype="genome", folder="Genome")
+            genome_rbs.check_free_energy()
+        # genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome)
+        # genome_alts_pre_rf.extend_orfs(args=args)
+        # genome_alts_pre_rf.sort_by_coordinates()
+        # genome_alts_pre_rf.sort_by_atg()
 
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
