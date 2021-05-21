@@ -161,7 +161,7 @@ def run_workflow(args):
         # genome_filter.protein_threshold()
         if args.rrna is not None:
             genome_rbs = SDInspection(args, filetype="genome", folder="Genome")
-            genome_rbs.check_free_energy()
+            genome_rbs.get_free_energy().save_data()
         # genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome)
         # genome_alts_pre_rf.extend_orfs(args=args)
         # genome_alts_pre_rf.sort_by_coordinates()

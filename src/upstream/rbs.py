@@ -15,6 +15,7 @@ class SDInspection(object):
         """
         self.rRNA = self.__get_sequences(args.rrna)[::-1][:13]  # one of the RNA strings must be 3'-5'.
         self.filetype = filetype
+        self.folder = folder
         self.results = pd.read_csv(f'{folder}/post_perc/{filetype}_results_02.txt', sep='\t')
         self.coordinates = self.results["Genome Coordinates"].tolist()
         self.entries = self.results["Protein"].tolist()
@@ -44,6 +45,7 @@ class SDInspection(object):
             elif 'reverse' in entry:
                 start = int(splat_coords[1])
                 upstream = self.__complement(self.genome[start: start+22][::-1])
+                # print(coords, upstream)
                 upstream_seqs.append(upstream)
         return upstream_seqs
 
@@ -59,14 +61,37 @@ class SDInspection(object):
             compl += nucs[nuc]
         return compl
 
-    def check_free_energy(self):
+    def get_free_energy(self):
         """
         Runs free_align.pl to check which part of the sequence has the minimum free energy when binding to the rRNA,
         i.e, has the most stable binding. """
         energies = []
+        sd = []
         for upstream_seq in self.upstreamSequences:
             cmd = f'{self.freeAlignPath} -e {upstream_seq} {self.rRNA}'
-            free_energy = subprocess.check_output(cmd, shell=True)
-            energies.append(free_energy)
-        print(self.upstreamSequences)
-        print(energies)
+            energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
+            energies.append(f'{energy}')
+            sd_seq = self.__check_rbs(energy)
+            sd.append(sd_seq)
+        self.results.insert(5, "Free Energy", energies)
+        self.results.insert(6, "Shine-Dalgarno", sd)
+        return self
+
+    @staticmethod
+    def __check_rbs(rbs):
+        if float(rbs) >= 0:
+            sd_seq = "Leaderless"
+        elif -8.4 < float(rbs) < 0:
+            sd_seq = "Present. Low to moderate binding."
+        elif float(rbs) <= -8.4:
+            sd_seq = "Present. Strong binding."
+        else:
+            sd_seq = "Leaderless"
+        return sd_seq
+
+    def save_data(self):
+        out = f'{self.folder}/post_perc/{self.filetype}_results_03.txt'
+        self.results.to_csv(out, sep='\t', index=False)
+        return self
+
+
