@@ -174,8 +174,8 @@ class AltCodons(object):
                         if ex_codon in args.starts.split(","):
                             self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
                             self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq, start_pos=alt.start +i-6)
-                            print(alt.start+i-3, alt.end)
-                            print(ex_seq)
+                            # print(alt.start+i-3, alt.end)
+                            # print(ex_seq)
                         if ex_codon in args.stops.split(","):
                             extend = False
 
@@ -268,4 +268,49 @@ class AltCodons(object):
         else:
             new_alts[alt.end].append(orf)
         return new_alts
+
+    def sort_by_shine(self):
+        """
+        Sorts the ORFs by their free energy when binding to the 16S rRNA. If no alternative START of a given STOP has
+        any Shine-Dalgarno sequences (free energy >= 0) upstream from their START codon, these ORFs are not sorted at
+        all.
+        :return: dictionary containing ORFCollections with ORFs sorted by the presence or absence of Shine-Dalgarno
+        sequences upstream from their START.
+        """
+        alternatives = {}
+        for stop in self.alternatives:
+            ignore = False
+            sorted_orfs = []
+            no_sd = 0  # marks the number of sequences without a SD sequence. If this is equal to the number of
+            # alternative starts, change ignore to True. Then, these ORFs should not be sorted by SD.
+            for alt in self.alternatives[stop]:
+                if alt.freeEnergy < 0:
+                    if len(sorted_orfs) > 0:
+                        if alt.freeEnergy < sorted_orfs[0].freeEnergy:
+                            sorted_orfs.insert(0, alt)
+                    else:
+                        sorted_orfs.append(alt)
+                else:
+                    no_sd += 1
+                if no_sd == len(self.alternatives[stop]):
+                    ignore = True
+            if stop not in alternatives:
+                if not ignore:
+                    alternatives[stop] = ORFCollection()
+                    alternatives[stop].add_orfs(sorted_orfs)
+                else:
+                    alternatives[stop] = self.alternatives[stop]
+            else:
+                if not ignore:
+                    alternatives[stop].add_orfs(sorted_orfs)
+                else:
+                    alternatives[stop] = self.alternatives[stop]
+        # for stop in alternatives:
+        #     print(alternatives[stop])
+        #     for alt in alternatives[stop]:
+        #         print(stop, alt.name, alt.start, alt.shineDalgarno)
+
+        return alternatives
+
+
 
