@@ -14,6 +14,8 @@ class ORF(object):
         self.transcript = transcript
         self.origin = origin
         self.start_codon = None
+        self.shineDalgarno = None
+        self.freeEnergy = None
 
         self.MSPeptides = []
 

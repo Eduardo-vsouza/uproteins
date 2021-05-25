@@ -5,8 +5,9 @@ from . import ORF, ORFCollection
 
 
 class AltCodons(object):
-    def __init__(self, file, genome):
+    def __init__(self, file, genome, maxsize):
         """ I hate this code """
+        self.maxSize = maxsize
         self.df = pd.read_csv(file, sep='\t')
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
@@ -71,7 +72,7 @@ class AltCodons(object):
     def sort_by_atg(self):
         """ Gives priority to ATG when sorting ORFs. """
         for alts in self.alternatives:
-            print(f'Alts: {alts}')
+            # print(f'Alts: {alts}')
             atgs = []
             for alt in self.alternatives[alts]:
                 if len(atgs) == 0:
@@ -108,7 +109,7 @@ class AltCodons(object):
                 # print([(alt.name, alt.start, alt.start_codon) for alt in atgs])
             self.alternatives[alts] = ORFCollection().add_orfs(atgs)
             print([(alt.name, alt.start, alt.start_codon, alt.seq) for alt in self.alternatives[alts]])
-            print(len(self.alternatives))
+            # print(len(self.alternatives))
 
     def __fetch_codons(self, orf):
         """ :returns the nucleotide sequence of the start codon for a given ORF. """
@@ -148,7 +149,7 @@ class AltCodons(object):
                             position = alt.start - i
 
                             seq = self.genome_seq[0][position+2: alt.end+1]
-                            new_alts, extend = self.__check_length(seq, alt, new_alts, i)
+                            new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
                             if s_codon in args.stops.split(","):
                                 extend = False
@@ -172,7 +173,7 @@ class AltCodons(object):
                         i += 3
                         # print(f'codon: {ex_codon}')
                         if ex_codon in args.starts.split(","):
-                            self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
+                            new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
                             self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq, start_pos=alt.start +i-6)
                             # print(alt.start+i-3, alt.end)
                             # print(ex_seq)
@@ -245,18 +246,22 @@ class AltCodons(object):
             # print(alt)
             # print(self.alternatives)
             # if 'Discard' not in new_alts[alt]:
+            # print([(orf.name, orf.start, orf.end, orf.seq) for orf in new_alts[alt]])
             self.alternatives[str(alt)].add_orfs(new_alts[alt])
         return self
 
     def __check_length(self, seq, alt, new_alts, i):
-        extend = True
-        if i > 300:
-            extend = False
+        # extend = True
+        if i > self.maxSize:
+            # extend = False
+            orf = ORF(name='Discard', end=alt.end, start=alt.start, seq=seq, strand=alt.strand)
+            orf.shineDalgarno = alt.shineDalgarno
+            orf.freeEnergy = alt.freeEnergy
             if alt.end not in new_alts:
-                new_alts[alt.end] = [ORF(name='Discard', end=alt.end, start=alt.start)]
+                new_alts[alt.end] = [orf]
             else:
-                new_alts[alt.end].insert(0, ORF(name='Discard', end=alt.end, start=alt.start))
-        return new_alts, extend
+                new_alts[alt.end].insert(0, orf)
+        return new_alts
 
     @staticmethod
     def __add_extended(new_alts, start_pos, alt, s_codon, seq):
@@ -291,6 +296,7 @@ class AltCodons(object):
                     else:
                         sorted_orfs.append(alt)
                 else:
+                    sorted_orfs.append(alt)
                     no_sd += 1
                 if no_sd == len(self.alternatives[stop]):
                     ignore = True
@@ -305,10 +311,9 @@ class AltCodons(object):
                     alternatives[stop].add_orfs(sorted_orfs)
                 else:
                     alternatives[stop] = self.alternatives[stop]
-        # for stop in alternatives:
-        #     print(alternatives[stop])
-        #     for alt in alternatives[stop]:
-        #         print(stop, alt.name, alt.start, alt.shineDalgarno)
+        for stop in alternatives:
+            # for alt in alternatives[stop]:
+            print('shine:', [(stop, alt.freeEnergy, alt.name, alt.start, alt.shineDalgarno) for alt in alternatives[stop]])
 
         return alternatives
 

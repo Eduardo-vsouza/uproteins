@@ -159,7 +159,8 @@ def run_workflow(args):
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
         # genome_filter.protein_threshold()
-        genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome)
+        genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome,
+                                       maxsize=args.maxsize)
         genome_alts_pre_rf.extend_orfs(args=args)
         if args.rrna is not None:
             genome_rbs = SDInspection(args, filetype="genome", folder="Genome", alternatives=genome_alts_pre_rf.alternatives)
@@ -167,7 +168,7 @@ def run_workflow(args):
             genome_alts_pre_rf.alternatives = alts
         genome_alts_pre_rf.sort_by_coordinates()
         genome_alts_pre_rf.sort_by_atg()
-        # genome_alts_pre_rf.sort_by_shine()
+        genome_alts_pre_rf.sort_by_shine()
 
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')

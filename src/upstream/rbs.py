@@ -65,21 +65,34 @@ class SDInspection(object):
         for stop in self.alternatives:
             # print(stop)
             # print(self.alternatives[stop])
+            # print([alt.name for alt in self.alternatives[stop]])
+            # print(self.alternatives[stop])
             for alt in self.alternatives[stop]:
-                if alt.name != "Discard":
+                # if alt.name != "Discard":
                     # print(alt.name, alt.strand, alt.start)
-                    if alt.strand == 'forward':
-                        upstream = self.genome[alt.start-22: alt.start]
-                        alt.upstream = upstream
-                    elif alt.strand == 'reverse':
-                        upstream = self.__complement(self.genome[alt.start: alt.start+22][::-1])
-                        alt.upstream = upstream
-                    if alt.end not in upstream_seqs:
-                        upstream_seqs[str(alt.end)] = ORFCollection()
-                        upstream_seqs[str(alt.end)].add_orf(alt)
-                    else:
-                        # print(upstream_seqs[alt.end])
-                        upstream_seqs[str(alt.end)].add_orf(alt)
+                if alt.strand == 'forward':
+                    upstream = self.genome[alt.start-22: alt.start]
+                    alt.upstream = upstream
+                elif alt.strand == 'reverse':
+                    upstream = self.__complement(self.genome[alt.start: alt.start+22][::-1])
+                    alt.upstream = upstream
+                if str(alt.end) not in upstream_seqs:
+                    upstream_seqs[str(alt.end)] = ORFCollection()
+                    upstream_seqs[str(alt.end)].add_orf(alt)
+                elif str(alt.end) in upstream_seqs:
+                    # print(upstream_seqs[alt.end])
+                    upstream_seqs[str(alt.end)].add_orf(alt)
+                # else:
+                #     if str(alt.end) in upstream_seqs:
+                #         upstream_seqs[str(alt.end)].add_orf(alt)
+                #     else:
+                #         upstream_seqs[str(alt.end)] = ORFCollection()
+                #         upstream_seqs[str(alt.end)].add_orf(alt)
+        for stop in upstream_seqs:
+            # for orf in upstream_seqs[stop]:
+            #     print('upstream', orf.name, orf.strand, orf.end)
+            print([('upstream', orf.name, orf.start, orf.end) for orf in upstream_seqs[stop]])
+
         return upstream_seqs
 
     @staticmethod
@@ -101,15 +114,15 @@ class SDInspection(object):
             # print(self.alternatives[stop])
 
             for alt in self.alternatives[stop]:
-                if alt.name != "Discard":
-                    cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
-                    energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
-                    alt.freeEnergy = float(energy)
-                    sd_seq = self.__check_rbs(energy)
-                    alt.shineDalgarno = sd_seq
-                else:
-                    alt.freeEnergy = 0
-                    alt.shineDalgarno = "Absent"
+                # if alt.name != "Discard":
+                cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
+                energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
+                alt.freeEnergy = float(energy)
+                sd_seq = self.__check_rbs(energy)
+                alt.shineDalgarno = sd_seq
+                # else:
+                #     alt.freeEnergy = 0
+                #     alt.shineDalgarno = "Absent"
                 if alt.end not in alts:
                     alts[alt.end] = ORFCollection()
                     alts[alt.end].add_orf(alt)
@@ -118,7 +131,7 @@ class SDInspection(object):
         # for alt in alts:
         #     for orf in alts[alt]:
         #         if orf.name != "Discard":
-        #             print(orf.start, orf.end)
+        #         print(orf.name, orf.start, orf.end)
         #             print(orf.freeEnergy, orf.shineDalgarno)
         return alts
 
