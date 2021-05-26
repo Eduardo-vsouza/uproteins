@@ -169,7 +169,7 @@ def run_workflow(args):
         genome_alts_pre_rf.sort_by_coordinates()
         genome_alts_pre_rf.sort_by_atg()
         genome_alts_pre_rf.sort_by_shine()
-
+        genome_alts_pre_rf.sort_by_peptides()
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
             transcriptome_filter.convert_output()

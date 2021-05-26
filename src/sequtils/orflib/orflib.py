@@ -3,7 +3,7 @@ from Bio import SeqIO
 
 class ORF(object):
     def __init__(self, name=None, seq=None, start=None, end=None, cds=None, strand=None, chromosome=None,
-                 transcript=None, origin=None, appearances=1, experiment=None):
+                 transcript=None, origin=None, appearances=1, experiment=None, protein_sequence=None):
         self.name = name
         self.seq = seq
         self.start = start
@@ -16,6 +16,7 @@ class ORF(object):
         self.start_codon = None
         self.shineDalgarno = None
         self.freeEnergy = None
+        self.proteinSequence = protein_sequence
 
         self.MSPeptides = []
 

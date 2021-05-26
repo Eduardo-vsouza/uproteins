@@ -11,10 +11,17 @@ class AltCodons(object):
         self.df = pd.read_csv(file, sep='\t')
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
+        self.proteinSequences = self.df["db entry"].tolist()
+        print(self.proteinSequences)
         self.__genome_records = SeqIO.parse(genome, 'fasta')
         self.genome_seq = [str(record.seq) for record in self.__genome_records]
 
         self.alternatives = self.__fetch_orfs()
+        self.alternatives = self.__extract_peptides()
+        for stop in self.alternatives:
+            for alt in self.alternatives[stop]:
+                print(alt.MSPeptides, alt.name)
+                break
 
     def __split_coords(self, i):
         splat = self.coordinates[i].split("-")
@@ -36,7 +43,7 @@ class AltCodons(object):
         alternatives = {}
         for i in range(len(self.names)):
             start, end, strand = self.__split_coords(i)
-            orf = ORF(name=self.names[i], start=int(start), end=int(end), strand=strand)
+            orf = ORF(name=self.names[i], start=int(start), end=int(end), strand=strand, protein_sequence=self.proteinSequences[i])
             orf = self.__fetch_codons(orf)
             if end not in alt_check:
                 alt_check[end] = []
@@ -268,6 +275,7 @@ class AltCodons(object):
         orf = ORF(name=f'{alt.name[:5]}_extended_{start_pos+3}-{alt.end}_{alt.strand}',
                   strand=alt.strand, start=start_pos+3, end=alt.end, seq=seq)
         orf.start_codon = s_codon
+        orf.MSPeptides = alt.MSPeptides
         if alt.end not in new_alts:
             new_alts[alt.end] = [orf]
         else:
@@ -317,5 +325,61 @@ class AltCodons(object):
 
         return alternatives
 
+
+    def __extract_peptides(self):
+        peptides = self.df["Peptide"].tolist()
+        # print(peptides)
+        def format_pep(pep):
+            fixed = ""
+            for i in pep:
+                if i.isalpha():
+                    fixed += i
+            return fixed
+
+        fixed_peps = []
+        for pep in peptides:
+            fixed = format_pep(pep)
+            fixed_peps.append(fixed)
+        alts_with_peps = {}
+        for stop in self.alternatives:
+            for alt in self.alternatives[stop]:
+                for pep in fixed_peps:
+                    if pep not in alt.MSPeptides and pep in alt.proteinSequence:
+                        # if pep in alt.proteinSequence:
+                        alt.MSPeptides.append(pep)
+                            # print(alt.MSPeptides, alt.proteinSequence, pep)
+                            # break
+                if str(stop) not in alts_with_peps:
+                    alts_with_peps[str(stop)] = ORFCollection()
+                    alts_with_peps[str(stop)].add_orf(alt)
+                elif str(stop) in alts_with_peps:
+                    alts_with_peps[str(stop)].add_orf(alt)
+        return alts_with_peps
+
+    def sort_by_peptides(self):
+        pep_sorted = {}
+        total = []
+        for stop in self.alternatives:
+            orfs = []
+            for alt in self.alternatives[stop]:
+                if len(orfs) > 0:
+                    if len(alt.MSPeptides) > len(orfs[0].MSPeptides):
+                        orfs.insert(0, alt)
+                    else:
+                        orfs.append(alt)
+                else:
+                    orfs.append(alt)
+            if stop not in pep_sorted:
+                pep_sorted[stop] = ORFCollection()
+                pep_sorted[stop].add_orfs(orfs)
+            else:
+                pep_sorted[stop].add_orfs(orfs)
+        for stop in pep_sorted:
+            for i in pep_sorted[stop]:
+                total.append(f'{i.name} {i.MSPeptides} {i.start_codon} \n')
+        with open('teste_peptide_sort.txt', 'w') as out:
+            out.writelines(total)
+            # print([('start', orf.name, orf.MSPeptides) for orf in self.alternatives[stop]])
+        return pep_sorted
 
 

@@ -88,10 +88,10 @@ class SDInspection(object):
                 #     else:
                 #         upstream_seqs[str(alt.end)] = ORFCollection()
                 #         upstream_seqs[str(alt.end)].add_orf(alt)
-        for stop in upstream_seqs:
+        # for stop in upstream_seqs:
             # for orf in upstream_seqs[stop]:
             #     print('upstream', orf.name, orf.strand, orf.end)
-            print([('upstream', orf.name, orf.start, orf.end) for orf in upstream_seqs[stop]])
+            # print([('upstream', orf.name, orf.start, orf.end) for orf in upstream_seqs[stop]])
 
         return upstream_seqs
 
