@@ -2,6 +2,7 @@ import pandas as pd
 from Bio import SeqIO
 
 from . import ORF, ORFCollection
+from ..conversion import Translator
 
 
 class AltCodons(object):
@@ -33,7 +34,7 @@ class AltCodons(object):
             start = splat[0]
             end = splat[1]
             strand = 'forward'
-        return start, end, strand
+        return int(start), int(end), strand
 
     def __fetch_orfs(self):
         """
@@ -43,7 +44,8 @@ class AltCodons(object):
         alternatives = {}
         for i in range(len(self.names)):
             start, end, strand = self.__split_coords(i)
-            orf = ORF(name=self.names[i], start=int(start), end=int(end), strand=strand, protein_sequence=self.proteinSequences[i])
+            seq = self.genome_seq[0][start - 1: end+1]
+            orf = ORF(name=self.names[i], start=int(start), end=int(end), seq=seq, strand=strand, protein_sequence=self.proteinSequences[i])
             orf = self.__fetch_codons(orf)
             if end not in alt_check:
                 alt_check[end] = []
@@ -331,6 +333,7 @@ class AltCodons(object):
         # print(peptides)
         def format_pep(pep):
             fixed = ""
+            # print(pep)
             for i in pep:
                 if i.isalpha():
                     fixed += i
@@ -362,6 +365,9 @@ class AltCodons(object):
         for stop in self.alternatives:
             orfs = []
             for alt in self.alternatives[stop]:
+                if 'extend' not in alt.name:
+                    to_trans = Translator(alt.seq)
+                    alt.proteinSequence = to_trans.translate()
                 if len(orfs) > 0:
                     if len(alt.MSPeptides) > len(orfs[0].MSPeptides):
                         orfs.insert(0, alt)
@@ -376,7 +382,7 @@ class AltCodons(object):
                 pep_sorted[stop].add_orfs(orfs)
         for stop in pep_sorted:
             for i in pep_sorted[stop]:
-                total.append(f'{i.name} {i.MSPeptides} {i.start_codon} \n')
+                total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence}\n')
         with open('teste_peptide_sort.txt', 'w') as out:
             out.writelines(total)
             # print([('start', orf.name, orf.MSPeptides) for orf in self.alternatives[stop]])
