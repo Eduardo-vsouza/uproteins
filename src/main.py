@@ -15,8 +15,10 @@ from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts
 from .master import Archives
 from .database import Database
-from .postprocess import PostPercolator
+from .postprocess import PostPercolator, ExtendedInformation
 from .sequtils.postsearch import DecoyVoid
+from .sequtils.orflib import AltCodons
+from .upstream import SDInspection
 
 
 pypath = sys.path[0]
@@ -156,7 +158,20 @@ def run_workflow(args):
         # genome_filter.unique_peptides()
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
-        genome_filter.protein_threshold()
+        # genome_filter.protein_threshold()
+        genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=args.genome,
+                                       maxsize=args.maxsize)
+        genome_alts_pre_rf.extend_orfs(args=args)
+        # if args.rrna is not None:
+            # genome_rbs = SDInspection(args, filetype="genome", folder="Genome", alternatives=genome_alts_pre_rf.alternatives)
+            # alts = genome_rbs.get_free_energy()
+            # genome_alts_pre_rf.alternatives = alts
+        # genome_alts_pre_rf.sort_by_coordinates()
+        # genome_alts_pre_rf.sort_by_atg()
+        # genome_alts_pre_rf.sort_by_shine()
+        genome_alts_pre_rf.sort_by_peptides()
+        ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+        ext.extract_spectra()
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
             transcriptome_filter.convert_output()

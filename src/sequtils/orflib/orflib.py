@@ -3,7 +3,7 @@ from Bio import SeqIO
 
 class ORF(object):
     def __init__(self, name=None, seq=None, start=None, end=None, cds=None, strand=None, chromosome=None,
-                 transcript=None, origin=None, appearances=1, experiment=None):
+                 transcript=None, origin=None, appearances=1, experiment=None, protein_sequence=None):
         self.name = name
         self.seq = seq
         self.start = start
@@ -13,6 +13,10 @@ class ORF(object):
         self.chromosome = chromosome
         self.transcript = transcript
         self.origin = origin
+        self.start_codon = None
+        self.shineDalgarno = None
+        self.freeEnergy = None
+        self.proteinSequence = protein_sequence
 
         self.MSPeptides = []
 
@@ -87,6 +91,10 @@ class ORFCollection(object):
         for orf in orfs:
             self.orfs.append(orf)
         return self
+
+    def add_orf(self, orf):
+        """ Add a single ORF to collection."""
+        self.orfs.append(orf)
 
     def __len__(self):
         return len(self.orfs)
