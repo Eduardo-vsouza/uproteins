@@ -76,7 +76,14 @@ class AltCodons(object):
                             starts.insert(0, alt)
                         else:
                             starts.append(alt)
-            self.alternatives[alts] = ORFCollection().add_orfs(starts)
+            self.alternatives[alts] = ORFCollection()
+            self.alternatives[alts].add_orfs(starts)
+        # total = []
+        # for stop in self.alternatives:
+        #     for i in self.alternatives[stop]:
+        #         total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence}\n')
+        # with open('teste_peptide_sort.txt', 'w') as out:
+        #     out.writelines(total)
 
     def sort_by_atg(self):
         """ Gives priority to ATG when sorting ORFs. """
@@ -116,8 +123,15 @@ class AltCodons(object):
                         else:
                             atgs.append(alt)
                 # print([(alt.name, alt.start, alt.start_codon) for alt in atgs])
-            self.alternatives[alts] = ORFCollection().add_orfs(atgs)
-            print([(alt.name, alt.start, alt.start_codon, alt.seq) for alt in self.alternatives[alts]])
+            self.alternatives[alts] = ORFCollection()
+            self.alternatives[alts].add_orfs(atgs)
+            # print([(alt.name, alt.start, alt.start_codon, alt.seq) for alt in self.alternatives[alts]])
+        # total = []
+        # for stop in self.alternatives:
+        #     for i in self.alternatives[stop]:
+        #         total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence}\n')
+        # with open('teste_peptide_sort.txt', 'w') as out:
+        #     out.writelines(total)
             # print(len(self.alternatives))
 
     def __fetch_codons(self, orf):
@@ -158,10 +172,10 @@ class AltCodons(object):
                             position = alt.start - i
 
                             seq = self.genome_seq[0][position+2: alt.end+1]
-                            new_alts  = self.__check_length(seq, alt, new_alts, i)
+                            # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
-                            if s_codon in args.stops.split(","):
-                                extend = False
+                        if s_codon in args.stops.split(","):
+                            extend = False
 
                             if extended != 'same':
 
@@ -174,7 +188,7 @@ class AltCodons(object):
                     i = 6
                     extend = True
                     while extend:
-                        ex_start = self.genome_seq[0][alt.end: alt.start + i][::-1]
+                        ex_start = self.genome_seq[0][alt.end - 1: alt.start + i][::-1]
                         ex_seq = self.complement(ex_start)
                         ex_codon = self.genome_seq[0][alt.start + i - 3:alt.start + i][::-1]
                         ex_codon = self.complement(ex_codon)
@@ -182,7 +196,7 @@ class AltCodons(object):
                         i += 3
                         # print(f'codon: {ex_codon}')
                         if ex_codon in args.starts.split(","):
-                            new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
+                            # new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
                             self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq, start_pos=alt.start +i-6)
                             # print(alt.start+i-3, alt.end)
                             # print(ex_seq)
@@ -295,7 +309,7 @@ class AltCodons(object):
         alternatives = {}
         for stop in self.alternatives:
             ignore = False
-            sorted_orfs = []
+            sorted_orfs = [orf for orf in self.alternatives[stop]]
             no_sd = 0  # marks the number of sequences without a SD sequence. If this is equal to the number of
             # alternative starts, change ignore to True. Then, these ORFs should not be sorted by SD.
             for alt in self.alternatives[stop]:
@@ -321,10 +335,21 @@ class AltCodons(object):
                     alternatives[stop].add_orfs(sorted_orfs)
                 else:
                     alternatives[stop] = self.alternatives[stop]
-        for stop in alternatives:
+        # for stop in alternatives:
             # for alt in alternatives[stop]:
-            print('shine:', [(stop, alt.freeEnergy, alt.name, alt.start, alt.shineDalgarno) for alt in alternatives[stop]])
-
+            # print('shine:', [(stop, alt.freeEnergy, alt.name, alt.start, alt.shineDalgarno) for alt in alternatives[stop]])
+        # total = []
+        # for stop in alternatives:
+        #     i = 0
+        #     for i in alternatives[stop]:
+        #         if i == 0:
+        #             total.append('__________________________________________\n')
+        #         total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence} {i.shineDalgarno} '
+        #                      f'{i.freeEnergy}\n')
+        #     total.append('__________________________________________\n')
+        # with open('teste_peptide_sort.txt', 'w') as out:
+        #     out.writelines(total)
+        self.alternatives = alternatives
         return alternatives
 
 
@@ -365,9 +390,11 @@ class AltCodons(object):
         for stop in self.alternatives:
             orfs = []
             for alt in self.alternatives[stop]:
-                if 'extend' not in alt.name:
-                    to_trans = Translator(alt.seq)
-                    alt.proteinSequence = to_trans.translate()
+                # if 'extend' not in alt.name:
+                # if alt.name == 'gORF__extended_3593023-3592712_reverse':  # MUST REMOVE AFTERWARDS
+                #     alt.MSPeptides = ['FAKEPEPTIDE', 'blibliblo']  # MUST DELETE
+                to_trans = Translator(alt.seq)
+                alt.proteinSequence = to_trans.translate()
                 if len(orfs) > 0:
                     if len(alt.MSPeptides) > len(orfs[0].MSPeptides):
                         orfs.insert(0, alt)
@@ -380,12 +407,28 @@ class AltCodons(object):
                 pep_sorted[stop].add_orfs(orfs)
             else:
                 pep_sorted[stop].add_orfs(orfs)
+        """ FOR DEBUGGING 
         for stop in pep_sorted:
+            i = 0
             for i in pep_sorted[stop]:
-                total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence}\n')
+                if i == 0:
+                    total.append('__________________________________________\n')
+                total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence} {i.shineDalgarno} '
+                             f'{i.freeEnergy}\n')
+            total.append('__________________________________________\n')
         with open('teste_peptide_sort.txt', 'w') as out:
             out.writelines(total)
             # print([('start', orf.name, orf.MSPeptides) for orf in self.alternatives[stop]])
+        """
+        self.alternatives = pep_sorted
         return pep_sorted
 
-
+    def get_priorities(self):
+        """ :returns the entries that have top priority for their START codons. """
+        pep_list = []
+        for stop in self.alternatives:
+            # pep_list.append(self.alternatives[stop])
+            for orf in self.alternatives[stop]:
+                pep_list.append(orf.name)
+                break
+        return pep_list
