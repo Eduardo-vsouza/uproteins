@@ -3,7 +3,7 @@
 import sys
 import argparse
 import os
-from src import run_workflow
+from src.main import run_workflow
 
 if __name__ == "__main__":
     main_parser = argparse.ArgumentParser(description="Run ORF identification pipeline",
@@ -229,6 +229,16 @@ if __name__ == "__main__":
         postms_parser.add_argument("--pep", help="Posterior Error Probability (PEP) cutoff for percolator output.",
                                    default=0.05)
         postms_parser.add_argument("--qvalue", help="Q-Value cutoff for percolator output.", default=0.01)
+        postms_parser.add_argument("--starts", help="Inform the Start codons that should be used for the six and "
+                                                      "three frame translation. By default, the NCBI bacterial genetic"
+                                                      " code is used. The codons must be separated by commas, nothing"
+                                                      " else.", default="TTG,CTG,ATT,ATC,ATA,ATG,GTG")
+        postms_parser.add_argument("--stops", help="Inform the stop codons that should be used for the six and three "
+                                                     "frame translation. By default, TAA, TAG and TGA are used.",
+                                     default="TAA,TAG,TGA")
+        postms_parser.add_argument("--rrna", help="Path to the fasta file containing the sequence for the 16S rRNA.",
+                                   default=None)
+        postms_parser.add_argument("--maxsize", help="Maximum ORF size in nucleotides.", default=300)
 
     elif mode == "visualization":
         browser_parser = parser.add_argument_group("Proteogenomics visualization options")
