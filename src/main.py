@@ -170,8 +170,9 @@ def run_workflow(args):
         genome_alts_pre_rf.sort_by_atg()
         genome_alts_pre_rf.sort_by_shine()
         genome_alts_pre_rf.sort_by_peptides()
-        genome_alts_pre_rf.get_priorities()
-        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+        priorities = genome_alts_pre_rf.get_priorities()
+        ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+        ext.filter_alternatives(priorities)
         # ext.extract_spectra()
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')

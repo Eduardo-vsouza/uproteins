@@ -163,7 +163,7 @@ class AltCodons(object):
                     position = 0
                     seq = "dummy"
                     while extend and (alt.start - i - 1) > 0:
-                        s_codon = self.genome_seq[0][alt.start - i - 1: alt.start - i + 2]
+                        s_codon = self.genome_seq[0][alt.start - i - 3: alt.start - i + 3]
                         # print(s_codon)
                         real_start = self.genome_seq[0][alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
                         # at the STOP codon, the real START codon should be 3 nucleotides downstream from that STOP
@@ -171,7 +171,7 @@ class AltCodons(object):
                             extended = real_start
                             position = alt.start - i
 
-                            seq = self.genome_seq[0][position+2: alt.end+1]
+                            seq = self.genome_seq[0][alt.start-i: alt.end+1]
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
                         if s_codon in args.stops.split(","):
@@ -407,7 +407,7 @@ class AltCodons(object):
                 pep_sorted[stop].add_orfs(orfs)
             else:
                 pep_sorted[stop].add_orfs(orfs)
-        """ FOR DEBUGGING 
+        """ FOR DEBUGGING """
         for stop in pep_sorted:
             i = 0
             for i in pep_sorted[stop]:
@@ -415,11 +415,13 @@ class AltCodons(object):
                     total.append('__________________________________________\n')
                 total.append(f'{i.name} {i.MSPeptides} {i.start_codon} {i.proteinSequence} {i.shineDalgarno} '
                              f'{i.freeEnergy}\n')
+
             total.append('__________________________________________\n')
+
         with open('teste_peptide_sort.txt', 'w') as out:
             out.writelines(total)
             # print([('start', orf.name, orf.MSPeptides) for orf in self.alternatives[stop]])
-        """
+
         self.alternatives = pep_sorted
         return pep_sorted
 

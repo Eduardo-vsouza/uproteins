@@ -1,5 +1,7 @@
 import pandas as pd
 
+from ..sequtils.orflib import ORF, ORFCollection
+
 
 class ExtendedInformation(object):
     def __init__(self, folder, filetype, alternatives):
@@ -15,6 +17,26 @@ class ExtendedInformation(object):
         self.alternatives = alternatives
         self.results = pd.read_csv(f'{self.folder}/post_perc/{self.filetype}_results_02.txt', sep='\t')
         self.peptides = self.__fix_peptides()
+
+    def filter_alternatives(self, priorities):
+        """
+        Excludes all but the top priority START codon based on the list of priorities.
+        :param priorities: list containing ORF names. Generated with get_priorities() method from AltCodons().
+        :return:
+        """
+        alternatives = {}
+        for stop in self.alternatives:
+            i = 0
+            for alt in self.alternatives[stop]:
+                # if alt.name in priorities:
+                if i == 0:
+                    alternatives[stop] = ORFCollection()
+                    alternatives[stop].add_orf(alt)
+                    i += 1
+        for stop in alternatives:
+            for alt in alternatives[stop]:
+                print(alt.name)
+        self.alternatives = alternatives
 
     def __fix_peptides(self):
         peptides = self.results["Peptide"].tolist()
@@ -38,9 +60,10 @@ class ExtendedInformation(object):
         # new_df.insert(3, "Extended ORF", [])
         extended = []
         ext_seqs = []
-        df = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
+        dfdf = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
+        chunk_size = 10**6
         for stop in self.alternatives:
-            df = df[df["Protein"].str.contains(str(stop))]
+            df = dfdf[dfdf["Protein"].str.contains(str(stop))]
             # df = df.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
             fixed_pep = df["Fixed Peptides"].tolist()
             for alt in self.alternatives[stop]:
