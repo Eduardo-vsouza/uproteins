@@ -13,16 +13,16 @@ class AltCodons(object):
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
         self.proteinSequences = self.df["db entry"].tolist()
-        print(self.proteinSequences)
+        # print(self.proteinSequences)
         self.__genome_records = SeqIO.parse(genome, 'fasta')
         self.genome_seq = [str(record.seq) for record in self.__genome_records]
 
         self.alternatives = self.__fetch_orfs()
         self.alternatives = self.__extract_peptides()
-        for stop in self.alternatives:
-            for alt in self.alternatives[stop]:
-                print(alt.MSPeptides, alt.name)
-                break
+        # for stop in self.alternatives:
+        #     for alt in self.alternatives[stop]:
+        #         print(alt.MSPeptides, alt.name)
+        #         break
 
     def __split_coords(self, i):
         splat = self.coordinates[i].split("-")
@@ -136,6 +136,7 @@ class AltCodons(object):
 
     def __fetch_codons(self, orf):
         """ :returns the nucleotide sequence of the start codon for a given ORF. """
+        print('fetch_codons')
         nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
         if orf.strand == 'forward':
             s_codon = self.genome_seq[0][orf.start-1: orf.start+2]
@@ -152,6 +153,7 @@ class AltCodons(object):
         to hell with python PEPs. I must remind myself to improve the readability of this chaotic mess. """
         new_alts = {}
         rev_genome = self.genome_seq[0][::-1]
+        print("extend_orfs")
         for alts in self.alternatives:
             for alt in self.alternatives[alts]:
                 # print(alt.strand)
@@ -162,8 +164,8 @@ class AltCodons(object):
                     extended = 'same'
                     position = 0
                     seq = "dummy"
-                    while extend and (alt.start - i - 1) > 0:
-                        s_codon = self.genome_seq[0][alt.start - i - 3: alt.start - i + 3]
+                    while extend and (alt.start - i) > 0:
+                        s_codon = self.genome_seq[0][alt.start - i - 1: alt.start - i + 2]
                         # print(s_codon)
                         real_start = self.genome_seq[0][alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
                         # at the STOP codon, the real START codon should be 3 nucleotides downstream from that STOP
@@ -172,6 +174,7 @@ class AltCodons(object):
                             position = alt.start - i
 
                             seq = self.genome_seq[0][alt.start-i: alt.end+1]
+                            print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
                         if s_codon in args.stops.split(","):
@@ -190,6 +193,8 @@ class AltCodons(object):
                     while extend:
                         ex_start = self.genome_seq[0][alt.end - 1: alt.start + i][::-1]
                         ex_seq = self.complement(ex_start)
+                        print('rev_seq')
+
                         ex_codon = self.genome_seq[0][alt.start + i - 3:alt.start + i][::-1]
                         ex_codon = self.complement(ex_codon)
                         # print(ex_start)
