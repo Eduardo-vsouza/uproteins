@@ -61,7 +61,7 @@ class ExtendedInformation(object):
         extended = []
         ext_seqs = []
         dfdf = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
-        chunk_size = 10**6
+        # chunk_size = 10**6
         for stop in self.alternatives:
             df = dfdf[dfdf["Protein"].str.contains(str(stop))]
             # df = df.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')

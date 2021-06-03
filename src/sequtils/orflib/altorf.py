@@ -13,6 +13,10 @@ class AltCodons(object):
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
         self.proteinSequences = self.df["db entry"].tolist()
+        # for i in self.proteinSequences:
+            # if i == 'nan':
+            # print(i)
+
         # print(self.proteinSequences)
         self.__genome_records = SeqIO.parse(genome, 'fasta')
         self.genome_seq = [str(record.seq) for record in self.__genome_records]
@@ -44,7 +48,14 @@ class AltCodons(object):
         alternatives = {}
         for i in range(len(self.names)):
             start, end, strand = self.__split_coords(i)
-            seq = self.genome_seq[0][start - 1: end+1]
+            if strand == 'forward':
+                seq = self.genome_seq[0][start -1: end]
+            else:
+                seq = self.genome_seq[0][end-1: start][::-1]
+                to_comp = Translator(seq)
+                seq = to_comp.complement()
+
+
             orf = ORF(name=self.names[i], start=int(start), end=int(end), seq=seq, strand=strand, protein_sequence=self.proteinSequences[i])
             orf = self.__fetch_codons(orf)
             if end not in alt_check:
@@ -136,7 +147,7 @@ class AltCodons(object):
 
     def __fetch_codons(self, orf):
         """ :returns the nucleotide sequence of the start codon for a given ORF. """
-        print('fetch_codons')
+        # print('fetch_codons')
         nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
         if orf.strand == 'forward':
             s_codon = self.genome_seq[0][orf.start-1: orf.start+2]
