@@ -170,7 +170,7 @@ class AltCodons(object):
                 # print(alt.strand)
                 nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
                 if alt.strand == 'forward':
-                    i = 6
+                    i = 3
                     extend = True
                     extended = 'same'
                     position = 0
@@ -184,7 +184,7 @@ class AltCodons(object):
                             extended = real_start
                             position = alt.start - i
 
-                            seq = self.genome_seq[0][alt.start-i: alt.end+1]
+                            seq = self.genome_seq[0][alt.start-i+2: alt.end]
                             print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
@@ -199,7 +199,7 @@ class AltCodons(object):
                             # print(extended)
                         i += 3
                 else:
-                    i = 6
+                    i = 3
                     extend = True
                     while extend:
                         ex_start = self.genome_seq[0][alt.end - 1: alt.start + i][::-1]
