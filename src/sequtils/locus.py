@@ -76,11 +76,13 @@ class GenomeCoordinatesRNA(object):
     def __init__(self, psm_table, string_dict, ref_dict=None):
         """ orf_dict is returned by get_dict() method from StringTieGFF class."""
         self.psm = pd.read_csv(psm_table, sep='\t')
+        self.psm = self.psm[self.psm["proteinIds"].str.contains('ORF')]
         self.psm = self.psm[self.psm["proteinIds"].str.contains('|', regex=False) == False]
         self.ids = self.psm["proteinIds"].tolist()
         self.stringTieDict = string_dict
         self.refSeqDict = ref_dict
         self.coordinates = []
+        print(self.stringTieDict)
 
     def get_proteins(self):
         coordinates = []
@@ -90,7 +92,7 @@ class GenomeCoordinatesRNA(object):
             for protein in proteins:
                 # only for proteins in the transcriptome gff file
                 if 'ORF' in protein:
-                    if 'MSMEG' not in protein:
+                    if 'gene' not in protein:
                         pos1 = protein.find("_")
                         pos2 = protein.rfind(".")
                         name = protein[pos1+1:pos2]
@@ -116,8 +118,9 @@ class GenomeCoordinatesRNA(object):
                         else:
                             start = genome_start
                             end = genome_end
-
                         coords = f'{start}-{end}'
+                        # print(coords)
+
                         if len(coord_set) > 0:
                             coord_set += f',{coords}'
                         else:
@@ -134,6 +137,7 @@ class GenomeCoordinatesRNA(object):
                         start = orf.start
                         end = orf.end
                         coords = f'{start}-{end}'
+                        print(orf, start, end, coords)
                         if len(coord_set) > 0:
                             coord_set += f',{coords}'
                         else:
@@ -143,8 +147,10 @@ class GenomeCoordinatesRNA(object):
                             coord_set += ',not found'
                         else:
                             coord_set += 'not found'
-
+            # print(coord_set)
             self.coordinates.append(coord_set)
+
+        print(self.coordinates)
         return self
 
     def save_table(self, output):

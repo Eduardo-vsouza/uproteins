@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from Bio import SeqIO
 
-from ..sequtils.postsearch import SequenceFinder, LinkData
+from ..sequtils.postsearch import SequenceFinder, LinkData, TSVChunks
 from ..sequtils.utilities import PercolatorConverter
 from ..sequtils import StringTieGFF, GenomeCoordinates, RefSeqGFF, GenomeCoordinatesRNA, PercolatorUTP, StillCounting, Enrichment
 
@@ -21,12 +21,14 @@ class PostPercolator(object):
 
     def convert_output(self):
         """ Fix some inconsistencies. Pre-processing step. """
-        pout = PercolatorConverter(pout=f'{self.percDir}/{self.filetype}_results_psm.txt', conversion_file='.',
+        print('Converting output\n')
+        pout = PercolatorConverter(pout=f'{self.folder}/Percolator/{self.filetype}_results_psm.txt', conversion_file='.',
                                    handle='psm', gff=self.args.gff)
-        pout.convert_entries(pattern='WP', output=f"{self.percDir}/{self.filetype}_converted_psm.txt")
+        pout.convert_entries(pattern='WP', output=f"{self.percDir}/{self.filetype}_converted_psm")
 
     def get_coordinates_rna(self):
         """ Finds the genome coordinates of each transcript. Must be used on transcriptome database exclusively. """
+        print('Getting coordinates\n')
         str_gff = StringTieGFF(gff='assembled.gtf')
         orf_dict = str_gff.get_dict()
         ref_gff = RefSeqGFF(gff=self.args.gff)
@@ -38,6 +40,7 @@ class PostPercolator(object):
 
     def get_coordinates_genome(self):
         """ Finds the genome coordinates of each ORF from the genome database. """
+        print('Getting coordinates\n')
         ref_gff = RefSeqGFF(gff=self.args.gff)
         ref_dict = ref_gff.get_dict()
         coordinates = GenomeCoordinates(f'{self.percDir}/{self.filetype}_converted_psm.txt', ref_dict)
@@ -45,11 +48,13 @@ class PostPercolator(object):
         return self
 
     def filter_novel(self):
+        print('Filtering novel peptides\n')
         anno = AnnoFilter(f'{self.percDir}/{self.filetype}_psm_coords.txt')
         anno.remove_annotated(f'{self.percDir}/{self.filetype}_no_anno.txt')
 
     def unique_peptides(self):
         """ Remove non-unique peptides. Check uProteInS methods for unique peptide classification. """
+        print("Removing non-unique peptides\n")
         unique = PercolatorUTP(coord_df=f'{self.percDir}/{self.filetype}_no_anno.txt', pep=self.args.pep,
                                qvalue=self.args.qvalue)
         unique.get_utps().save_table(output=f'{self.percDir}/{self.filetype}_utps', keep='all')
@@ -57,14 +62,18 @@ class PostPercolator(object):
 
     def msgf_info(self):
         """ Adds MSGF info to percolator's output. """
+        print('Adding MSGF info\n')
         os.system(f'cat {self.folder}/tsv_msgf/*.tsv > {self.percDir}/{self.filetype}_search.tsv')
-        link = LinkData(f'{self.percDir}/{self.filetype}_search.tsv', f'{self.percDir}/{self.filetype}_utps.txt')
+        chunks = TSVChunks(folder='Transcriptome', filetype='transcriptome')
+        chunks.filter_search()
+        link = LinkData(f'{self.percDir}/{self.filetype}_chunk_search.tsv', f'{self.percDir}/{self.filetype}_utps.txt')
         link.filter_msgf(f'{self.percDir}/{self.filetype}_linked')
 
     def protein_seqs(self):
         """
         Adds protein seqs to the output.
         """
+        print('Adding protein sequences\n')
         seq = SequenceFinder(f'{self.percDir}/{self.filetype}_linked.tsv', f'{self.filetype}_database.fasta')
         seq.df_proteins().save(f'{self.percDir}/{self.filetype}_proteined')
 
@@ -72,6 +81,7 @@ class PostPercolator(object):
         """
         Applies a protein FDR to the results.
         """
+        print('Protein threshold\n')
         protein = ProteinFDR(folder=self.folder, filetype=self.filetype)
         protein.protein_cutoff()
         protein.apply_to_psm()

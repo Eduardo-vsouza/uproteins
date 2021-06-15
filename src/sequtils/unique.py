@@ -4,12 +4,15 @@ from .postsearch import Peptide
 
 
 class PercolatorUTP(object):
-    def __init__(self, coord_df=None, pep=0.01, qvalue=0.01):
+    def __init__(self, coord_df=None, pep=0.01, qvalue=0.05):
         """ 'coord_df' must be a data frame created by get_coords() method from either GenomeCoordinates or
         GenomeCoordinatesRNA classes. """
         self.df = pd.read_csv(coord_df, sep="\t")
         self.df = self.df[self.df["Genome Coordinates"].str.contains('not found') == False]
         self.df = self.df[self.df["proteinIds"].str.contains('ORF')]
+        self.df = self.df[self.df["Genome Coordinates"] != "Genome Coordinates"]
+        # self.df = self.df[self.df["q-value"]]
+        # self.df = self.df[""]
         self.df = self.df[(self.df["q-value"] < qvalue) & (self.df["posterior_error_prob"] < pep)]
         # self.df = self.df[self.df["posterior_error_prob"] <= 0.01]
         # self.df = self.df[self.df["proteinIds"].str.contains('lcl|') == False]

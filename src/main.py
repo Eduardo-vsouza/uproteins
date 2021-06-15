@@ -6,6 +6,7 @@ from . import results_new_approach as pms
 from . import the_visualizer as vis
 from . import orthologs as phylo
 from . import f_translation as trans
+from .postms import TSVConverter
 from .working_runs import OrganizePlot
 from .Digestion_sets import Digestion, Digested, PlotData
 # import prowser.gene_organizer as gorg
@@ -176,10 +177,10 @@ def run_workflow(args):
         # ext.extract_spectra()
         if args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
-            transcriptome_filter.convert_output()
-            transcriptome_filter.get_coordinates_rna()
-            transcriptome_filter.filter_novel()
-            transcriptome_filter.unique_peptides()
+        #     transcriptome_filter.convert_output()
+        #     transcriptome_filter.get_coordinates_rna()
+        #     transcriptome_filter.filter_novel()
+        #     transcriptome_filter.unique_peptides()
             transcriptome_filter.msgf_info()
             transcriptome_filter.protein_seqs()
             transcriptome_filter.protein_threshold()
@@ -200,7 +201,7 @@ def run_workflow(args):
                                           alternatives=transcriptome_alts_pre_rf.alternatives)
             rna_ext.filter_alternatives(rna_priorities)
             rna_ext.extract_spectra()
-            # decoy = DecoyVoid('Genome/genome_proteined.tsv', 'Transcriptome/transcriptome_proteined.tsv',
+    # decoy = DecoyVoid('Genome/genome_proteined.tsv', 'Transcriptome/transcriptome_proteined.tsv',
             #                   'genome_database.fasta', 'transcriptome_database.fasta')
             # decoy.check_decoy()
             # decoy.subset_single_df('all_subsets')
