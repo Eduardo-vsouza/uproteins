@@ -181,15 +181,15 @@ def run_workflow(args):
         #     transcriptome_filter.get_coordinates_rna()
         #     transcriptome_filter.filter_novel()
         #     transcriptome_filter.unique_peptides()
-            transcriptome_filter.msgf_info()
-            transcriptome_filter.protein_seqs()
-            transcriptome_filter.protein_threshold()
+        #     transcriptome_filter.msgf_info()
+        #     transcriptome_filter.protein_seqs()
+        #     transcriptome_filter.protein_threshold()
             transcriptome_alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
                                                   genome=args.genome, maxsize=args.maxsize)
             transcriptome_alts_pre_rf.extend_orfs(args=args)
             if args.rrna is not None:
                 transcriptome_rbs = SDInspection(args, filetype='transcriptome', folder='Transcriptome',
-                                                 alternatives=transcriptome_alts_pre_rf)
+                                                 alternatives=transcriptome_alts_pre_rf.alternatives)
                 rna_alts = transcriptome_rbs.get_free_energy()
                 transcriptome_alts_pre_rf.alternatives = rna_alts
             transcriptome_alts_pre_rf.sort_by_coordinates()

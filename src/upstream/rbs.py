@@ -117,6 +117,7 @@ class SDInspection(object):
                 # if alt.name != "Discard":
                 cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
                 energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
+                # print(energy)
                 alt.freeEnergy = float(energy)
                 sd_seq = self.__check_rbs(energy)
                 alt.shineDalgarno = sd_seq

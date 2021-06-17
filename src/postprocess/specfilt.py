@@ -105,7 +105,7 @@ class ProteinFDR(object):
         self.fdr = fdr
         self.percDir = f'{self.folder}/post_perc'
         self.filteredProtein = None
-        # self.__cat_protein_results()
+        self.__cat_protein_results()
 
     def __cat_protein_results(self):
         self.catProteinFile = f'{self.percDir}/{self.filetype}_cat_protein_results.txt'

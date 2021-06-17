@@ -63,11 +63,13 @@ class ExtendedInformation(object):
         dfdf = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
         # chunk_size = 10**6
         for stop in self.alternatives:
-            df = dfdf[dfdf["Protein"].str.contains(str(stop))]
+            df = dfdf[dfdf["Genome Coordinates"].str.contains(str(stop))]
             # df = df.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
             fixed_pep = df["Fixed Peptides"].tolist()
             for alt in self.alternatives[stop]:
+                # print(alt.name)
                 for pep in fixed_pep:
+                    # print(pep)
                     # df = self.results[self.results["Fixed Peptides"].isin(alt.proteinSequence)]
                     ndf = df[df["db entry"].str.contains(pep)]
                     peps = ndf["Fixed Peptides"].tolist()

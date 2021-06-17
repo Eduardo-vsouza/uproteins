@@ -164,7 +164,7 @@ class AltCodons(object):
         to hell with python PEPs. I must remind myself to improve the readability of this chaotic mess. """
         new_alts = {}
         rev_genome = self.genome_seq[0][::-1]
-        print("extend_orfs")
+        # print("extend_orfs")
         for alts in self.alternatives:
             for alt in self.alternatives[alts]:
                 # print(alt.strand)
@@ -185,7 +185,7 @@ class AltCodons(object):
                             position = alt.start - i
 
                             seq = self.genome_seq[0][alt.start-i+2: alt.end]
-                            print('forward_seq')
+                            # print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
                         if s_codon in args.stops.split(","):
