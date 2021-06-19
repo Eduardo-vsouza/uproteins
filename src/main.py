@@ -16,7 +16,7 @@ from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts
 from .master import Archives
 from .database import Database
-from .postprocess import PostPercolator, ExtendedInformation
+from .postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing
 from .sequtils.postsearch import DecoyVoid
 from .sequtils.orflib import AltCodons
 from .upstream import SDInspection
