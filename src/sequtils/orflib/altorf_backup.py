@@ -3,14 +3,11 @@ from Bio import SeqIO
 
 from . import ORF, ORFCollection
 from ..conversion import Translator
-from ..locus import StringTieGFF
-from ..transcriptomics import TranscriptExtractor
 
 
 class AltCodons(object):
-    def __init__(self, file, genome, maxsize, transcriptome_gff=None, assembly=None):
+    def __init__(self, file, genome, maxsize):
         """ I hate this code """
-        self.tORFs = self.__check_transcriptome(transcriptome_gff, assembly)
         self.maxSize = maxsize
         self.df = pd.read_csv(file, sep='\t')
         self.coordinates = self.df["Genome Coordinates"].tolist()
@@ -30,19 +27,6 @@ class AltCodons(object):
         #     for alt in self.alternatives[stop]:
         #         print(alt.MSPeptides, alt.name)
         #         break
-
-    @staticmethod
-    def __check_transcriptome(gff, transcripts_fasta):
-        if gff is not None and transcripts_fasta is not None:
-            assembly = TranscriptExtractor(assembly=transcripts_fasta)
-            transcripts = assembly.get_transcripts()
-            gff = StringTieGFF(gff)
-            orf_dict = gff.get_dict()
-            for gene in orf_dict:
-                orf = orf_dict[gene]
-                orf.transcript = transcripts[orf.name]
-                print(orf.name, orf.start, orf.end, orf.transcript)
-            return orf_dict
 
     def __split_coords(self, i):
         splat = self.coordinates[i].split("-")

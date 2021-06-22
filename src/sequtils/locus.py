@@ -56,6 +56,9 @@ class StringTieGFF(object):
             if 'ref_gene_id' in attrs[i]:
                 name = attrs[i].split(";")[1][21:-1]
 
+                if 'rna-' in attrs[i]:
+                    name = attrs[i].split(";")[1][20:-1]
+
             start = starts[i]
             end = ends[i]
             strand = strands[i]
