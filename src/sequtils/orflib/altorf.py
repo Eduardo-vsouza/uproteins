@@ -10,6 +10,7 @@ from ..transcriptomics import TranscriptExtractor
 class AltCodons(object):
     def __init__(self, file, genome, maxsize, transcriptome_gff=None, assembly=None):
         """ I hate this code """
+        self.subset = "Genome"
         self.tORFs = self.__check_transcriptome(transcriptome_gff, assembly)
         self.maxSize = maxsize
         self.df = pd.read_csv(file, sep='\t')
@@ -31,9 +32,9 @@ class AltCodons(object):
         #         print(alt.MSPeptides, alt.name)
         #         break
 
-    @staticmethod
-    def __check_transcriptome(gff, transcripts_fasta):
+    def __check_transcriptome(self, gff, transcripts_fasta):
         if gff is not None and transcripts_fasta is not None:
+            self.subset = "Transcriptome"
             assembly = TranscriptExtractor(assembly=transcripts_fasta)
             transcripts = assembly.get_transcripts()
             gff = StringTieGFF(gff)
@@ -41,7 +42,6 @@ class AltCodons(object):
             for gene in orf_dict:
                 orf = orf_dict[gene]
                 orf.transcript = transcripts[orf.name]
-                print(orf.name, orf.start, orf.end, orf.transcript)
             return orf_dict
 
     def __split_coords(self, i):
@@ -56,6 +56,23 @@ class AltCodons(object):
             strand = 'forward'
         return int(start), int(end), strand
 
+    def __get_transcript_name(self, entry):
+        gene = entry.split("_")[1]
+        if 'gene' in gene:
+            name = gene[5:]
+        elif 'rna' in gene:
+            name = gene[4:]
+        else:
+            splat = gene.split(".")
+            name = f'{splat[0]}.{splat[1]}'
+        return name
+
+    def __get_transcript_coordinates(self, entry):
+        splat = entry.split("_")
+        coords = splat[len(splat)-1].split("-")
+        start, end = coords[0], coords[1]
+        return start, end
+
     def __fetch_orfs(self):
         """
         :returns a dictionary containing all ORFs with alternative START codons for a given STOP codon.
@@ -63,9 +80,20 @@ class AltCodons(object):
         alt_check = {}
         alternatives = {}
         for i in range(len(self.names)):
-            start, end, strand = self.__split_coords(i)
+            name = self.__get_transcript_name(self.names[i])
+            if self.subset == "Genome":
+                start, end, strand = self.__split_coords(i)
+                transcript = None
+            elif self.subset == "Transcriptome":
+                start, end = self.__get_transcript_coordinates(self.names[i])
+                # start, end, strand = self.tORFs[name].start, self.tORFs[name].end, 'forward'
+                strand = 'forward'
+                transcript = self.tORFs[name].transcript
             if strand == 'forward':
-                seq = self.genome_seq[0][start -1: end]
+                if self.subset == "Genome":
+                    seq = self.genome_seq[0][start -1: end]
+                else:
+                    seq = transcript[start -1: end]
             else:
                 seq = self.genome_seq[0][end-1: start][::-1]
                 to_comp = Translator(seq)
@@ -73,6 +101,7 @@ class AltCodons(object):
 
 
             orf = ORF(name=self.names[i], start=int(start), end=int(end), seq=seq, strand=strand, protein_sequence=self.proteinSequences[i])
+            orf.transcript = transcript
             orf = self.__fetch_codons(orf)
             if end not in alt_check:
                 alt_check[end] = []
@@ -165,26 +194,49 @@ class AltCodons(object):
         """ :returns the nucleotide sequence of the start codon for a given ORF. """
         # print('fetch_codons')
         nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
-        if orf.strand == 'forward':
-            s_codon = self.genome_seq[0][orf.start-1: orf.start+2]
+        if self.subset == "Genome":
+            sequence = self.genome_seq[0]
         else:
-            to_reverse = self.genome_seq[0][orf.start-3: orf.start][::-1]
+            sequence = orf.transcript
+        if orf.strand == 'forward':
+            # if self.subset == "Genome":
+            s_codon = sequence[orf.start-1: orf.start+2]
+            # else:
+            #     s_codon = orf.transcript[orf.start-1 : orf.start+2]
+        else:
+            to_reverse = sequence[orf.start-3: orf.start][::-1]
             s_codon = ""
             for nuc in to_reverse:
                 s_codon += nucs[nuc]
         orf.start_codon = s_codon
         return orf
 
+    def __check_subset(self, orf):
+        if self.subset == "Genome":
+            sequence = self.genome_seq[0]
+        else:
+            sequence = orf.transcript
+        return sequence
+
+    def __check_transcript(self, orf):
+        if self.subset == "Genome":
+            transcript = None
+        else:
+            transcript = orf.transcript
+        return transcript
+
     def extend_orfs(self, args):
         """ note: call this function first. From now on, it's pure black magic. As this is getting kinda complex,
         to hell with python PEPs. I must remind myself to improve the readability of this chaotic mess. """
         new_alts = {}
-        rev_genome = self.genome_seq[0][::-1]
+        # rev_genome = self.genome_seq[0][::-1]
         # print("extend_orfs")
         for alts in self.alternatives:
             for alt in self.alternatives[alts]:
                 # print(alt.strand)
                 nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+                sequence = self.__check_subset(alt)
+                transcript = self.__check_transcript(alt)
                 if alt.strand == 'forward':
                     i = 3
                     extend = True
@@ -192,18 +244,18 @@ class AltCodons(object):
                     position = 0
                     seq = "dummy"
                     while extend and (alt.start - i) > 0:
-                        s_codon = self.genome_seq[0][alt.start - i - 1: alt.start - i + 2]
+                        s_codon = sequence[alt.start - i - 1: alt.start - i + 2]
                         # print(s_codon)
-                        real_start = self.genome_seq[0][alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
+                        real_start = sequence[alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
                         # at the STOP codon, the real START codon should be 3 nucleotides downstream from that STOP
                         if real_start in args.starts.split(","):
                             extended = real_start
                             position = alt.start - i
 
-                            seq = self.genome_seq[0][alt.start-i+2: alt.end]
+                            seq = sequence[alt.start-i+2: alt.end]
                             # print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
-                            self.__add_extended(new_alts, position, alt, extended, seq)
+                            self.__add_extended(new_alts, position, alt, extended, seq, transcript=transcript)
                         if s_codon in args.stops.split(","):
                             extend = False
 
@@ -217,10 +269,11 @@ class AltCodons(object):
                 else:
                     i = 3
                     extend = True
+                    transcript = None
                     while extend:
                         ex_start = self.genome_seq[0][alt.end - 1: alt.start + i][::-1]
                         ex_seq = self.complement(ex_start)
-                        print('rev_seq')
+                        # print('rev_seq')
 
                         ex_codon = self.genome_seq[0][alt.start + i - 3:alt.start + i][::-1]
                         ex_codon = self.complement(ex_codon)
@@ -229,7 +282,8 @@ class AltCodons(object):
                         # print(f'codon: {ex_codon}')
                         if ex_codon in args.starts.split(","):
                             # new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
-                            self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq, start_pos=alt.start +i-6)
+                            self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq,
+                                                start_pos=alt.start +i-6, transcript=transcript)
                             # print(alt.start+i-3, alt.end)
                             # print(ex_seq)
                         if ex_codon in args.stops.split(","):
@@ -306,6 +360,7 @@ class AltCodons(object):
         return self
 
     def __check_length(self, seq, alt, new_alts, i):
+        """ Deprecated """
         # extend = True
         if i > self.maxSize:
             # extend = False
@@ -319,9 +374,9 @@ class AltCodons(object):
         return new_alts
 
     @staticmethod
-    def __add_extended(new_alts, start_pos, alt, s_codon, seq):
+    def __add_extended(new_alts, start_pos, alt, s_codon, seq, transcript):
         orf = ORF(name=f'{alt.name[:5]}_extended_{start_pos+3}-{alt.end}_{alt.strand}',
-                  strand=alt.strand, start=start_pos+3, end=alt.end, seq=seq)
+                  strand=alt.strand, start=start_pos+3, end=alt.end, seq=seq, transcript=transcript)
         orf.start_codon = s_codon
         orf.MSPeptides = alt.MSPeptides
         if alt.end not in new_alts:

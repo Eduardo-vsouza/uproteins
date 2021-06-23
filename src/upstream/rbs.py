@@ -9,7 +9,7 @@ from ..sequtils.orflib import ORF, ORFCollection
 
 
 class SDInspection(object):
-    def __init__(self, args, filetype, folder, alternatives):
+    def __init__(self, args, filetype, folder, alternatives, subset="Genome"):
         """
         Looks for a Shine-Dalgarno sequence using the script free_align.pl from free2bind package.
         :param args: uProteInS arguments
@@ -17,6 +17,7 @@ class SDInspection(object):
         :param alternatives: the dictionary containing alternative START codons for a given STOP codon, after extending
         it with AltORF method extend_orfs(), preferably.
         """
+        self.subset = subset
         self.rRNA = self.__get_sequences(args.rrna)[::-1][:13]  # one of the RNA strings must be 3'-5'.
         self.filetype = filetype
         self.folder = folder
