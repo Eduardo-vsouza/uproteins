@@ -50,7 +50,8 @@ class SDInspection(object):
             sequences = TranscriptExtractor(assembly=assembly)
             transcripts = sequences.get_transcripts()
                         # self.transcripts = transcripts
-            for orf in torfs:
+            for i in torfs:
+                orf = torfs[i]
                 orf.transcript = transcripts[orf.name]
                 self.tORFs[orf.name] = orf
         return self

@@ -69,9 +69,9 @@ class AltCodons(object):
 
     def __get_transcript_coordinates(self, entry):
         splat = entry.split("_")
-        coords = splat[len(splat)-1].split("-")
+        coords = splat[len(splat)-2].split("-")
         start, end = coords[0], coords[1]
-        return start, end
+        return int(start), int(end)
 
     def __fetch_orfs(self):
         """
@@ -384,17 +384,17 @@ class AltCodons(object):
                 new_alts[alt.end].insert(0, orf)
         return new_alts
 
-    @staticmethod
-    def __add_extended(new_alts, start_pos, alt, s_codon, seq, transcript, transcript_name=None):
+    def __add_extended(self, new_alts, start_pos, alt, s_codon, seq, transcript, transcript_name=None):
         orf = ORF(name=f'{alt.name[:5]}_extended_{start_pos+3}-{alt.end}_{alt.strand}',
                   strand=alt.strand, start=start_pos+3, end=alt.end, seq=seq, transcript=transcript)
         orf.start_codon = s_codon
         orf.MSPeptides = alt.MSPeptides
         orf.transcriptName = transcript_name
-        if alt.end not in new_alts:
-            new_alts[alt.end] = [orf]
+        identifier = self.__define_identifier(orf_end=orf.end, transcript_name=transcript_name)
+        if identifier not in new_alts:
+            new_alts[identifier] = [orf]
         else:
-            new_alts[alt.end].append(orf)
+            new_alts[identifier].append(orf)
         return new_alts
 
     def sort_by_shine(self):
