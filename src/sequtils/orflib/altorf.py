@@ -103,16 +103,25 @@ class AltCodons(object):
             orf = ORF(name=self.names[i], start=int(start), end=int(end), seq=seq, strand=strand, protein_sequence=self.proteinSequences[i])
             orf.transcript = transcript
             orf = self.__fetch_codons(orf)
-            if end not in alt_check:
-                alt_check[end] = []
+            orf.transcriptName = name
+            identifier = self.__define_identifier(end, transcript_name=orf.transcriptName)
+            if identifier not in alt_check:
+                alt_check[identifier] = []
             # if start not in alt_check[end]:
             #     alt_check[end].append(start)
-            if end not in alternatives:
-                alternatives[end] = ORFCollection()
-            if start not in alt_check[end]:
-                alternatives[end].add_orf(orf)
-                alt_check[end].append(start)
+            if identifier not in alternatives:
+                alternatives[identifier] = ORFCollection()
+            if start not in alt_check[identifier]:
+                alternatives[identifier].add_orf(orf)
+                alt_check[identifier].append(start)
         return alternatives
+
+    def __define_identifier(self, orf_end, transcript_name=None):
+        if self.subset == "Genome":
+            identifier = orf_end
+        else:
+            identifier = f'{transcript_name}_{orf_end}'
+        return identifier
 
     def sort_by_coordinates(self):
         """ Sorts the alternative ORFs inside self.alternatives by their start codons. """
@@ -194,10 +203,11 @@ class AltCodons(object):
         """ :returns the nucleotide sequence of the start codon for a given ORF. """
         # print('fetch_codons')
         nucs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
-        if self.subset == "Genome":
-            sequence = self.genome_seq[0]
-        else:
-            sequence = orf.transcript
+        # if self.subset == "Genome":
+        #     sequence = self.genome_seq[0]
+        # else:
+        #     sequence = orf.transcript
+        sequence = self.__check_subset(orf)
         if orf.strand == 'forward':
             # if self.subset == "Genome":
             s_codon = sequence[orf.start-1: orf.start+2]
@@ -255,7 +265,8 @@ class AltCodons(object):
                             seq = sequence[alt.start-i+2: alt.end]
                             # print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
-                            self.__add_extended(new_alts, position, alt, extended, seq, transcript=transcript)
+                            self.__add_extended(new_alts, position, alt, extended, seq, transcript=transcript,
+                                                transcript_name=alt.transcriptName)
                         if s_codon in args.stops.split(","):
                             extend = False
 
@@ -374,11 +385,12 @@ class AltCodons(object):
         return new_alts
 
     @staticmethod
-    def __add_extended(new_alts, start_pos, alt, s_codon, seq, transcript):
+    def __add_extended(new_alts, start_pos, alt, s_codon, seq, transcript, transcript_name=None):
         orf = ORF(name=f'{alt.name[:5]}_extended_{start_pos+3}-{alt.end}_{alt.strand}',
                   strand=alt.strand, start=start_pos+3, end=alt.end, seq=seq, transcript=transcript)
         orf.start_codon = s_codon
         orf.MSPeptides = alt.MSPeptides
+        orf.transcriptName = transcript_name
         if alt.end not in new_alts:
             new_alts[alt.end] = [orf]
         else:
@@ -477,9 +489,6 @@ class AltCodons(object):
         for stop in self.alternatives:
             orfs = []
             for alt in self.alternatives[stop]:
-                # if 'extend' not in alt.name:
-                # if alt.name == 'gORF__extended_3593023-3592712_reverse':  # MUST REMOVE AFTERWARDS
-                #     alt.MSPeptides = ['FAKEPEPTIDE', 'blibliblo']  # MUST DELETE
                 to_trans = Translator(alt.seq)
                 alt.proteinSequence = to_trans.translate()
                 if len(orfs) > 0:
