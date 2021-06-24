@@ -131,6 +131,13 @@ class SDInspection(object):
 
         return upstream_seqs
 
+    def __define_identifier(self, orf_end, transcript_name=None):
+        if self.subset == "Genome":
+            identifier = orf_end
+        else:
+            identifier = f'{transcript_name}_{orf_end}'
+        return identifier
+
     @staticmethod
     def __complement(seq):
         """
@@ -151,20 +158,25 @@ class SDInspection(object):
 
             for alt in self.alternatives[stop]:
                 # if alt.name != "Discard":
-                cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
-                energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
-                # print(energy)
-                alt.freeEnergy = float(energy)
-                sd_seq = self.__check_rbs(energy)
-                alt.shineDalgarno = sd_seq
-                # else:
-                #     alt.freeEnergy = 0
-                #     alt.shineDalgarno = "Absent"
-                if alt.end not in alts:
-                    alts[alt.end] = ORFCollection()
-                    alts[alt.end].add_orf(alt)
+                if alt.upstream != '':
+                    cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
+                    energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
+                    # print(energy)
+                    alt.freeEnergy = float(energy)
+                    sd_seq = self.__check_rbs(energy)
+                    alt.shineDalgarno = sd_seq
+                    # else:
+                    #     alt.freeEnergy = 0
+                    #     alt.shineDalgarno = "Absent"
                 else:
-                    alts[alt.end].add_orf(alt)
+                    alt.freeEnergy = 0
+                    alt.shineDalgarno = self.__check_rbs(0)
+                identifier = self.__define_identifier(alt.end, transcript_name=alt.transcriptName)
+                if identifier not in alts:
+                    alts[identifier] = ORFCollection()
+                    alts[identifier].add_orf(alt)
+                else:
+                    alts[identifier].add_orf(alt)
         # for alt in alts:
         #     for orf in alts[alt]:
         #         if orf.name != "Discard":

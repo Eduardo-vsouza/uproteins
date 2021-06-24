@@ -64,8 +64,12 @@ class ExtendedInformation(object):
         # chunk_size = 10**6
         for stop in self.alternatives:
             # df = dfdf[dfdf["Genome Coordinates"].str.contains(str(stop))]
-            df = dfdf[dfdf["Protein"].str.contains(str(stop))]
-
+            new_stop = stop.split("_")
+            if len(new_stop) > 1:
+                real_stop = new_stop[1]
+            else:
+                real_stop = stop
+            df = dfdf[dfdf["Protein"].str.contains(str(real_stop))]
             # df = df.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
             fixed_pep = df["Fixed Peptides"].tolist()
             for alt in self.alternatives[stop]:
