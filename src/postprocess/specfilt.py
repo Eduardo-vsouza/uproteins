@@ -99,7 +99,7 @@ class AnnoFilter(object):
 
 
 class ProteinFDR(object):
-    def __init__(self, folder, filetype, fdr=0.01):
+    def __init__(self, folder, filetype, fdr=0.5):
         self.folder = folder
         self.filetype = filetype
         self.fdr = fdr

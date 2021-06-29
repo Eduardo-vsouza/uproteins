@@ -60,13 +60,16 @@ class ExtendedInformation(object):
         # new_df.insert(3, "Extended ORF", [])
         extended = []
         ext_seqs = []
+        energies = []
+        sds = []
         dfdf = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
         # chunk_size = 10**6
         for stop in self.alternatives:
             # df = dfdf[dfdf["Genome Coordinates"].str.contains(str(stop))]
-            new_stop = stop.split("_")
-            if len(new_stop) > 1:
-                real_stop = new_stop[1]
+            if type(stop) == str:
+                new_stop = stop.split("_")
+                if len(new_stop) > 1:
+                    real_stop = new_stop[1]
             else:
                 real_stop = stop
             df = dfdf[dfdf["Protein"].str.contains(str(real_stop))]
@@ -83,13 +86,17 @@ class ExtendedInformation(object):
                     for pep in peps:
                         extended.append(alt.name)
                         ext_seqs.append(alt.proteinSequence)
+                        energies.append(alt.freeEnergy)
+                        sds.append(alt.shineDalgarno)
                     # if i == 0:
                     # ndf.insert(3, "Extended ORF", extended)
                     # i += 1
                     new_df = new_df.append(ndf)
         new_df.insert(3, "Extended ORF", extended)
         new_df.insert(4, "Extended Sequence", ext_seqs)
-
+        new_df.insert(5, "Free Energy", energies)
+        new_df.insert(6, "Shine Dalgarno", sds)
+        new_df = new_df.drop_duplicates(subset=["SpecFile", "ScanNum"])
         new_df.to_csv(f'{self.folder}/post_perc/{self.filetype}_results_04.txt', sep='\t', index=False)
         return self
 

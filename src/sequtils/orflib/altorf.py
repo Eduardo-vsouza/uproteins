@@ -80,11 +80,13 @@ class AltCodons(object):
         alt_check = {}
         alternatives = {}
         for i in range(len(self.names)):
-            name = self.__get_transcript_name(self.names[i])
             if self.subset == "Genome":
+                name = self.names[i]
                 start, end, strand = self.__split_coords(i)
                 transcript = None
             elif self.subset == "Transcriptome":
+                name = self.__get_transcript_name(self.names[i])
+
                 start, end = self.__get_transcript_coordinates(self.names[i])
                 # start, end, strand = self.tORFs[name].start, self.tORFs[name].end, 'forward'
                 strand = 'forward'
@@ -523,10 +525,10 @@ class AltCodons(object):
 
     def get_priorities(self):
         """ :returns the entries that have top priority for their START codons. """
-        pep_list = []
+        pep_list = {}
         for stop in self.alternatives:
             # pep_list.append(self.alternatives[stop])
             for orf in self.alternatives[stop]:
-                pep_list.append(orf.name)
+                pep_list[stop] = [orf]
                 break
         return pep_list
