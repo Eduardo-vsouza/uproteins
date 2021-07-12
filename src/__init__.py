@@ -7,6 +7,6 @@ from . import f_translation as trans
 from .working_runs import MinimalRuns, OrganizePlot
 from .Digestion_sets import Digestion, Digested, PlotData
 from . import uProteins_testing as test
-
+from .decoy_gen import Decoy
 
 from .main import run_workflow

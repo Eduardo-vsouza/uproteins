@@ -44,7 +44,7 @@ class Decoy(object):
     def to_fasta(self):
         out = []
         for i in range(len(self.reversed)):
-            string = f">{self.type}_Decoy_Protein_{i+1}\n{self.reversed[i]}\n"
+            string = f">{self.type}_decoy_Protein_{i+1}\n{self.reversed[i]}\n"
             out.append(string)
         seqs = self.add_contaminants()
         for seq in seqs:
