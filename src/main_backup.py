@@ -9,7 +9,7 @@ from working_runs import OrganizePlot
 from Digestion_sets import Digestion, Digested, PlotData
 import prowser.gene_organizer as gorg
 import prowser.browser_gui_v16 as prsr
-import uProteins_testing as test
+from src.testing import uproteins_testing as test
 from percolator import Decoy, PercolatorProcessing
 from assembly import TranscriptAssembly, CompareTranscripts
 from master import Archives

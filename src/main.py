@@ -6,18 +6,16 @@ from . import results_new_approach as pms
 from . import the_visualizer as vis
 from . import orthologs as phylo
 from . import f_translation as trans
-from .postms import TSVConverter
 from .working_runs import OrganizePlot
 from .Digestion_sets import Digestion, Digested, PlotData
 # import prowser.gene_organizer as gorg
 # import prowser.browser_gui_v16 as prsr
-from . import uProteins_testing as test
+from .testing import uproteins_testing as test
 from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts
 from .master import Archives
 from .database import Database
-from .postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing
-from .sequtils.postsearch import DecoyVoid
+from .postprocess import PostPercolator, ExtendedInformation
 from .sequtils.orflib import AltCodons
 from .upstream import SDInspection
 
