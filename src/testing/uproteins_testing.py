@@ -4,8 +4,8 @@ import sys
 from src.database import database_generator as dg
 from src import peptide_search as ps
 from src import results_new_approach as pms
-from . import TestArgs
-from ..assembly import TranscriptAssembly, CompareTranscripts
+from .testargs import TestArgs
+from ..assembly import TranscriptAssembly, CompareTranscripts, ReadMapper
 from ..master import Archives
 
 
@@ -70,18 +70,36 @@ class TestingOutput(object):
                                 "================================================================================\n"
         return stdout
 
+
 class PipelineTesting(object):
     def __init__(self, args):
         self.args = args
+        self.path = sys.path
+        self.testFolder = f"{self.path[0][:-3]}testkit"
+        self.assemblyState = 'Not tested'
+        self.databaseState = 'Not tested'
+        self.MSState = 'Not tested'
+        self.postMSState = 'Not tested'
 
-    def test_assembly(self):
-        ...
+    def print_status(self):
+        print(f'\n--------------\nTesting uProteInS different modes\nAssembly: {self.assemblyState}\nDatabase:'
+              f' {self.databaseState}\nPeptide Search (MS mode): {self.MSState}\nPostMS: {self.postMSState}'
+              f'\n--------------\n')
 
-    def check_skipping(self, mode):
-        """
-        :param mode: skip_assembly, skip_db
-        :return:
-        """
+    def run(self):
+        assembly = AssemblyTesting(self.args)
+        assembly.test()
+
+
+class AssemblyTesting(PipelineTesting):
+    def __init__(self, args):
+        super().__init__(args)
+
+    def _fix_args(self):
+        self.args.gtf = f'{self.testFolder}/test_gtf.gtf'
+        self.args.single = f'{self.testFolder}/'
+
+    def test(self):
         if not self.args.skip_assembly:
             arxivs = Archives()
             assembly = TranscriptAssembly(self.args)
@@ -94,7 +112,10 @@ class PipelineTesting(object):
             arxivs.comparisonsDirectory = compare_dir
             sequences = comparisons.extract_sequences()
             arxivs.RNASequences = sequences
-
+            self.assemblyState = 'OK'
+        else:
+            self.assemblyState = 'SKIPPED'
+        self.print_status()
 
 
 class PipelineTestingOld(object):

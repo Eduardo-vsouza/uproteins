@@ -1,2 +1,2 @@
 from .uproteins_testing import PipelineTesting
-from .args import MSArgs, TestArgs
+from src.testing.testargs.args import MSArgs, TestArgs

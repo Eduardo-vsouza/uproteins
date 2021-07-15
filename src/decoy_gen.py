@@ -58,5 +58,5 @@ class Decoy(object):
         
 #genome_decoy = Decoy(db="genome_database.fasta", db_type="Genome")
 #genome_decoy.reverse_sequences().to_fasta()
-transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
-transcriptome_decoy.reverse_sequences().to_fasta()
+# transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
+# transcriptome_decoy.reverse_sequences().to_fasta()
