@@ -95,6 +95,8 @@ class PipelineTesting(object):
         database = DatabaseTesting(self.args)
         self.databaseState = database.test()
         self.print_status()
+        search = MSTesting(self.args)
+        search.test()
 
 
 class AssemblyTesting(PipelineTesting):
@@ -172,21 +174,24 @@ class DatabaseTesting(PipelineTesting):
         self.args.stops = "TAA,TAG,TGA"
 
     def test(self):
-        print("Generating the genome database.")
-        db = Database(self.args)
-        db.translate()
-        # print("\nORFs identified \nNow performing steps to generate the GENOME database\n")
-        genome_db = dg.Database("genome_ORFs.fasta", self.args.proteome, "genome")
-        # genome_db.mark_annotated()
-        genome_db.unify()
-        print("Genome database generated.")
-        if self.args.Transcriptome is not None:
-            print("Generating the transcriptome database.")
-            transcriptome_db = dg.Database("transcriptome_ORFs.fasta", self.args.proteome, "transcriptome")
-            # transcriptome_db.mark_annotated()
-            transcriptome_db.unify()
-            print("Transcriptome database generated.")
-        self._check()
+        if self.args.skip_db != 'TRUE':
+            print("Generating the genome database.")
+            db = Database(self.args)
+            db.translate()
+            # print("\nORFs identified \nNow performing steps to generate the GENOME database\n")
+            genome_db = dg.Database("genome_ORFs.fasta", self.args.proteome, "genome")
+            # genome_db.mark_annotated()
+            genome_db.unify()
+            print("Genome database generated.")
+            if self.args.Transcriptome is not None:
+                print("Generating the transcriptome database.")
+                transcriptome_db = dg.Database("transcriptome_ORFs.fasta", self.args.proteome, "transcriptome")
+                # transcriptome_db.mark_annotated()
+                transcriptome_db.unify()
+                print("Transcriptome database generated.")
+            self._check()
+        else:
+            self.databaseState = 'SKIPPED'
         return self.databaseState
 
     def _check(self):
@@ -215,7 +220,7 @@ class MSTesting(PipelineTesting):
         self._fix_args()
 
     def _fix_args(self):
-        self.args.Mass_spec = f'{self.testFolder}/mzml'
+        self.args.Mass_spec = f'{self.testFolder}/mzml/'
         self.args.Transcriptome = 'YES'
 
     def test(self):
