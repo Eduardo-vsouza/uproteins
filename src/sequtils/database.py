@@ -33,10 +33,10 @@ class DatabaseGenerator(object):
         data = self.db.retrieve()
         return data
 
-    def to_fasta(self, filename="db_orfs.fasta"):
+    def to_fasta(self, filename="db_orfs.fasta", identifier='g'):
         """ Writes and entries and sequences inside the database to a fasta file. """
         data = self.retrieve()
-        to_write = [f">{orf[1]}_{orf[4]}-{orf[5]}_{orf[6]}\n{orf[2]}\n" for orf in data]
+        to_write = [f">{identifier}{orf[1]}_{orf[4]}-{orf[5]}_{orf[6]}\n{orf[2]}\n" for orf in data]
         with open(filename, 'w') as fa:
             fa.writelines(to_write)
 

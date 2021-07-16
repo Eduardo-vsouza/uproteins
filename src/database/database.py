@@ -1,6 +1,7 @@
 from ..sequtils import TranscriptomeTranslator, GenomeTranslator, ORFCollection, DatabaseGenerator
 from Bio import SeqIO
 
+
 class Database(object):
     def __init__(self, args):
         self.args = args

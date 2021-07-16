@@ -7,6 +7,7 @@ from src import results_new_approach as pms
 from .testargs import TestArgs
 from ..assembly import TranscriptAssembly, CompareTranscripts, ReadMapper
 from ..master import Archives
+from ..database import Database
 
 
 class TestingOutput(object):
@@ -90,7 +91,9 @@ class PipelineTesting(object):
         assembly = AssemblyTesting(self.args)
         self.assemblyState = assembly.test()
         self.print_status()
-
+        database = DatabaseTesting(self.args)
+        self.databaseState = database.test()
+        self.print_status()
 
 
 class AssemblyTesting(PipelineTesting):
@@ -142,6 +145,68 @@ class AssemblyTesting(PipelineTesting):
             for line in lines:
                 if 'gene-Rv0001' in line:
                     self.assemblyState = 'OK'
+
+
+class DatabaseTesting(PipelineTesting):
+    def __init__(self, args):
+        super().__init__(args)
+        self._fix_args()
+        self.transcriptome = f'{self.testFolder}/transcripts.fasta'
+        self._get_transcriptome()
+
+    def _get_transcriptome(self):
+        if not os.path.exists('HISAT'):
+            cmd_dir = 'mkdir HISAT'
+            os.system(cmd_dir)
+        cmd_mv = f'cp {self.transcriptome} HISAT/.'
+        os.system(cmd_mv)
+
+    def _fix_args(self):
+        self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
+        self.args.proteome = f'{self.testFolder}/proteome_for_database.fasta'
+        self.args.Transcriptome = "YES"
+        self.args.minsize = 30
+        self.args.maxsize = 300
+        self.args.starts = 'ATG,ATT,TTG,GTG'
+        self.args.stops = "TAA,TAG,TGA"
+
+    def test(self):
+        print("Generating the genome database.")
+        db = Database(self.args)
+        db.translate()
+        # print("\nORFs identified \nNow performing steps to generate the GENOME database\n")
+        genome_db = dg.Database("genome_ORFs.fasta", self.args.proteome, "genome")
+        # genome_db.mark_annotated()
+        genome_db.unify()
+        print("Genome database generated.")
+        if self.args.Transcriptome is not None:
+            print("Generating the transcriptome database.")
+            transcriptome_db = dg.Database("transcriptome_ORFs.fasta", self.args.proteome, "transcriptome")
+            # transcriptome_db.mark_annotated()
+            transcriptome_db.unify()
+            print("Transcriptome database generated.")
+        self._check()
+        return self.databaseState
+
+    def _check(self):
+        self.databaseState = 'FAILED'
+        rna = 'FAILED'
+        dna = 'FAILED'
+        with open('transcriptome_database.fasta', 'r') as db:
+            lines = db.readlines()
+            for line in lines:
+                if 'tORF_gene-Rv0001' in line:
+                    rna = 'OK'
+                    break
+        with open('genome_database.fasta', 'r') as db:
+            lines = db.readlines()
+            for line in lines:
+                if 'gORF__6_398-493' in line:
+                    dna = 'OK'
+                    break
+        if rna == 'OK' and dna == 'OK':
+            self.databaseState = 'OK'
+
 
 class PipelineTestingOld(object):
     def __init__(self, outdir, skip_assembly, skip_db, skip_ms, skip_postms):

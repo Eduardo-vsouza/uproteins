@@ -9,6 +9,7 @@ from ..translate import GenomeReader as tr
 
 path = sys.path[0]
 
+
 class Assembly(object):
     def __init__(self, args):
         self.args = args
@@ -118,6 +119,20 @@ class Database(object):
         self.proteome = p
         self.filetype = filetype
         self.blast_dir = f'{path}/dependencies/blast_for_uproteins/bin'
+
+    def mark_annotated(self):
+        if not os.path.exists('annotated.fasta'):
+            marked = []
+            records = SeqIO.parse(self.proteome, 'fasta')
+            for record in records:
+                marked.append(f'>{str(record.description)}_ANNO\n{str(record.seq)}\n')
+            with open('annotated.fasta', 'w') as out:
+                out.writelines(marked)
+
+    def unify(self):
+        cmd_cat = f'cat {self.orf_to_blast} {self.proteome} > {self.filetype}_database.fasta'
+        os.system(cmd_cat)
+
 
     def blast_to_Proteome(self):
         """ Aligns the ORFs to the annotated proteome with Blastp in order to identify annotated entries. """

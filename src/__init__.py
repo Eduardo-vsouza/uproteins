@@ -6,7 +6,7 @@ from . import the_visualizer as vis
 from . import f_translation as trans
 from .working_runs import MinimalRuns, OrganizePlot
 # from .Digestion_sets import Digestion, Digested, PlotData
-from .testing import uproteins_testing as test
+from .testing import modes as test
 from .decoy_gen import Decoy
 
 from .main import run_workflow
