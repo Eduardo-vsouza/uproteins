@@ -6,7 +6,7 @@ from Bio import SeqIO
 class Decoy(object):
     def __init__(self, db, db_type):
         self.df = db
-        self.seqs = self.__get_seqs()
+        self.seqs, self.entries = self.__get_seqs()
         self.reversed = []
         self.type = db_type
         self.__create_dir()
@@ -19,10 +19,12 @@ class Decoy(object):
 
     def __get_seqs(self):
         seqs = []
+        entries = []
         records = SeqIO.parse(self.df, 'fasta')
         for record in records:
             seqs.append(record.seq)
-        return seqs
+            entries.append(str(record.description))
+        return seqs, entries
 
     def reverse_sequences(self):
         """ Reverses the amino acid sequence of a protein, except for the aa in the c-terminal. """
@@ -44,7 +46,7 @@ class Decoy(object):
     def to_fasta(self):
         out = []
         for i in range(len(self.reversed)):
-            string = f">{self.type}_Decoy_Protein_{i+1}\n{self.reversed[i]}\n"
+            string = f">decoy_{self.entries[i]}\n{self.reversed[i]}\n"
             out.append(string)
         seqs = self.add_contaminants()
         for seq in seqs:

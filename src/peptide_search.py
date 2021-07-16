@@ -44,9 +44,10 @@ class PeptideSearch(object):
         return self
 
     def run_msgf(self, file):
+        self._check_folder()
         output = ""
         if self.decoy:
-            output = f" -o {self.ms_files_folder}{file}_decoy.mzid"
+            output = f" -o mzid/{file}_decoy.mzid"
         ms_args = ""
         item_list = [None, "Mass_spec", "outdir", "Transcriptome", "mode"]
         for arg in vars(self.args).items():
@@ -56,6 +57,15 @@ class PeptideSearch(object):
         cmd = f'java -Xmx12G -jar {self.path}/dependencies/MSGF/MSGFPlus.jar -d {db}{output} -tda 0 -s {os.path.abspath(self.args.Mass_spec)}/{file} -addFeatures 1{ms_args}'
         os.system(cmd)
         return self
+
+    def _check_folder(self):
+        if not os.path.exists('mzid'):
+            os.system('mkdir mzid')
+        if self.args.Transcriptome == 'YES' and not os.path.exists('mzid/Transcriptome'):
+            os.system('mkdir mzid/Transcriptome')
+        if not os.path.exists('mzid/Genome'):
+            os.system('mkdir mzid/Genome')
+
 
     def peptide_filtering(self):
         """ DEPRECATED FOR NOW """

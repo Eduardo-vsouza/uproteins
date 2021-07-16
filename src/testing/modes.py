@@ -8,6 +8,7 @@ from .testargs import TestArgs
 from ..assembly import TranscriptAssembly, CompareTranscripts, ReadMapper
 from ..master import Archives
 from ..database import Database
+from ..percolator import Decoy
 
 
 class TestingOutput(object):
@@ -207,6 +208,33 @@ class DatabaseTesting(PipelineTesting):
         if rna == 'OK' and dna == 'OK':
             self.databaseState = 'OK'
 
+
+class MSTesting(PipelineTesting):
+    def __init__(self, args):
+        super().__init__(args)
+        self._fix_args()
+
+    def _fix_args(self):
+        self.args.Mass_spec = f'{self.testFolder}/mzml'
+        self.args.Transcriptome = 'YES'
+
+    def test(self):
+        genome = ps.PeptideSearch("Genome", self.args.Mass_spec, "genome_database.fasta", self.args)
+        genome.peptide_identification()
+        genome_decoy = Decoy(db="genome_database.fasta", db_type="Genome")
+        genome_decoy.reverse_sequences().to_fasta()
+        genome_decoy_search = ps.PeptideSearch("Genome", self.args.Mass_spec, "Genome/Percolator/Genome_decoy.fasta",
+                                               self.args, decoy=True)
+        genome_decoy_search.peptide_identification()
+        if self.args.Transcriptome is not None:
+            transcriptome = ps.PeptideSearch("Transcriptome", self.args.Mass_spec, "transcriptome_database.fasta", self.args)
+            transcriptome.peptide_identification()
+            transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
+            transcriptome_decoy.reverse_sequences().to_fasta()
+            transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", self.args.Mass_spec,
+                                                          "Transcriptome/Percolator/Transcriptome_decoy.fasta", self.args,
+                                                          decoy=True)
+            transcriptome_decoy_search.peptide_identification()
 
 class PipelineTestingOld(object):
     def __init__(self, outdir, skip_assembly, skip_db, skip_ms, skip_postms):
