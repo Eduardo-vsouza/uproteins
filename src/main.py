@@ -10,7 +10,7 @@ from .working_runs import OrganizePlot
 from .Digestion_sets import Digestion, Digested, PlotData
 # import prowser.gene_organizer as gorg
 # import prowser.browser_gui_v16 as prsr
-from .testing import uproteins_testing as test
+# from .testing import uproteins_testing as test
 from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts
 from .master import Archives
@@ -18,13 +18,14 @@ from .database import Database
 from .postprocess import PostPercolator, ExtendedInformation
 from .sequtils.orflib import AltCodons
 from .upstream import SDInspection
+from .testing import PipelineTesting
 
 
 pypath = sys.path[0]
 
 
 def run_workflow(args):
-    run = False
+    run = True
     # argfix = ArgumentsFixer(parser)
     # args = argfix.get_abspath()
     mode = args.mode
@@ -56,45 +57,45 @@ def run_workflow(args):
             arxivs.RNASequences = sequences
 
         elif mode == "testing":
-            test_args = test.PipelineTesting(args.outdir, args.skip_assembly, args.skip_db, args.skip_ms,
-                                             args.skip_postms)
-            state = test.TestingOutput(args)
-            if args.skip_assembly != "TRUE":
-                test_args.test_assembly()
-                state.assembly = "OK"
-            ass_out = state.testing_stdout("assembly step ")
-            print(ass_out)
-            if args.skip_db != "TRUE":
-                test_args.summarize_assembly()
-                test_args.test_database()
-                db_content = state.db_checkpoint()
-                if db_content == "Filled":
-                    state.db = "OK"
-                else:
-                    state.db = "Failed"
-            db_out = state.testing_stdout("database step ")
-            print(db_out)
-
-            if args.skip_ms != "TRUE":
-                test_args.test_ms()
-                state.ms = "OK"
-                ms_content = state.ms_checkpoint()
-                if ms_content == "Filled":
-                    state.ms = "OK"
-                else:
-                    state.ms = "Failed"
-            ms_out = state.testing_stdout("MS step ======")
-            print(ms_out)
-
-            if args.skip_postms != "TRUE":
-                test_args.test_postms()
-                postms_content = state.postms_checkpoint()
-                if postms_content == "Filled":
-                    state.postms = "OK"
-                else:
-                    state.postms = "Failed"
-            postms_out = state.testing_stdout("PostMS step ==")
-            print(postms_out)
+            testing = PipelineTesting(args)
+            # state = test.TestingOutput(args)
+            testing.run()
+            # if args.skip_assembly != "TRUE":
+            #     test_args.test_assembly()
+            #     state.assembly = "OK"
+            # ass_out = state.testing_stdout("assembly step ")
+            # print(ass_out)
+            # if args.skip_db != "TRUE":
+            #     test_args.summarize_assembly()
+            #     test_args.test_database()
+            #     db_content = state.db_checkpoint()
+            #     if db_content == "Filled":
+            #         state.db = "OK"
+            #     else:
+            #         state.db = "Failed"
+            # db_out = state.testing_stdout("database step ")
+            # print(db_out)
+            #
+            # if args.skip_ms != "TRUE":
+            #     test_args.test_ms()
+            #     state.ms = "OK"
+            #     ms_content = state.ms_checkpoint()
+            #     if ms_content == "Filled":
+            #         state.ms = "OK"
+            #     else:
+            #         state.ms = "Failed"
+            # ms_out = state.testing_stdout("MS step ======")
+            # print(ms_out)
+            #
+            # if args.skip_postms != "TRUE":
+            #     test_args.test_postms()
+            #     postms_content = state.postms_checkpoint()
+            #     if postms_content == "Filled":
+            #         state.postms = "OK"
+            #     else:
+            #         state.postms = "Failed"
+            # postms_out = state.testing_stdout("PostMS step ==")
+            # print(postms_out)
 
 
 

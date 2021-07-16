@@ -75,7 +75,7 @@ class PipelineTesting(object):
     def __init__(self, args):
         self.args = args
         self.path = sys.path
-        self.testFolder = f"{self.path[0][:-3]}testkit"
+        self.testFolder = f"{self.path[0]}/testkit"
         self.assemblyState = 'Not tested'
         self.databaseState = 'Not tested'
         self.MSState = 'Not tested'
@@ -88,35 +88,60 @@ class PipelineTesting(object):
 
     def run(self):
         assembly = AssemblyTesting(self.args)
-        assembly.test()
+        self.assemblyState = assembly.test()
+        self.print_status()
+
 
 
 class AssemblyTesting(PipelineTesting):
     def __init__(self, args):
         super().__init__(args)
+        self._fix_args()
 
     def _fix_args(self):
         self.args.gtf = f'{self.testFolder}/test_gtf.gtf'
-        self.args.single = f'{self.testFolder}/'
+        self.args.single = f'{self.testFolder}/testing_reads.fastq'
+        self.args.genome = f'{self.testFolder}/testing_genome.fasta'
+        self.args.strandness = 'F'
+        self.args.reads1 = None
+        self.args.reads2 = None
+        self.args.gff_compare_path = None
+        self.args.gffread_path = None
 
     def test(self):
-        if not self.args.skip_assembly:
-            arxivs = Archives()
-            assembly = TranscriptAssembly(self.args)
-            assembly.assemble()
-            assembly.create_gtf_list()
-            gtf = assembly.merge_transcripts()
-            arxivs.assembledGTF = gtf
-            comparisons = CompareTranscripts(self.args, arxivs.assembledGTF)
-            compare_dir = comparisons.run_gffcompare()
-            arxivs.comparisonsDirectory = compare_dir
-            sequences = comparisons.extract_sequences()
-            arxivs.RNASequences = sequences
-            self.assemblyState = 'OK'
+        if self.args.skip_assembly == 'FALSE':
+            self._map_reads()
+            self._assemble_transcriptome()
+            self.check_assembly()
         else:
             self.assemblyState = 'SKIPPED'
-        self.print_status()
+        return self.assemblyState
 
+    def _map_reads(self):
+        mapping = ReadMapper(self.args)
+        mapping.create_indexes()
+        mapping.align_reads()
+
+    def _assemble_transcriptome(self):
+        arxivs = Archives()
+        assembly = TranscriptAssembly(self.args)
+        assembly.assemble()
+        assembly.create_gtf_list()
+        gtf = assembly.merge_transcripts()
+        arxivs.assembledGTF = gtf
+        comparisons = CompareTranscripts(self.args, arxivs.assembledGTF)
+        compare_dir = comparisons.run_gffcompare()
+        arxivs.comparisonsDirectory = compare_dir
+        sequences = comparisons.extract_sequences()
+        arxivs.RNASequences = sequences
+
+    def check_assembly(self):
+        self.assemblyState = 'FAILED'
+        with open('assembled.gtf', 'r') as ass:
+            lines = ass.readlines()
+            for line in lines:
+                if 'gene-Rv0001' in line:
+                    self.assemblyState = 'OK'
 
 class PipelineTestingOld(object):
     def __init__(self, outdir, skip_assembly, skip_db, skip_ms, skip_postms):
