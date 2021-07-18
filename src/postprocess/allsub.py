@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 
@@ -11,8 +12,9 @@ class AllSub(object):
         """ Removes from the pin files any peptide that matches an annotated protein, leaving only those relevant
         to the hypothesis of the pipeline. """
         self.pinFile = self.pinFile[self.pinFile["Proteins"].str.contains('ANNO') == False]
+        os.system(f'mv {self.folder}/Percolator/{self.folder}_pin.txt {self.folder}/Percolator/{self.folder}_all_pin.txt')
 
-    def save(self, output):
-        self.pinFile.to_csv(output, sep='\t', index=False)
+    def save(self):
+        self.pinFile.to_csv(f'{self.folder}/Percolator/{self.folder}_pin.txt', sep='\t', index=False)
 
 
