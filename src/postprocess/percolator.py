@@ -112,10 +112,10 @@ class PercolatorProcessing(object):
             if self.args.percolator_path is not None:
                 perc_path = self.args.percolator_path
         cmd_perc = f'{perc_path} -X {self.folder}/Percolator/{self.filetype}_percolator_out.xml --tab-out ' \
-                   f'{folder}/comp_features.txt -w {folder}/feature_weights.txt -v 3 -r {folder}/pep_results.txt -m ' \
-                   f'{folder}/results_psm.txt --search-input separate --results-proteins {folder}/protein_results.txt' \
+                   f'{folder}/comp_features.txt -w {folder}/feature_weights.txt -v 3 -r {folder}/{self.filetype}_pep_results.txt -m ' \
+                   f'{folder}/{self.filetype}_results_psm.txt --search-input separate --results-proteins {folder}/{self.filetype}_protein_results.txt' \
                    f' --protein-enzyme {enz} --protein-report-duplicates --protein-report-fragments ' \
-                   f'--spectral-counting-fdr 0.01 --picked-protein auto {folder}/{self.folder}_pin.txt'
+                   f'--spectral-counting-fdr 0.01 -Y -P decoy_ --picked-protein auto {folder}/{self.folder}_pin.txt'
         os.system(cmd_perc)
         return self
 

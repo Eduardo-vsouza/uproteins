@@ -99,7 +99,10 @@ class PipelineTesting(object):
         self.databaseState = database.test()
         self.print_status()
         search = MSTesting(self.args)
-        search.test()
+        self.MSState = search.test()
+        self.print_status()
+        postms = PostMSTesting(self.args)
+        postms.test()
 
 
 class AssemblyTesting(PipelineTesting):
@@ -227,50 +230,96 @@ class MSTesting(PipelineTesting):
         self.args.Transcriptome = 'YES'
 
     def test(self):
-        genome = ps.PeptideSearch("Genome", self.args.Mass_spec, "genome_database.fasta", self.args)
-        genome.peptide_identification()
-        genome_decoy = Decoy(db="genome_database.fasta", db_type="Genome")
-        genome_decoy.reverse_sequences().to_fasta()
-        genome_decoy_search = ps.PeptideSearch("Genome", self.args.Mass_spec, "Genome/Percolator/Genome_decoy.fasta",
-                                               self.args, decoy=True)
-        genome_decoy_search.peptide_identification()
-        if self.args.Transcriptome is not None:
-            transcriptome = ps.PeptideSearch("Transcriptome", self.args.Mass_spec, "transcriptome_database.fasta", self.args)
-            transcriptome.peptide_identification()
-            transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
-            transcriptome_decoy.reverse_sequences().to_fasta()
-            transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", self.args.Mass_spec,
-                                                          "Transcriptome/Percolator/Transcriptome_decoy.fasta", self.args,
-                                                          decoy=True)
-            transcriptome_decoy_search.peptide_identification()
+        if self.args.skip_ms == "FALSE":
+            genome = ps.PeptideSearch("Genome", self.args.Mass_spec, "genome_database.fasta", self.args)
+            genome.peptide_identification()
+            genome_decoy = Decoy(db="genome_database.fasta", db_type="Genome")
+            genome_decoy.reverse_sequences().to_fasta()
+            genome_decoy_search = ps.PeptideSearch("Genome", self.args.Mass_spec, "Genome/Percolator/Genome_decoy.fasta",
+                                                   self.args, decoy=True)
+            genome_decoy_search.peptide_identification()
+            if self.args.Transcriptome is not None:
+                transcriptome = ps.PeptideSearch("Transcriptome", self.args.Mass_spec, "transcriptome_database.fasta", self.args)
+                transcriptome.peptide_identification()
+                transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
+                transcriptome_decoy.reverse_sequences().to_fasta()
+                transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", self.args.Mass_spec,
+                                                              "Transcriptome/Percolator/Transcriptome_decoy.fasta", self.args,
+                                                              decoy=True)
+                transcriptome_decoy_search.peptide_identification()
+            self._check()
+
+        else:
+            self.MSState = 'SKIPPED'
+        return self.MSState
 
     def _check(self):
-        self.postMSState = 'FAILED'
+        self.MSState = 'FAILED'
         target = '20140719_H37Rv_20140718_5ug_120min_top8_1.mzid'
         decoy = '20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid'
+
         def check_size(folder):
-            if os.path.getsize(f'{folder}/{target}') > 20000000
+            if os.path.getsize(f'{folder}/{target}') > 20000000 and os.path.getsize(f'{folder}/{decoy}') > 20000000:
+                state = 'OK'
+            else:
+                state = 'FAILED'
+            return state
+
+        genome_state = check_size('Genome')
+        transcriptome_state = check_size('Transcriptome')
+        if genome_state == 'OK' and transcriptome_state == 'OK':
+            self.MSState = 'OK'
 
 
 class PostMSTesting(PipelineTesting):
     def __init__(self, args):
         super().__init__(args)
+        self.postMSKit = f'{self.testFolder}/postms'
         self._fix_args()
+        self._add_test_kit()
 
     def _fix_args(self):
         self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
         self.args.proteome = f'{self.testFolder}/proteome_for_database.fasta'
+        self.args.gff = f'{self.testFolder}/test_gff.gff'
+        self.args.pep = 0.5
+        self.args.qvalue = 0.02
+        self.args.starts = 'ATG,TTG,ATT,GTG'
+        self.args.stops = 'TAA,TAG,TGA'
+        self.args.maxsize = 300
+        self.args.rrna = f'{self.testFolder}/rrna.fna'
+
+    def _add_test_kit(self):
+
+        directions = {'genome_database.fasta': '.', 'Genome_decoy.fasta': 'Genome/Percolator/.',
+                      'transcriptome_database.fasta': '.', 'Transcriptome_decoy.fasta': 'Transcriptome/Percolator/.',
+                      'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Transcriptome/.',
+                      'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Transcriptome',
+                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Genome',
+                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Genome/.'}
+
+        def move_cmd(item, destination):
+            cmd = f'cp {self.postMSKit}/{item} {destination}'
+            os.system(cmd)
+
+        for file in directions:
+            move_cmd(file, directions[file])
 
     def test(self):
         genome_perc = PercolatorProcessing("Genome", filetype="genome")
         genome_perc.create_metafiles().convert_to_pin()
         all_sub = AllSub(filetype='genome', folder="Genome")
+        all_sub.modify_decoy()
         all_sub.remove_irrelevant()
         all_sub.save()
         genome_perc.percolate()
         if self.args.Transcriptome is not None:
             rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
             rna_perc.create_metafiles().convert_to_pin()
+            rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
+            rna_all_sub.modify_decoy()
+            rna_all_sub.remove_irrelevant()
+            rna_all_sub.save()
             rna_perc.percolate()
         genome_tsv = TSVConverter("Genome")
         genome_tsv.convert_files()
@@ -298,42 +347,40 @@ class PostMSTesting(PipelineTesting):
         genome_alts_pre_rf.sort_by_shine()
         genome_alts_pre_rf.sort_by_peptides()
         priorities = genome_alts_pre_rf.get_priorities()
-        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
-        ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=priorities)
+        ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=priorities)
 
         ext.filter_alternatives(priorities)
         ext.extract_spectra()
-        # if args.Transcriptome is not None:
-        #     transcriptome_filter = PostPercolator(args, 'Transcriptome', filetype='transcriptome')
-        #     transcriptome_filter.convert_output()
-        #     transcriptome_filter.get_coordinates_rna()
-        #     transcriptome_filter.filter_novel()
-        #     transcriptome_filter.unique_peptides()
-        #     transcriptome_filter.msgf_info()
-        #     transcriptome_filter.protein_seqs()
-        #     transcriptome_filter.protein_threshold()
-        #     transcriptome_alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
-        #                                           genome=args.genome, maxsize=args.maxsize,
-        #                                           transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta")
-        #     transcriptome_alts_pre_rf.extend_orfs(args=args)
-        #     if args.rrna is not None:
-        #         transcriptome_rbs = SDInspection(args, filetype='transcriptome', folder='Transcriptome',
-        #                                          alternatives=transcriptome_alts_pre_rf.alternatives,
-        #                                          transcriptome_gff='assembled.gtf',
-        #                                          transcripts="HISAT/transcripts.fasta")
-        #         rna_alts = transcriptome_rbs.get_free_energy()
-        #         transcriptome_alts_pre_rf.alternatives = rna_alts
-        #     transcriptome_alts_pre_rf.sort_by_coordinates()
-        #     transcriptome_alts_pre_rf.sort_by_atg()
-        #     transcriptome_alts_pre_rf.sort_by_shine()
-        #     transcriptome_alts_pre_rf.sort_by_peptides()
-        #     rna_priorities = transcriptome_alts_pre_rf.get_priorities()
-        #     rna_ext = ExtendedInformation(folder='Transcriptome', filetype='transcriptome',
-        #                                   alternatives=transcriptome_alts_pre_rf.alternatives)
-        #     rna_ext.filter_alternatives(rna_priorities)
-        #     rna_ext.extract_spectra()
-
-
+        if self.args.Transcriptome is not None:
+            transcriptome_filter = PostPercolator(self.args, 'Transcriptome', filetype='transcriptome')
+            transcriptome_filter.convert_output()
+            transcriptome_filter.get_coordinates_rna()
+            transcriptome_filter.filter_novel()
+            transcriptome_filter.unique_peptides()
+            transcriptome_filter.msgf_info()
+            transcriptome_filter.protein_seqs()
+            transcriptome_filter.protein_threshold()
+            transcriptome_alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
+                                                  genome=self.args.genome, maxsize=self.args.maxsize,
+                                                  transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta")
+            transcriptome_alts_pre_rf.extend_orfs(args=self.args)
+            if self.args.rrna is not None:
+                transcriptome_rbs = SDInspection(self.args, filetype='transcriptome', folder='Transcriptome',
+                                                 alternatives=transcriptome_alts_pre_rf.alternatives,
+                                                 transcriptome_gff='assembled.gtf',
+                                                 transcripts="HISAT/transcripts.fasta")
+                rna_alts = transcriptome_rbs.get_free_energy()
+                transcriptome_alts_pre_rf.alternatives = rna_alts
+            transcriptome_alts_pre_rf.sort_by_coordinates()
+            transcriptome_alts_pre_rf.sort_by_atg()
+            transcriptome_alts_pre_rf.sort_by_shine()
+            transcriptome_alts_pre_rf.sort_by_peptides()
+            rna_priorities = transcriptome_alts_pre_rf.get_priorities()
+            rna_ext = ExtendedInformation(folder='Transcriptome', filetype='transcriptome',
+                                          alternatives=transcriptome_alts_pre_rf.alternatives)
+            rna_ext.filter_alternatives(rna_priorities)
+            rna_ext.extract_spectra()
 
 
 class PipelineTestingOld(object):
