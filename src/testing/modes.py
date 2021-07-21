@@ -315,20 +315,20 @@ class PostMSTesting(PipelineTesting):
         # all_sub.remove_irrelevant()
         # all_sub.save()
         # genome_perc.percolate()
-        # if self.args.Transcriptome is not None:
-        #     rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
-        #     rna_perc.create_metafiles().convert_to_pin()
-        #     rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
-        #     rna_all_sub.modify_decoy()
-        #     rna_all_sub.remove_irrelevant()
-        #     rna_all_sub.save()
-        #     rna_perc.percolate()
+        if self.args.Transcriptome is not None:
+            rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
+            rna_perc.create_metafiles().convert_to_pin()
+            rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
+            rna_all_sub.modify_decoy()
+            rna_all_sub.remove_irrelevant()
+            rna_all_sub.save()
+            rna_perc.percolate()
         # genome_tsv = TSVConverter("Genome")
         # genome_tsv.convert_files()
-        # if self.args.Transcriptome is not None:
-        #     transcriptome_tsv = TSVConverter("Transcriptome")
-        #     transcriptome_tsv.convert_files()
-        genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
+        if self.args.Transcriptome is not None:
+            transcriptome_tsv = TSVConverter("Transcriptome")
+            transcriptome_tsv.convert_files()
+        # genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
         # genome_filter.convert_output()
         # genome_filter.get_coordinates_genome()
         # genome_filter.filter_novel()
@@ -336,25 +336,25 @@ class PostMSTesting(PipelineTesting):
         # genome_filter.msgf_info()
         # genome_filter.protein_seqs()
         # genome_filter.protein_threshold()
-        genome_filter.add_coordinates()
-        genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
-                                       maxsize=self.args.maxsize)
-        genome_alts_pre_rf.extend_orfs(args=self.args)
-        if self.args.rrna is not None:
-            genome_rbs = SDInspection(self.args, filetype="genome", folder="Genome",
-                                      alternatives=genome_alts_pre_rf.alternatives)
-            alts = genome_rbs.get_free_energy()
-            genome_alts_pre_rf.alternatives = alts
-        genome_alts_pre_rf.sort_by_coordinates()
-        genome_alts_pre_rf.sort_by_atg()
-        genome_alts_pre_rf.sort_by_shine()
-        genome_alts_pre_rf.sort_by_peptides()
-        priorities = genome_alts_pre_rf.get_priorities()
-        ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+        # genome_filter.add_coordinates()
+        # genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
+        #                                maxsize=self.args.maxsize)
+        # genome_alts_pre_rf.extend_orfs(args=self.args)
+        # if self.args.rrna is not None:
+            # genome_rbs = SDInspection(self.args, filetype="genome", folder="Genome",
+            #                           alternatives=genome_alts_pre_rf.alternatives)
+            # alts = genome_rbs.get_free_energy()
+            # genome_alts_pre_rf.alternatives = alts
+        # genome_alts_pre_rf.sort_by_coordinates()
+        # genome_alts_pre_rf.sort_by_atg()
+        # genome_alts_pre_rf.sort_by_shine()
+        # genome_alts_pre_rf.sort_by_peptides()
+        # priorities = genome_alts_pre_rf.get_priorities()
+        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
         # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=priorities)
 
-        ext.filter_alternatives(priorities)
-        ext.extract_spectra()
+        # ext.filter_alternatives(priorities)
+        # ext.extract_spectra()
         if self.args.Transcriptome is not None:
             transcriptome_filter = PostPercolator(self.args, 'Transcriptome', filetype='transcriptome')
             transcriptome_filter.convert_output()
