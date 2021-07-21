@@ -92,6 +92,10 @@ class PostPercolator(object):
         protein.filter_from_utp()
         protein.add_proteins(f'{self.percDir}/{self.filetype}_results_02.txt')
 
+    def add_coordinates(self):
+        coords = Coordinator(proteined=f'{self.percDir}/{self.filetype}_proteined.tsv', utps=f'{self.percDir}/{self.filetype}_utps.txt')
+        coords.add_information(f'{self.percDir}/{self.filetype}_results_02.txt')
+
 
 class AnnoFilter(object):
     def __init__(self, df):
@@ -100,6 +104,44 @@ class AnnoFilter(object):
     def remove_annotated(self, output):
         df = self.df[self.df["proteinIds"].str.contains('ANNO') == False]
         df.to_csv(output, sep='\t', index=False)
+
+
+class Coordinator(object):
+    def __init__(self, utps, proteined):
+        self.UTPs = pd.read_csv(utps, sep='\t')
+        self.proteined = pd.read_csv(proteined, sep='\t')
+        self.coordinates = self._get_coordinates()
+
+    def _get_coordinates(self):
+        coordinates = self.UTPs["Genome Coordinates"].tolist()
+        orfs = self.UTPs["proteinIds"].tolist()
+        coordict = {}
+        for coords, orf in zip(coordinates, orfs):
+            coord_list = coords.split(",")
+            orf_list = orf.split(",")
+            for i in range(len(coord_list)):
+                if orf_list[i] not in coordict:
+                    coordict[orf_list[i]] = coord_list[i]
+        return coordict
+
+    def add_information(self, output):
+        # proteins = self.proteined["Protein"].tolist()
+        ndf = pd.DataFrame(columns=self.proteined.columns)
+        for protein in self.coordinates:
+            df = self.proteined[self.proteined["Protein"].str.contains(protein)]
+            proteins = df["Protein"].tolist()
+            new_proteins = []
+            coordinates = []
+            for entry in proteins:
+                new_proteins.append(protein)
+                coordinates.append(self.coordinates[protein])
+            df.insert(8, "entry", new_proteins)
+            df.insert(5, "Genome Coordinates", coordinates)
+            ndf = ndf.append(df)
+        ndf = ndf.drop_duplicates()
+        ndf = ndf.drop(columns='Protein')
+        ndf = ndf.rename(columns={'entry': 'Protein'})
+        ndf.to_csv(output, sep='\t', index=False)
 
 
 class ProteinFDR(object):
@@ -115,7 +157,6 @@ class ProteinFDR(object):
         self.catProteinFile = f'{self.percDir}/{self.filetype}_cat_protein_results.txt'
         os.system(f'cat {self.folder}/Percolator/*protein_results* > {self.catProteinFile}')
         return self
-
 
     def protein_cutoff(self):
         df = pd.read_csv(self.catProteinFile, sep='\t')
@@ -167,11 +208,11 @@ class ProteinFDR(object):
         names = df["Protein"].tolist()
         renamed = []
         for name in names:
+            print(name)
             renamed.append(name.split("(")[0])
         df = df.drop(columns="Protein")
         df.insert(8, "Protein", renamed)
         return df
-
 
     def filter_from_utp(self):
         """
@@ -180,7 +221,8 @@ class ProteinFDR(object):
         """
         prots, coords = self.__get_utp_prots_and_coords()
         renamed_protein_filtered_df = self.__rename_orfs()
-        df = renamed_protein_filtered_df[renamed_protein_filtered_df["Protein"].isin(prots)]
+        # df = renamed_protein_filtered_df[renamed_protein_filtered_df["Protein"].isin(prots)] # it's this piece of shit
+        df = renamed_protein_filtered_df
         filtered_df = pd.DataFrame(columns=df.columns)
         filtered_df.insert(5, "Genome Coordinates", [])
         for prot, coord in zip(prots, coords):
@@ -192,6 +234,7 @@ class ProteinFDR(object):
             filtered_df = filtered_df.append(ndf)
         filtered_df = filtered_df.drop_duplicates()
         filtered_df.to_csv(f"{self.percDir}/{self.filetype}_results_01.txt", sep='\t', index=False)
+        # print(filtered_df)
         return self
 
     def __read_db(self):

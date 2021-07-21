@@ -16,7 +16,7 @@ class AltCodons(object):
         self.df = pd.read_csv(file, sep='\t')
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
-        self.proteinSequences = self.df["db entry"].tolist()
+        self.proteinSequences = self.df["ORF Sequence"].tolist()
         # for i in self.proteinSequences:
             # if i == 'nan':
             # print(i)

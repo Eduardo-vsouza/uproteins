@@ -279,11 +279,13 @@ class PostMSTesting(PipelineTesting):
         self._add_test_kit()
 
     def _fix_args(self):
-        self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
+        # self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
+        self.args.genome = f'{self.testFolder}/testing_genome.fasta'
+
         self.args.proteome = f'{self.testFolder}/proteome_for_database.fasta'
         self.args.gff = f'{self.testFolder}/test_gff.gff'
         self.args.pep = 0.5
-        self.args.qvalue = 0.02
+        self.args.qvalue = 0.5
         self.args.starts = 'ATG,TTG,ATT,GTG'
         self.args.stops = 'TAA,TAG,TGA'
         self.args.maxsize = 300
@@ -306,34 +308,35 @@ class PostMSTesting(PipelineTesting):
             move_cmd(file, directions[file])
 
     def test(self):
-        genome_perc = PercolatorProcessing("Genome", filetype="genome")
-        genome_perc.create_metafiles().convert_to_pin()
-        all_sub = AllSub(filetype='genome', folder="Genome")
-        all_sub.modify_decoy()
-        all_sub.remove_irrelevant()
-        all_sub.save()
-        genome_perc.percolate()
-        if self.args.Transcriptome is not None:
-            rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
-            rna_perc.create_metafiles().convert_to_pin()
-            rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
-            rna_all_sub.modify_decoy()
-            rna_all_sub.remove_irrelevant()
-            rna_all_sub.save()
-            rna_perc.percolate()
-        genome_tsv = TSVConverter("Genome")
-        genome_tsv.convert_files()
-        if self.args.Transcriptome is not None:
-            transcriptome_tsv = TSVConverter("Transcriptome")
-            transcriptome_tsv.convert_files()
+        # genome_perc = PercolatorProcessing("Genome", filetype="genome")
+        # genome_perc.create_metafiles().convert_to_pin()
+        # all_sub = AllSub(filetype='genome', folder="Genome")
+        # all_sub.modify_decoy()
+        # all_sub.remove_irrelevant()
+        # all_sub.save()
+        # genome_perc.percolate()
+        # if self.args.Transcriptome is not None:
+        #     rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
+        #     rna_perc.create_metafiles().convert_to_pin()
+        #     rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
+        #     rna_all_sub.modify_decoy()
+        #     rna_all_sub.remove_irrelevant()
+        #     rna_all_sub.save()
+        #     rna_perc.percolate()
+        # genome_tsv = TSVConverter("Genome")
+        # genome_tsv.convert_files()
+        # if self.args.Transcriptome is not None:
+        #     transcriptome_tsv = TSVConverter("Transcriptome")
+        #     transcriptome_tsv.convert_files()
         genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
-        genome_filter.convert_output()
-        genome_filter.get_coordinates_genome()
-        genome_filter.filter_novel()
-        genome_filter.unique_peptides()
-        genome_filter.msgf_info()
-        genome_filter.protein_seqs()
-        genome_filter.protein_threshold()
+        # genome_filter.convert_output()
+        # genome_filter.get_coordinates_genome()
+        # genome_filter.filter_novel()
+        # genome_filter.unique_peptides()
+        # genome_filter.msgf_info()
+        # genome_filter.protein_seqs()
+        # genome_filter.protein_threshold()
+        genome_filter.add_coordinates()
         genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
                                        maxsize=self.args.maxsize)
         genome_alts_pre_rf.extend_orfs(args=self.args)

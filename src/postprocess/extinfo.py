@@ -80,7 +80,7 @@ class ExtendedInformation(object):
                 for pep in fixed_pep:
                     # print(pep)
                     # df = self.results[self.results["Fixed Peptides"].isin(alt.proteinSequence)]
-                    ndf = df[df["db entry"].str.contains(pep)]
+                    ndf = df[df["ORF Sequence"].str.contains(pep)]
                     peps = ndf["Fixed Peptides"].tolist()
                     # extended = [alt.name for pep in peps]
                     for pep in peps:

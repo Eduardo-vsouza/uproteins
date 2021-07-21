@@ -3,11 +3,13 @@ from Bio import SeqIO
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2
 
+
 class SequenceFinder(object):
     def __init__(self, df, fasta_db):
         self.df = pd.read_csv(df, sep="\t")
         self.df = self.df[self.df["Protein"].str.contains("contaminant") == False]
         self.df = self.df[self.df["Protein"].str.contains("lcl|", regex=False) == False]
+        self.df = self.df[self.df["Protein"].str.contains("decoy", regex=False) == False]
         self.proteins = self.df["Protein"].tolist()
         self.fasta = fasta_db
         self.proteinDict = self.__get_db_proteins()
