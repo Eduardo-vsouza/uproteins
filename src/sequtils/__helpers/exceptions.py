@@ -10,6 +10,13 @@ class HandlerError(Error):
         super().__init__(self.message)
 
 
+class FiletypeError(Error):
+    """ Raised when the filetype is incorrect. """
+    def __init__(self, message='Unrecognized filetype. Please inform one of the following: genome, transcriptome.'):
+        self.message = message
+        super().__init__(self.message)
+
+
 class SourceError(Error):
     """ Raised when the source of the data is incorrect. """
     def __init__(self, message="Unrecognized data source. Please provide a valid one."):

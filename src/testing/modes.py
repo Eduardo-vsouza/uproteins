@@ -12,6 +12,7 @@ from ..percolator import Decoy
 from ..postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing, AllSub, TSVConverter
 from ..sequtils.orflib import AltCodons
 from ..upstream import SDInspection
+from ..pipelines import PostMSPipeline
 
 
 class TestingOutput(object):
@@ -94,15 +95,19 @@ class PipelineTesting(object):
     def run(self):
         assembly = AssemblyTesting(self.args)
         self.assemblyState = assembly.test()
-        self.print_status()
+        if self.assemblyState != 'SKIPPED':
+            self.print_status()
         database = DatabaseTesting(self.args)
         self.databaseState = database.test()
-        self.print_status()
+        if self.databaseState != 'SKIPPED':
+            self.print_status()
         search = MSTesting(self.args)
         self.MSState = search.test()
-        self.print_status()
+        if self.MSState != 'SKIPPED':
+            self.print_status()
         postms = PostMSTesting(self.args)
-        postms.test()
+        self.postMSState = postms.test()
+        self.print_status()
 
 
 class AssemblyTesting(PipelineTesting):
@@ -308,82 +313,110 @@ class PostMSTesting(PipelineTesting):
             move_cmd(file, directions[file])
 
     def test(self):
-        # genome_perc = PercolatorProcessing("Genome", filetype="genome")
-        # genome_perc.create_metafiles().convert_to_pin()
-        # all_sub = AllSub(filetype='genome', folder="Genome")
-        # all_sub.modify_decoy()
-        # all_sub.remove_irrelevant()
-        # all_sub.save()
-        # genome_perc.percolate()
-        if self.args.Transcriptome is not None:
-            rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
-            rna_perc.create_metafiles().convert_to_pin()
-            rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
-            rna_all_sub.modify_decoy()
-            rna_all_sub.remove_irrelevant()
-            rna_all_sub.save()
-            rna_perc.percolate()
-        # genome_tsv = TSVConverter("Genome")
-        # genome_tsv.convert_files()
-        if self.args.Transcriptome is not None:
-            transcriptome_tsv = TSVConverter("Transcriptome")
-            transcriptome_tsv.convert_files()
-        # genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
-        # genome_filter.convert_output()
-        # genome_filter.get_coordinates_genome()
-        # genome_filter.filter_novel()
-        # genome_filter.unique_peptides()
-        # genome_filter.msgf_info()
-        # genome_filter.protein_seqs()
-        # genome_filter.protein_threshold()
-        # genome_filter.add_coordinates()
-        # genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
-        #                                maxsize=self.args.maxsize)
-        # genome_alts_pre_rf.extend_orfs(args=self.args)
-        # if self.args.rrna is not None:
-            # genome_rbs = SDInspection(self.args, filetype="genome", folder="Genome",
-            #                           alternatives=genome_alts_pre_rf.alternatives)
-            # alts = genome_rbs.get_free_energy()
-            # genome_alts_pre_rf.alternatives = alts
-        # genome_alts_pre_rf.sort_by_coordinates()
-        # genome_alts_pre_rf.sort_by_atg()
-        # genome_alts_pre_rf.sort_by_shine()
-        # genome_alts_pre_rf.sort_by_peptides()
-        # priorities = genome_alts_pre_rf.get_priorities()
-        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
-        # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=priorities)
+        if self.args.skip_postms == 'FALSE':
+            genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome')
+            genome.run()
+            if self.args.Transcriptome == 'YES':
+                transcriptome = PostMSPipeline(args=self.args, filetype='transcriptome', folder='Transcriptome')
+                transcriptome.run()
+            # genome_perc = PercolatorProcessing("Genome", filetype="genome")
+            # genome_perc.create_metafiles().convert_to_pin()
+            # all_sub = AllSub(filetype='genome', folder="Genome")
+            # all_sub.modify_decoy()
+            # all_sub.remove_annotated()
+            # genome_perc.percolate()
+            # if self.args.Transcriptome is not None:
+            #     rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
+            #     rna_perc.create_metafiles().convert_to_pin()
+            #     rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
+            #     rna_all_sub.modify_decoy()
+            #     rna_all_sub.remove_annotated()
+            #     rna_perc.percolate()
+            # genome_tsv = TSVConverter("Genome")
+            # genome_tsv.convert_files()
+            # if self.args.Transcriptome is not None:
+            #     transcriptome_tsv = TSVConverter("Transcriptome")
+            #     transcriptome_tsv.convert_files()
+            # genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
+            # genome_filter.convert_output()
+            # genome_filter.get_coordinates_genome()
+            # genome_filter.filter_novel()
+            # genome_filter.unique_peptides()
+            # genome_filter.msgf_info()
+            # genome_filter.protein_seqs()
+            # genome_filter.add_coordinates()
+            # genome_alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
+            #                                maxsize=self.args.maxsize)
+            # genome_alts_pre_rf.extend_orfs(args=self.args)
+            # if self.args.rrna is not None:
+            #     genome_rbs = SDInspection(self.args, filetype="genome", folder="Genome",
+            #                               alternatives=genome_alts_pre_rf.alternatives)
+            #     alts = genome_rbs.get_free_energy()
+            #     genome_alts_pre_rf.alternatives = alts
+            # genome_alts_pre_rf.sort_by_coordinates()
+            # genome_alts_pre_rf.sort_by_atg()
+            # genome_alts_pre_rf.sort_by_shine()
+            # genome_alts_pre_rf.sort_by_peptides()
+            # priorities = genome_alts_pre_rf.get_priorities()
+            # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
+            # ext.filter_alternatives(priorities)
+            # ext.extract_spectra()
+            # if self.args.Transcriptome is not None:
+            #     transcriptome_filter = PostPercolator(self.args, 'Transcriptome', filetype='transcriptome')
+            #     transcriptome_filter.convert_output()
+            #     transcriptome_filter.get_coordinates_rna()
+            #     transcriptome_filter.filter_novel()
+            #     transcriptome_filter.unique_peptides()
+            #     transcriptome_filter.msgf_info()
+            #     transcriptome_filter.protein_seqs()
+            #     transcriptome_filter.add_coordinates()
+            #     transcriptome_alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
+            #                                           genome=self.args.genome, maxsize=self.args.maxsize,
+            #                                           transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta")
+            #     transcriptome_alts_pre_rf.extend_orfs(args=self.args)
+            #     if self.args.rrna is not None:
+            #         transcriptome_rbs = SDInspection(self.args, filetype='transcriptome', folder='Transcriptome',
+            #                                          alternatives=transcriptome_alts_pre_rf.alternatives,
+            #                                          transcriptome_gff='assembled.gtf',
+            #                                          transcripts="HISAT/transcripts.fasta")
+            #         rna_alts = transcriptome_rbs.get_free_energy()
+            #         transcriptome_alts_pre_rf.alternatives = rna_alts
+            #     transcriptome_alts_pre_rf.sort_by_coordinates()
+            #     transcriptome_alts_pre_rf.sort_by_atg()
+            #     transcriptome_alts_pre_rf.sort_by_shine()
+            #     transcriptome_alts_pre_rf.sort_by_peptides()
+            #     rna_priorities = transcriptome_alts_pre_rf.get_priorities()
+            #     rna_ext = ExtendedInformation(folder='Transcriptome', filetype='transcriptome',
+            #                                   alternatives=transcriptome_alts_pre_rf.alternatives)
+            #     rna_ext.filter_alternatives(rna_priorities)
+            #     rna_ext.extract_spectra()
+            self._check()
+        else:
+            self.postMSState = 'SKIPPED'
+        return self.postMSState
 
-        # ext.filter_alternatives(priorities)
-        # ext.extract_spectra()
-        if self.args.Transcriptome is not None:
-            transcriptome_filter = PostPercolator(self.args, 'Transcriptome', filetype='transcriptome')
-            transcriptome_filter.convert_output()
-            transcriptome_filter.get_coordinates_rna()
-            transcriptome_filter.filter_novel()
-            transcriptome_filter.unique_peptides()
-            transcriptome_filter.msgf_info()
-            transcriptome_filter.protein_seqs()
-            transcriptome_filter.protein_threshold()
-            transcriptome_alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
-                                                  genome=self.args.genome, maxsize=self.args.maxsize,
-                                                  transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta")
-            transcriptome_alts_pre_rf.extend_orfs(args=self.args)
-            if self.args.rrna is not None:
-                transcriptome_rbs = SDInspection(self.args, filetype='transcriptome', folder='Transcriptome',
-                                                 alternatives=transcriptome_alts_pre_rf.alternatives,
-                                                 transcriptome_gff='assembled.gtf',
-                                                 transcripts="HISAT/transcripts.fasta")
-                rna_alts = transcriptome_rbs.get_free_energy()
-                transcriptome_alts_pre_rf.alternatives = rna_alts
-            transcriptome_alts_pre_rf.sort_by_coordinates()
-            transcriptome_alts_pre_rf.sort_by_atg()
-            transcriptome_alts_pre_rf.sort_by_shine()
-            transcriptome_alts_pre_rf.sort_by_peptides()
-            rna_priorities = transcriptome_alts_pre_rf.get_priorities()
-            rna_ext = ExtendedInformation(folder='Transcriptome', filetype='transcriptome',
-                                          alternatives=transcriptome_alts_pre_rf.alternatives)
-            rna_ext.filter_alternatives(rna_priorities)
-            rna_ext.extract_spectra()
+    def _check(self):
+        self.postMSState = 'FAILED'
+
+        def inspect_result(pattern, folder, filetype):
+            state = 'FAILED'
+            results = f'{folder}/post_perc/{filetype}_results_04.txt'
+            if os.path.exists(results):
+                with open(results, 'r') as data:
+                    lines = data.readlines()
+                    for line in lines:
+                        if pattern in line:
+                            state = 'OK'
+                            break
+            return state
+
+        transcriptome_state = inspect_result(pattern='tORF_gene-Rv2031c_42266_136-432_', folder='Transcriptome',
+                                             filetype='transcriptome')
+        genome_state = inspect_result(pattern='gORF__9451_326088-326246_forward', folder='Genome', filetype='genome')
+        if transcriptome_state == 'OK' and genome_state == 'OK':
+            self.postMSState = 'OK'
+
+
 
 
 class PipelineTestingOld(object):

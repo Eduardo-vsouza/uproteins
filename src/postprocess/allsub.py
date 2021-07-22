@@ -10,10 +10,21 @@ class AllSub(object):
         self.fileToFix = f'{self.folder}/Percolator/{self.folder}_pin.txt'
         self.dfToFix = pd.read_csv(self.fileToFix, sep='\t', usecols=[i for i in range(35)])
         self.catProteins = []
-        self._fix_columns()
-        self._save_fixed()
+        # self._fix_columns()
+        # self._save_fixed()
 
-        self.pinFile = pd.read_csv(f'{self.folder}/Percolator/{self.folder}_pin.txt', sep='\t')
+        # self.pinFile = pd.read_csv(f'{self.folder}/Percolator/{self.folder}_pin.txt', sep='\t')
+
+    def remove_annotated(self):
+        removed = []
+        with open(self.fileToFix, 'r') as tofix, open(f'{self.folder}/Percolator/{self.folder}_pin_removed.txt', 'w') as out:
+            lines = tofix.readlines()
+            for line in lines:
+                if 'ANNO' not in line:
+                    removed.append(line)
+            out.writelines(removed)
+        os.system(f'mv {self.fileToFix} {self.fileToFix}_all.txt')
+        os.system(f'mv {self.folder}/Percolator/{self.folder}_pin_removed.txt {self.fileToFix}')
 
     def _fix_columns(self):
         with open(self.fileToFix) as unfixed:
@@ -65,7 +76,6 @@ class AllSub(object):
         cmd_mv = f'mv {self.folder}/Percolator/{self.folder}_decoy.fasta {self.folder}/Percolator/{self.folder}_decoy_all.fasta'
         os.system(cmd_mv)
 
-
     def save(self):
         self.pinFile.to_csv(f'{self.folder}/Percolator/{self.folder}_pin.txt', sep='\t', index=False)
         to_write = []
@@ -75,6 +85,7 @@ class AllSub(object):
                 if 'SpecId' not in line and 'Default' not in line:
                     line = line.replace(",", "\t")
                 to_write.append(line)
+                print(line)
             out.writelines(to_write)
         cmd_mv = f'mv {self.fileToFix} {self.fileToFix}_old.txt'
         cmd_mv2 = f'mv {self.fileToFix}_refixed {self.fileToFix}'
