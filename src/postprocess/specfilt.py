@@ -55,9 +55,10 @@ class PostPercolator(object):
     def unique_peptides(self):
         """ Remove non-unique peptides. Check uProteInS methods for unique peptide classification. """
         print("Removing non-unique peptides\n")
-        unique = PercolatorUTP(coord_df=f'{self.percDir}/{self.filetype}_no_anno.txt', pep=self.args.pep,
-                               qvalue=self.args.qvalue)
-        unique.get_utps().save_table(output=f'{self.percDir}/{self.filetype}_utps', keep='all')
+        os.system(f'cp {self.percDir}/{self.filetype}_no_anno.txt {self.percDir}/{self.filetype}_utps.txt')
+        # unique = PercolatorUTP(coord_df=f'{self.percDir}/{self.filetype}_no_anno.txt', pep=self.args.pep,
+        #                        qvalue=self.args.qvalue)
+        # unique.get_utps().save_table(output=f'{self.percDir}/{self.filetype}_utps', keep='all')
         return self
 
     def msgf_info(self):

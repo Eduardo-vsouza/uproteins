@@ -280,6 +280,7 @@ class PostMSTesting(PipelineTesting):
     def __init__(self, args):
         super().__init__(args)
         self.postMSKit = f'{self.testFolder}/postms'
+        self._check_transcriptome_folder()
         self._fix_args()
         self._add_test_kit()
 
@@ -295,6 +296,9 @@ class PostMSTesting(PipelineTesting):
         self.args.stops = 'TAA,TAG,TGA'
         self.args.maxsize = 300
         self.args.rrna = f'{self.testFolder}/rrna.fna'
+        self.args.Transcriptome = 'YES'
+        self.newArgs = self.args
+
 
     def _add_test_kit(self):
 
@@ -303,7 +307,8 @@ class PostMSTesting(PipelineTesting):
                       'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Transcriptome/.',
                       'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Transcriptome',
                       'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Genome',
-                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Genome/.'}
+                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Genome/.',
+                      'assembled.gtf': '.', 'transcripts.fasta': 'HISAT/.'}
 
         def move_cmd(item, destination):
             cmd = f'cp {self.postMSKit}/{item} {destination}'
@@ -312,12 +317,17 @@ class PostMSTesting(PipelineTesting):
         for file in directions:
             move_cmd(file, directions[file])
 
+    @staticmethod
+    def _check_transcriptome_folder():
+        if not os.path.exists("HISAT"):
+            os.system('mkdir HISAT')
+
     def test(self):
         if self.args.skip_postms == 'FALSE':
-            genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome')
-            genome.run()
+            # genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome')
+            # genome.run()
             if self.args.Transcriptome == 'YES':
-                transcriptome = PostMSPipeline(args=self.args, filetype='transcriptome', folder='Transcriptome')
+                transcriptome = PostMSPipeline(args=self.newArgs, filetype='transcriptome', folder='Transcriptome')
                 transcriptome.run()
             # genome_perc = PercolatorProcessing("Genome", filetype="genome")
             # genome_perc.create_metafiles().convert_to_pin()

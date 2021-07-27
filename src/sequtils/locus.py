@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 from .orflib import ORF, ORFCollection
 
@@ -39,9 +41,22 @@ class RefSeqGFF(object):
 class StringTieGFF(object):
     def __init__(self, gff):
         self.gff = gff
+        self._fix_header()
+
+    def _fix_header(self):
+        with open(self.gff, 'r') as problemo, open('scapegoat.txt', 'w') as fixed_gff:
+            fixed = []
+            lines = problemo.readlines()
+            for line in lines:
+                if '# StringTie version' in line:
+                    line = 'seqname\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\tattributes\n'
+                fixed.append(line)
+            fixed_gff.writelines(fixed)
+        os.system(f'mv {self.gff} gff_unfixed.gff')
+        os.system(f'mv scapegoat.txt {self.gff}')
 
     def __read_gff(self):
-        df = pd.read_csv(self.gff, sep='\t', header=2)
+        df = pd.read_csv(self.gff, sep='\t', header=1)
         df.columns = ['seqname', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'attributes']
         df = df[df["feature"] == "transcript"]
         starts = df["start"].tolist()

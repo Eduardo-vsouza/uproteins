@@ -41,7 +41,11 @@ class AltCodons(object):
             orf_dict = gff.get_dict()
             for gene in orf_dict:
                 orf = orf_dict[gene]
+                print(orf, orf.name)
+
+                # orf.transcript = transcripts[orf.name]
                 orf.transcript = transcripts[orf.name]
+
             return orf_dict
 
     def __split_coords(self, i):
@@ -90,6 +94,8 @@ class AltCodons(object):
                 start, end = self.__get_transcript_coordinates(self.names[i])
                 # start, end, strand = self.tORFs[name].start, self.tORFs[name].end, 'forward'
                 strand = 'forward'
+                # print(name)
+                # print(self.tORFs)
                 transcript = self.tORFs[name].transcript
             if strand == 'forward':
                 if self.subset == "Genome":

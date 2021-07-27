@@ -32,7 +32,9 @@ class PercolatorUTP(object):
                     end = i.split("-")[1]
                     peptide.add_spec(start, end)
                     peptide.check_loci()
-                self.unique.append(peptide.unique)
+                # self.unique.append(peptide.unique)
+                self.unique.append(True)
+
             else:
                 self.unique.append(False)
         return self

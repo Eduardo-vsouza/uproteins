@@ -9,6 +9,8 @@ class TranscriptExtractor(object):
         rnas = {}
         for record in self.assembly:
             gene = str(record.id)
+            # if '0001' in gene:
+            #     print('WORKING', gene)
             if 'gene' in gene:
                 gene = gene[5:]
             elif 'uproteins' in gene:
