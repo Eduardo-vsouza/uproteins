@@ -110,6 +110,7 @@ class AnnoFilter(object):
 class Coordinator(object):
     def __init__(self, utps, proteined):
         self.UTPs = pd.read_csv(utps, sep='\t')
+        self.UTPs = self.UTPs[self.UTPs["q-value"] <= 0.01]
         self.proteined = pd.read_csv(proteined, sep='\t')
         self.coordinates = self._get_coordinates()
 

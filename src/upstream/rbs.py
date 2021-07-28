@@ -99,7 +99,10 @@ class SDInspection(object):
                     if self.subset == "Genome":
                         upstream = self.genome[alt.start-22: alt.start]
                     else:
-                        upstream = alt.transcript[alt.start-22: alt.start]
+                        if alt.start-22 > 0:
+                            upstream = alt.transcript[alt.start-22: alt.start]
+                        else:
+                            upstream = ''
                     alt.upstream = upstream
                 elif alt.strand == 'reverse':
                     upstream = self.__complement(self.genome[alt.start: alt.start+22][::-1])
@@ -158,7 +161,10 @@ class SDInspection(object):
 
             for alt in self.alternatives[stop]:
                 # if alt.name != "Discard":
+                print(alt)
+                print(alt.upstream)
                 if alt.upstream != '':
+
                     cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
                     energy = subprocess.check_output(cmd, shell=True).strip().rstrip()
                     # print(energy)

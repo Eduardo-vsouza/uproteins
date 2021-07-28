@@ -11,7 +11,7 @@ class PostMSPipeline(object):
         self.folder = folder
 
     def run(self):
-        # self._run_percolator()
+        self._run_percolator()
         self._process_percolator()
         self._select_codons()
 
@@ -24,22 +24,22 @@ class PostMSPipeline(object):
         perc.percolate()
 
     def _process_percolator(self):
-        # tsv = TSVConverter(self.folder)
-        # tsv.convert_files()
+        tsv = TSVConverter(self.folder)
+        tsv.convert_files()
 
         data_filter = PostPercolator(self.args, folder=self.folder, filetype=self.filetype)
-        # data_filter.convert_output()
-        # if self.filetype == 'genome':
-        #     data_filter.get_coordinates_genome()
-        # elif self.filetype == 'transcriptome':
-        #     data_filter.get_coordinates_rna()
-        # else:
-        #     raise FiletypeError
-        # data_filter.filter_novel()
-        # data_filter.unique_peptides()
-        # data_filter.msgf_info()
-        # data_filter.protein_seqs()
-        # data_filter.add_coordinates()
+        data_filter.convert_output()
+        if self.filetype == 'genome':
+            data_filter.get_coordinates_genome()
+        elif self.filetype == 'transcriptome':
+            data_filter.get_coordinates_rna()
+        else:
+            raise FiletypeError
+        data_filter.filter_novel()
+        data_filter.unique_peptides()
+        data_filter.msgf_info()
+        data_filter.protein_seqs()
+        data_filter.add_coordinates()
 
     def _select_codons(self):
         if self.filetype == 'genome':

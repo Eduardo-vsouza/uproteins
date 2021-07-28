@@ -133,6 +133,7 @@ class AltCodons(object):
 
     def sort_by_coordinates(self):
         """ Sorts the alternative ORFs inside self.alternatives by their start codons. """
+        print('sorting by coordinates')
         for alts in self.alternatives:
             starts = []
             for alt in self.alternatives[alts]:
@@ -160,6 +161,7 @@ class AltCodons(object):
 
     def sort_by_atg(self):
         """ Gives priority to ATG when sorting ORFs. """
+        print('sorting by atgs')
         for alts in self.alternatives:
             # print(f'Alts: {alts}')
             atgs = []
@@ -246,6 +248,7 @@ class AltCodons(object):
     def extend_orfs(self, args):
         """ note: call this function first. From now on, it's pure black magic. As this is getting kinda complex,
         to hell with python PEPs. I must remind myself to improve the readability of this chaotic mess. """
+        print("extending ORFS")
         new_alts = {}
         # rev_genome = self.genome_seq[0][::-1]
         # print("extend_orfs")
@@ -269,12 +272,15 @@ class AltCodons(object):
                         if real_start in args.starts.split(","):
                             extended = real_start
                             position = alt.start - i
+                            print('transcript:', alt.transcriptName, transcript)
 
                             seq = sequence[alt.start-i+2: alt.end]
+                            print('seq:', seq)
                             # print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq, transcript=transcript,
                                                 transcript_name=alt.transcriptName)
+
                         if s_codon in args.stops.split(","):
                             extend = False
 
@@ -307,7 +313,6 @@ class AltCodons(object):
                             # print(ex_seq)
                         if ex_codon in args.stops.split(","):
                             extend = False
-
 
                     # i = 6
                     # extend = True
@@ -357,6 +362,7 @@ class AltCodons(object):
                     #         print(extended)
                     #     i += 3
         self.__add_new_alts(new_alts)
+        print('done extending')
 
     @staticmethod
     def complement(seq):
@@ -413,6 +419,7 @@ class AltCodons(object):
         :return: dictionary containing ORFCollections with ORFs sorted by the presence or absence of Shine-Dalgarno
         sequences upstream from their START.
         """
+        print('sorting by RBS')
         alternatives = {}
         for stop in self.alternatives:
             ignore = False
@@ -492,6 +499,7 @@ class AltCodons(object):
         return alts_with_peps
 
     def sort_by_peptides(self):
+        print('sorting by ms peptides')
         pep_sorted = {}
         total = []
         for stop in self.alternatives:

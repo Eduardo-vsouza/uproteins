@@ -286,8 +286,8 @@ class PostMSTesting(PipelineTesting):
 
     def _fix_args(self):
         # self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
-        self.args.genome = f'{self.testFolder}/testing_genome.fasta'
-
+        # self.args.genome = f'{self.testFolder}/testing_genome.fasta'
+        self.args.genome = f'{self.postMSKit}/genome.fasta'
         self.args.proteome = f'{self.testFolder}/proteome_for_database.fasta'
         self.args.gff = f'{self.testFolder}/test_gff.gff'
         self.args.pep = 0.5
@@ -306,9 +306,9 @@ class PostMSTesting(PipelineTesting):
                       'transcriptome_database.fasta': '.', 'Transcriptome_decoy.fasta': 'Transcriptome/Percolator/.',
                       'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Transcriptome/.',
                       'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Transcriptome',
-                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Genome',
+                      'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Genome/.',
                       'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Genome/.',
-                      'assembled.gtf': '.', 'transcripts.fasta': 'HISAT/.'}
+                      'assembled.gtf': '.', 'transcripts.fasta': 'HISAT/.', }
 
         def move_cmd(item, destination):
             cmd = f'cp {self.postMSKit}/{item} {destination}'
@@ -324,8 +324,8 @@ class PostMSTesting(PipelineTesting):
 
     def test(self):
         if self.args.skip_postms == 'FALSE':
-            # genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome')
-            # genome.run()
+            genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome')
+            genome.run()
             if self.args.Transcriptome == 'YES':
                 transcriptome = PostMSPipeline(args=self.newArgs, filetype='transcriptome', folder='Transcriptome')
                 transcriptome.run()
