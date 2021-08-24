@@ -1,0 +1,1 @@
+from .assembled import TranscriptExtractor
