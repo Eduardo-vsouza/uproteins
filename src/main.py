@@ -21,6 +21,7 @@ from .upstream import SDInspection
 from .testing import PipelineTesting
 from .postms import TSVConverter
 from .pipelines import PostMSPipeline
+from .forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest
 
 
 pypath = sys.path[0]
@@ -147,9 +148,9 @@ def run_workflow(args):
             """ newest method """
             genome = PostMSPipeline(args=args, filetype='genome', folder='Genome')
             genome.run()
-            # if args.Transcriptome == 'YES':
-            #     transcriptome = PostMSPipeline(args=args, filetype='transcriptome', folder='Transcriptome')
-            #     transcriptome.run()
+            if args.Transcriptome == 'YES':
+                transcriptome = PostMSPipeline(args=args, filetype='transcriptome', folder='Transcriptome')
+                transcriptome.run()
             """ new method """
             # genome_perc = PercolatorProcessing("Genome", filetype="genome")
             # genome_perc.create_metafiles().convert_to_pin()
@@ -341,6 +342,49 @@ def run_workflow(args):
         #         transcriptome.add_pep_spec()
         #     print("DONE. Results written to results_with_specs.txt in Genome or Transcriptome folders.")
 
+        elif mode == "validate":
+            genome_pin = ProteinFixer(pin_folder='Genome/Percolator')
+            genome_pin.fix_files(outdir='Genome/Percolator')
+            genome_prefiltering = PreFiltering(pin_folder='Genome/Percolator',
+                                               results_04='Genome/post_perc/genome_results_05.txt')
+            genome_prefiltering.filter_proteins()
+            if not os.path.exists("Genome/Percolator/for_predicting"):
+                os.system('mkdir Genome/Percolator/for_predicting')
+            genome_prefiltering.filter_pin_files('Genome/Percolator/for_predicting')
+            genome_fishing = FeatureFishing(results='Genome/post_perc/genome_results_05.txt',
+                                            pin_folder='Genome/Percolator')
+            genome_fishing.add_features()
+            genome_fishing.save_table('Genome/Percolator/for_predicting/genome_results_with_features.txt')
+
+            genome_sf = SpectralForest(model_pickle=f'{pypath}/model/model.pickle',
+                                       results='Genome/Percolator/for_predicting/genome_results_with_features.txt')
+            genome_sf.predict()
+            if not os.path.exists('Genome/predicted'):
+                os.system('mkdir Genome/predicted')
+            genome_sf.save('Genome/predicted/genome_predicted.txt')
+
+            if args.Transcriptome == "YES":
+                transcriptome_pin = ProteinFixer(pin_folder='Transcriptome/Percolator')
+                transcriptome_pin.fix_files(outdir='Transcriptome/Percolator')
+                transcriptome_prefiltering = PreFiltering(pin_folder='Transcriptome/Percolator',
+                                                          results_04='Transcriptome/post_perc/transcriptome_results_04.txt')
+                transcriptome_prefiltering.filter_proteins()
+                if not os.path.exists('Transcriptome/Percolator/for_predicting'):
+                    os.system('mkdir Transcriptome/Percolator/for_predicting')
+                transcriptome_prefiltering.filter_pin_files('Transcriptome/Percolatotr/for_predicting')
+                transcriptome_fishing = FeatureFishing(results='Transcriptome/post_perc/transcriptome_results_05.txt',
+                                                       pin_folder='Transcriptome/Percolator')
+                transcriptome_fishing.add_features()
+                transcriptome_fishing.save_table('Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
+
+
+                transcriptome_sf = SpectralForest(model_pickle=f'{pypath}/model/model.pickle',
+                                           results='Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
+                transcriptome_sf.predict()
+                if not os.path.exists('Transcriptome/predicted'):
+                    os.system('mkdir Transcriptome/predicted')
+                transcriptome_sf.save('Transcriptome/predicted/genome_predicted.txt')
+
         elif mode == "visualization":
             if not os.path.exists("RefSeq_Reading_Frames.ods"):
                 print(
@@ -408,71 +452,71 @@ def run_workflow(args):
             else:
                 print("\nPlease inform a valid data subset.")
 
-        elif mode == "orthologs":
-            database = phylo.BlastDB("Orthologs")
-            database.download_assemblies()
-            database.create_database()
-            rna = phylo.Orthologs(args.organism, args, "transcriptome")
-            rna.blast_sequences()
-            rna.identify_hits()
-            both = phylo.Orthologs(args.organism, args, "both")
-            both.blast_sequences()
-            both.identify_hits()
-            dna = phylo.Orthologs(args.organism, args, "genome")
-            dna.blast_sequences()
-            dna.identify_hits()
-            results = phylo.Motifs(args)
-            results.find_motifs()
+        # elif mode == "orthologs":
+        #     database = phylo.BlastDB("Orthologs")
+        #     database.download_assemblies()
+        #     database.create_database()
+        #     rna = phylo.Orthologs(args.organism, args, "transcriptome")
+        #     rna.blast_sequences()
+        #     rna.identify_hits()
+        #     both = phylo.Orthologs(args.organism, args, "both")
+        #     both.blast_sequences()
+        #     both.identify_hits()
+        #     dna = phylo.Orthologs(args.organism, args, "genome")
+        #     dna.blast_sequences()
+        #     dna.identify_hits()
+        #     results = phylo.Motifs(args)
+        #     results.find_motifs()
 
-
-        elif mode == "digestion":
-            if not args.coverage and not args.ups:
-                print("\nPlease choose either --coverage and/or --ups in order to perform these analyzes. You may choose "
-                      "both.\n")
-            else:
-                peptides = Digestion("genome_database_no_anno.fasta")
-                peptides.digest_orfs(args.enzymes)
-                genome_trypsin = Digested("genome_database_no_anno_0/", "genome",
-                                          "genome_database_no_anno.fasta", "Trypsin", args.proteome)
-                genome_lysc = Digested("genome_database_no_anno_1/", "genome",
-                                       "genome_database_no_anno.fasta", "Lys_C", args.proteome)
-                genome_argc = Digested("genome_database_no_anno_2/", "genome",
-                                       "genome_database_no_anno.fasta", "Arg_C", args.proteome)
-                genome_gluc = Digested("genome_database_no_anno_3/", "genome",
-                                       "genome_database_no_anno.fasta", "Glu_C", args.proteome)
-                enzymes = args.enzymes.split(",")
-                if args.coverage is True:
-                    if "0" in enzymes:
-                        genome_trypsin.virtual_coverage("genome_database_no_anno_3")
-                    if "1" in enzymes:
-                        genome_lysc.virtual_coverage()
-                    if "2" in enzymes:
-                        genome_argc.virtual_coverage()
-                    if "3" in enzymes:
-                        genome_gluc.virtual_coverage()
-                if args.ups is True:
-                    if "0" in enzymes:
-                        genome_trypsin.ups_per_orf()
-                    if "1" in enzymes:
-                        genome_lysc.ups_per_orf()
-                    if "2" in enzymes:
-                        genome_argc.ups_per_orf()
-                    if "3" in enzymes:
-                        genome_gluc.ups_per_orf()
-                enzymes = PlotData(args.enzymes)
-                enzymes.plot_up_orf()
-                enzymes.plot_mixed_data()
-                enzymes.plot_coverage_data()
-
-        elif mode == "runs":
-            genome = OrganizePlot(
-                "Genome/Results/genome_unique_results_summarized.xls")
-            genome.plot_data()
-            if args.Transcriptome is not None:
-                rna = OrganizePlot("Transcriptome/Results/transcriptome_unique_results_summarized.xls")
-                rna.plot_data()
-                both = OrganizePlot("Genome/Results/Summarized_final_results.ods")
-                both.plot_data()
+        #
+        # elif mode == "digestion":
+        #     if not args.coverage and not args.ups:
+        #         print("\nPlease choose either --coverage and/or --ups in order to perform these analyzes. You may choose "
+        #               "both.\n")
+        #     else:
+        #         peptides = Digestion("genome_database_no_anno.fasta")
+        #         peptides.digest_orfs(args.enzymes)
+        #         genome_trypsin = Digested("genome_database_no_anno_0/", "genome",
+        #                                   "genome_database_no_anno.fasta", "Trypsin", args.proteome)
+        #         genome_lysc = Digested("genome_database_no_anno_1/", "genome",
+        #                                "genome_database_no_anno.fasta", "Lys_C", args.proteome)
+        #         genome_argc = Digested("genome_database_no_anno_2/", "genome",
+        #                                "genome_database_no_anno.fasta", "Arg_C", args.proteome)
+        #         genome_gluc = Digested("genome_database_no_anno_3/", "genome",
+        #                                "genome_database_no_anno.fasta", "Glu_C", args.proteome)
+        #         enzymes = args.enzymes.split(",")
+        #         if args.coverage is True:
+        #             if "0" in enzymes:
+        #                 genome_trypsin.virtual_coverage("genome_database_no_anno_3")
+        #             if "1" in enzymes:
+        #                 genome_lysc.virtual_coverage()
+        #             if "2" in enzymes:
+        #                 genome_argc.virtual_coverage()
+        #             if "3" in enzymes:
+        #                 genome_gluc.virtual_coverage()
+        #         if args.ups is True:
+        #             if "0" in enzymes:
+        #                 genome_trypsin.ups_per_orf()
+        #             if "1" in enzymes:
+        #                 genome_lysc.ups_per_orf()
+        #             if "2" in enzymes:
+        #                 genome_argc.ups_per_orf()
+        #             if "3" in enzymes:
+        #                 genome_gluc.ups_per_orf()
+        #         enzymes = PlotData(args.enzymes)
+        #         enzymes.plot_up_orf()
+        #         enzymes.plot_mixed_data()
+        #         enzymes.plot_coverage_data()
+        #
+        # elif mode == "runs":
+        #     genome = OrganizePlot(
+        #         "Genome/Results/genome_unique_results_summarized.xls")
+        #     genome.plot_data()
+        #     if args.Transcriptome is not None:
+        #         rna = OrganizePlot("Transcriptome/Results/transcriptome_unique_results_summarized.xls")
+        #         rna.plot_data()
+        #         both = OrganizePlot("Genome/Results/Summarized_final_results.ods")
+        #         both.plot_data()
 
         else:
             print("Invalid mode. Please choose a valid mode.")

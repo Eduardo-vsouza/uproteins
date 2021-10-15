@@ -12,7 +12,7 @@ from ..percolator import Decoy
 from ..postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing, AllSub, TSVConverter
 from ..sequtils.orflib import AltCodons
 from ..upstream import SDInspection
-from ..pipelines import PostMSPipeline
+from ..pipelines import PostMSPipeline, ValidatePipeline
 
 
 class TestingOutput(object):
@@ -86,11 +86,12 @@ class PipelineTesting(object):
         self.databaseState = 'Not tested'
         self.MSState = 'Not tested'
         self.postMSState = 'Not tested'
+        self.validateState = 'Not tested'
 
     def print_status(self):
         print(f'\n--------------\nTesting uProteInS different modes\nAssembly: {self.assemblyState}\nDatabase:'
               f' {self.databaseState}\nPeptide Search (MS mode): {self.MSState}\nPostMS: {self.postMSState}'
-              f'\n--------------\n')
+              f'\nValidate mode: {self.validateState}\n--------------\n')
 
     def run(self):
         assembly = AssemblyTesting(self.args)
@@ -105,8 +106,12 @@ class PipelineTesting(object):
         self.MSState = search.test()
         if self.MSState != 'SKIPPED':
             self.print_status()
-        postms = PostMSTesting(self.args)
-        self.postMSState = postms.test()
+        if self.postMSState != 'SKIPPED':
+            postms = PostMSTesting(self.args)
+            self.postMSState = postms.test()
+            self.print_status()
+        validate = ValidateTesting(self.args)
+        self.validateState = validate.test()
         self.print_status()
 
 
@@ -305,7 +310,7 @@ class PostMSTesting(PipelineTesting):
         directions = {'genome_database.fasta': '.', 'Genome_decoy.fasta': 'Genome/Percolator/.',
                       'transcriptome_database.fasta': '.', 'Transcriptome_decoy.fasta': 'Transcriptome/Percolator/.',
                       'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Transcriptome/.',
-                      'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Transcriptome',
+                      'Transcriptome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Transcriptome/.',
                       'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzid': 'Genome/.',
                       'Genome/20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid': 'Genome/.',
                       'assembled.gtf': '.', 'transcripts.fasta': 'HISAT/.', }
@@ -427,6 +432,38 @@ class PostMSTesting(PipelineTesting):
             self.postMSState = 'OK'
 
 
+class ValidateTesting(PipelineTesting):
+    def __init__(self, args):
+        super().__init__(args)
+        self.validationKit = f'{self.testFolder}/validate'
+        self.__check_folders()
+        self.__add_testing_files()
+
+    @staticmethod
+    def __check_folders():
+        folders = ['Genome', 'Genome/Percolator', 'Genome/Percolator/for_predicting',
+                   'Transcriptome', 'Transcriptome/Percolator', 'Transcriptome/Percolator/for_predicting',
+                   "Genome/post_perc", "Transcriptome/post_perc"]
+        for folder in folders:
+            print(folder)
+            # if not os.path.exists(folder):
+            os.system(f'mkdir {folder}')
+
+    def __add_testing_files(self):
+        pin_files = os.listdir(f'{self.validationKit}/pin_files')
+        files = {"genome_results_04.txt": "Genome/post_perc", "transcriptome_results_04.txt": "Transcriptome/post_perc"}
+        for pin in pin_files:
+            os.system(f'cp {self.validationKit}/pin_files/{pin} Transcriptome/Percolator/.')
+        for file in files:
+            os.system(f'cp {self.validationKit}/{file} {files[file]}/.')
+
+    def test(self):
+        if self.args.skip_validation == 'FALSE':
+            validation = ValidatePipeline(args=self.args)
+            validation.validate_transcriptome()
+        else:
+            self.validateState = 'SKIPPED'
+        return self.validateState
 
 
 class PipelineTestingOld(object):

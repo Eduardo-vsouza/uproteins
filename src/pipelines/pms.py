@@ -24,8 +24,8 @@ class PostMSPipeline(object):
         perc.percolate()
 
     def _process_percolator(self):
-        tsv = TSVConverter(self.folder)
-        tsv.convert_files()
+        # tsv = TSVConverter(self.folder)
+        # tsv.convert_files()
 
         data_filter = PostPercolator(self.args, folder=self.folder, filetype=self.filetype)
         data_filter.convert_output()
@@ -48,7 +48,7 @@ class PostMSPipeline(object):
         elif self.filetype == 'transcriptome':
             alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
                                     genome=self.args.genome, maxsize=self.args.maxsize,
-                                    transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta")
+                                    transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta", subset="Transcriptome")
         else:
             raise FiletypeError
         alts_pre_rf.extend_orfs(args=self.args)
@@ -60,7 +60,7 @@ class PostMSPipeline(object):
                 genome_rbs = SDInspection(self.args, filetype='transcriptome', folder='Transcriptome',
                                           alternatives=alts_pre_rf.alternatives,
                                           transcriptome_gff='assembled.gtf',
-                                          transcripts="HISAT/transcripts.fasta")
+                                          transcripts="HISAT/transcripts.fasta", subset="Transcriptome")
             else:
                 raise FiletypeError
             alts = genome_rbs.get_free_energy()

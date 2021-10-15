@@ -27,16 +27,12 @@ class ExtendedInformation(object):
         alternatives = {}
         for stop in self.alternatives:
             i = 0
-            alternatives[stop] = self.alternatives[stop]
             for alt in self.alternatives[stop]:
                 # if alt.name in priorities:
                 if i == 0:
-                    alternatives[stop].set_priority(alt)
-                    # alternatives[stop] = ORFCollection()
-                    # alternatives[stop].add_orf(alt)
+                    alternatives[stop] = ORFCollection()
+                    alternatives[stop].add_orf(alt)
                     i += 1
-                else:
-                    break
         # for stop in alternatives:
         #     for alt in alternatives[stop]:
         #         print(alt.name)
@@ -66,7 +62,6 @@ class ExtendedInformation(object):
         extended = []
         ext_seqs = []
         energies = []
-        coordinates = []
         sds = []
         dfdf = self.results.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
         # chunk_size = 10**6
@@ -83,49 +78,36 @@ class ExtendedInformation(object):
             #         real_stop = new_stop[1]
             # else:
             #     real_stop = stop
-            # for alt in self.alternatives[stop]:
-            #     real_stop = alt.end
-            #     break
-            real_stop = self.alternatives[stop].priority.end
+            for alt in self.alternatives[stop]:
+                real_stop = alt.end
+                break
             df = dfdf[dfdf["Protein"].str.contains(str(real_stop))]
             # df = df.drop_duplicates(subset=["SpecFile", "ScanNum"], keep='last')
-            # fixed_pep = df["Fixed Peptides"].tolist()
-            priority = self.alternatives[stop].priority
+            fixed_pep = df["Fixed Peptides"].tolist()
             for alt in self.alternatives[stop]:
-                ndf = df[df["Protein"].str.contains(alt.name)]
-                new_df = new_df.append(ndf)
-                prots = ndf["Protein"].tolist()
-                for prot in prots:
-                    priority_coords = f'{priority.start}-{priority.end}'
-                    extended.append(priority.name)
-                    ext_seqs.append(priority.proteinSequence)
-                    energies.append(priority.freeEnergy)
-                    sds.append(priority.shineDalgarno)
-                    coordinates.append(priority_coords)
                 # print(alt.name)
-                # for pep in fixed_pep:
-                #     print('pep', pep)
-                #     # print(pep)
-                #     # df = self.results[self.results["Fixed Peptides"].isin(alt.proteinSequence)]
-                #     ndf = df[df["ORF Sequence"].str.contains(pep)]
-                #     peps = ndf["Fixed Peptides"].tolist()
-                #     # print('ndf', ndf)
-                #     # print('peps', peps)
-                #     # extended = [alt.name for pep in peps]
-                #     for pep in peps:
-                #         extended.append(alt.name)
-                #         ext_seqs.append(alt.proteinSequence)
-                #         energies.append(alt.freeEnergy)
-                #         sds.append(alt.shineDalgarno)
-                #     # if i == 0:
-                #     # ndf.insert(3, "Extended ORF", extended)
-                #     # i += 1
-                # new_df = new_df.append(ndf)
+                for pep in fixed_pep:
+                    print('pep', pep)
+                    # print(pep)
+                    # df = self.results[self.results["Fixed Peptides"].isin(alt.proteinSequence)]
+                    ndf = df[df["ORF Sequence"].str.contains(pep)]
+                    peps = ndf["Fixed Peptides"].tolist()
+                    print('ndf', ndf)
+                    print('peps', peps)
+                    # extended = [alt.name for pep in peps]
+                    for pep in peps:
+                        extended.append(alt.name)
+                        ext_seqs.append(alt.proteinSequence)
+                        energies.append(alt.freeEnergy)
+                        sds.append(alt.shineDalgarno)
+                    # if i == 0:
+                    # ndf.insert(3, "Extended ORF", extended)
+                    # i += 1
+                    new_df = new_df.append(ndf)
         new_df.insert(3, "Extended ORF", extended)
         new_df.insert(4, "Extended Sequence", ext_seqs)
         new_df.insert(5, "Free Energy", energies)
         new_df.insert(6, "Shine Dalgarno", sds)
-        new_df.insert(7, "Extended Coordinates", coordinates)
         new_df = new_df.drop_duplicates(subset=["SpecFile", "ScanNum"])
         new_df.to_csv(f'{self.folder}/post_perc/{self.filetype}_results_04.txt', sep='\t', index=False)
         return self

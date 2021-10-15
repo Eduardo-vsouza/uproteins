@@ -70,6 +70,7 @@ class ORFCollection(object):
         self.ends = None
         self.coordinates = None
         self.orfs = []
+        self.priority = None
 
     def __iter__(self):
         i = 0
@@ -78,6 +79,9 @@ class ORFCollection(object):
             i += 1
             if i >= self.__len__():
                 break
+
+    def set_priority(self, orf):
+        self.priority = orf
 
     def read_fasta(self, file):
         """ Adds all entries and sequences in a fasta file to this class instance. """

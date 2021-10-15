@@ -152,7 +152,7 @@ class GenomeCoordinatesRNA(object):
                 else:
                     if protein in self.refSeqDict:
                         orf = self.refSeqDict[protein]
-                        start = orf.start
+                        start = orf.start - 1
                         end = orf.end
                         coords = f'{start}-{end}'
                         print(orf, start, end, coords)

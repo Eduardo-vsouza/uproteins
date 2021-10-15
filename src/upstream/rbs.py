@@ -161,8 +161,8 @@ class SDInspection(object):
 
             for alt in self.alternatives[stop]:
                 # if alt.name != "Discard":
-                print(alt)
-                print(alt.upstream)
+                # print(alt)
+                # print(alt.upstream)
                 if alt.upstream != '':
 
                     cmd = f'{self.freeAlignPath} -e {alt.upstream} {self.rRNA}'
