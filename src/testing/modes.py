@@ -456,13 +456,15 @@ class ValidateTesting(PipelineTesting):
         files = {"genome_results_04.txt": "Genome/post_perc", "transcriptome_results_04.txt": "Transcriptome/post_perc"}
         for pin in pin_files:
             os.system(f'cp {self.validationKit}/pin_files/{pin} Transcriptome/Percolator/.')
+            os.system(f'cp {self.validationKit}/pin_files/{pin} Genome/Percolator/.')
         for file in files:
             os.system(f'cp {self.validationKit}/{file} {files[file]}/.')
 
     def test(self):
         if self.args.skip_validation == 'FALSE':
             validation = ValidatePipeline(args=self.args)
-            validation.validate_transcriptome()
+            validation.validate_genome()
+            # validation.validate_transcriptome()
             self._check()
         else:
             self.validateState = 'SKIPPED'
