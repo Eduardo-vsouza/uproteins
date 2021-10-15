@@ -11,8 +11,8 @@ class PostMSPipeline(object):
         self.folder = folder
 
     def run(self):
-        # self._run_percolator()
-        # self._process_percolator()
+        self._run_percolator()
+        self._process_percolator()
         self._select_codons()
 
     def _run_percolator(self):
@@ -24,8 +24,8 @@ class PostMSPipeline(object):
         perc.percolate()
 
     def _process_percolator(self):
-        # tsv = TSVConverter(self.folder)
-        # tsv.convert_files()
+        tsv = TSVConverter(self.folder)
+        tsv.convert_files()
 
         data_filter = PostPercolator(self.args, folder=self.folder, filetype=self.filetype)
         data_filter.convert_output()

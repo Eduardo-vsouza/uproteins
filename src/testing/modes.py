@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pandas as pd
+
 from src.database import database_generator as dg
 from src import peptide_search as ps
 from src import results_new_approach as pms
@@ -461,10 +463,18 @@ class ValidateTesting(PipelineTesting):
         if self.args.skip_validation == 'FALSE':
             validation = ValidatePipeline(args=self.args)
             validation.validate_transcriptome()
+            self._check()
         else:
             self.validateState = 'SKIPPED'
         return self.validateState
 
+    def _check(self):
+        df = pd.read_csv(f'Transcriptome/post_perc/transcriptome_results_05.txt', sep='\t')
+        files = df["RenamedFiles"].tolist()
+        if '20150904_cdd_KO_CITOPL_50ug_MP_9' in files:
+            self.validateState = "OK"
+        else:
+            self.validateState = "FAILED"
 
 class PipelineTestingOld(object):
     def __init__(self, outdir, skip_assembly, skip_db, skip_ms, skip_postms):

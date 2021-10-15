@@ -1,4 +1,4 @@
-from ..forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest
+from ..forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest, SpectrumMiner
 import os
 import sys
 
@@ -45,9 +45,14 @@ class ValidatePipeline(object):
             # transcriptome_fishing.save_table(
             #     'Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
 
-            transcriptome_sf = SpectralForest(model_pickle=f'{self.pypath}/src/model/model.pkl',
-                                              results='Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
-            transcriptome_sf.predict()
-            if not os.path.exists('Transcriptome/predicted'):
-                os.system('mkdir Transcriptome/predicted')
-            transcriptome_sf.save('Transcriptome/predicted/genome_predicted.txt')
+            # transcriptome_sf = SpectralForest(model_pickle=f'{self.pypath}/src/model/model.pkl',
+            #                                   results='Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
+            # transcriptome_sf.predict()
+            # if not os.path.exists('Transcriptome/predicted'):
+            #     os.system('mkdir Transcriptome/predicted')
+            # transcriptome_sf.save('Transcriptome/predicted/transcriptome_predicted.txt')
+            transcriptome_mining = SpectrumMiner(predicted='Transcriptome/predicted/transcriptome_predicted.txt',
+                                                 results='Transcriptome/post_perc/transcriptome_results_04.txt')
+            transcriptome_mining.filter_results('Transcriptome/post_perc/transcriptome_results_05.txt')
+            # data = SpectrumMiner(predicted='../for_predicting/predicted_pin_files.txt', results='Transcriptome/transcriptome_results_04.txt')
+            # data.filter_results('Transcriptome/post_perc/transcriptome_results_05.txt')
