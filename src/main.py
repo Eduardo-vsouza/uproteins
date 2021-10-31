@@ -3,11 +3,11 @@ import sys
 from src.database import database_generator as dg
 from . import peptide_search as ps
 from . import results_new_approach as pms
-from . import the_visualizer as vis
+#from . import the_visualizer as vis
 # from . import orthologs as phylo
 from . import f_translation as trans
 from .working_runs import OrganizePlot
-from .Digestion_sets import Digestion, Digested, PlotData
+#from .Digestion_sets import Digestion, Digested, PlotData
 # import prowser.gene_organizer as gorg
 # import prowser.browser_gui_v16 as prsr
 # from .testing import uproteins_testing as test
@@ -124,72 +124,72 @@ def run_workflow(args):
             validation.validate_genome()
             validation.validate_transcriptome()
 
-        elif mode == "visualization":
-            if not os.path.exists("RefSeq_Reading_Frames.ods"):
-                print(
-                    "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
-                trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
-            if args.type == "dna":
-                if not os.path.exists("dna_results_with_rfs.ods"):
-                    print("\nPreparing the genome unique ORFs for proper visualization\n")
-                    trans.find_orfs_rfs("Genome/Results/Genome_unique_results_numbers.xls", args.genome, "dna")
-                vis.prog_browser(args.type)
-            elif args.type == "both":
-                if not os.path.exists("both_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Genome/Results/Both_results_numbers.xls", args.genome, "both")
-                vis.prog_browser(args.type)
+        #elif mode == "visualization":
+        #    if not os.path.exists("RefSeq_Reading_Frames.ods"):
+        #        print(
+        #            "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
+        #        trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
+        #    if args.type == "dna":
+        #        if not os.path.exists("dna_results_with_rfs.ods"):
+        #            print("\nPreparing the genome unique ORFs for proper visualization\n")
+        #            trans.find_orfs_rfs("Genome/Results/Genome_unique_results_numbers.xls", args.genome, "dna")
+        #        vis.prog_browser(args.type)
+        #    elif args.type == "both":
+        #        if not os.path.exists("both_results_with_rfs.ods"):
+        #            trans.find_orfs_rfs("Genome/Results/Both_results_numbers.xls", args.genome, "both")
+        #        vis.prog_browser(args.type)
 
-            elif args.type == "rna":
-                if not os.path.exists("rna_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Transcriptome/Results/Rna_unique_results_numbers.xls", args.genome, "rna")
-                    pms.fix_frames()
-                vis.prog_browser(args.type)
+         #   elif args.type == "rna":
+         #       if not os.path.exists("rna_results_with_rfs.ods"):
+         #           trans.find_orfs_rfs("Transcriptome/Results/Rna_unique_results_numbers.xls", args.genome, "rna")
+         #           pms.fix_frames()
+         #       vis.prog_browser(args.type)
 
-        elif mode == "prowser":
-            if not os.path.exists("RefSeq_Reading_Frames.ods"):
-                print(
-                    "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
-                trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
-            if args.type == "genome":
-                if not os.path.exists("dna_results_with_rfs.ods"):
-                    print("\nPreparing the genome unique ORFs for proper visualization\n")
-                    trans.find_orfs_rfs("Genome/Results/genome_unique_results_summarized.xls", args.genome, "dna")
-                    orfome = gorg.ORFome("dna_results_with_rfs.ods", "dna")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("dna")
-            elif args.type == "transcriptome":
-                if not os.path.exists("rna_results_with_rfs"):
-                    print("\nPreparing the transcriptome unique ORFs for browsing.\n")
-                    trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome,
-                                        "rna")
-                    pms.fix_frames()
-                    orfome = gorg.ORFome("rna_results_with_rfs.ods", "rna")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("rna")
-            elif args.type == "both":
-                if not os.path.exists("both_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Genome/Results/both_summarized_final_results.xls", args.genome, "both")
-                if not os.path.exists("both_df_to_visualize.ods"):
-                    orfome = gorg.ORFome("both_results_with_rfs.ods", "both")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("both")
+        #elif mode == "prowser":
+        #    if not os.path.exists("RefSeq_Reading_Frames.ods"):
+        #        print(
+        #            "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
+        #        trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
+        #    if args.type == "genome":
+        #        if not os.path.exists("dna_results_with_rfs.ods"):
+        #            print("\nPreparing the genome unique ORFs for proper visualization\n")
+        #            trans.find_orfs_rfs("Genome/Results/genome_unique_results_summarized.xls", args.genome, "dna")
+        #            orfome = gorg.ORFome("dna_results_with_rfs.ods", "dna")
+        #            orfome.define_gene_names()
+        #            orfome.get_gene_info()
+        #            orfome.get_specs_counts()
+        #            orfome.organize_df()
+        #        prsr.run_prowser("dna")
+        #    elif args.type == "transcriptome":
+        #        if not os.path.exists("rna_results_with_rfs"):
+        #            print("\nPreparing the transcriptome unique ORFs for browsing.\n")
+        #            trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome,
+        #                                "rna")
+        #            pms.fix_frames()
+        #            orfome = gorg.ORFome("rna_results_with_rfs.ods", "rna")
+        #            orfome.define_gene_names()
+        #            orfome.get_gene_info()
+        #            orfome.get_specs_counts()
+        #            orfome.organize_df()
+        #        prsr.run_prowser("rna")
+        #    elif args.type == "both":
+        #        if not os.path.exists("both_results_with_rfs.ods"):
+        #            trans.find_orfs_rfs("Genome/Results/both_summarized_final_results.xls", args.genome, "both")
+        #        if not os.path.exists("both_df_to_visualize.ods"):
+        #            orfome = gorg.ORFome("both_results_with_rfs.ods", "both")
+        #            orfome.define_gene_names()
+        #            orfome.get_gene_info()
+        #            orfome.get_specs_counts()
+        #            orfome.organize_df()
+        #        prsr.run_prowser("both")
 
 
             # elif args.type == "rna":
             #     if not os.path.exists("rna_results_with_rfs.ods"):
             #         trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome, "rna")
             #         pms.fix_frames()
-            else:
-                print("\nPlease inform a valid data subset.")
+        #    else:
+        #        print("\nPlease inform a valid data subset.")
 
         # elif mode == "orthologs":
         #     database = phylo.BlastDB("Orthologs")
