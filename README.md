@@ -46,29 +46,39 @@ $ python uProteInS database --help
   $ uProteInS assembly --reads1 read1_1, read2_1, read3_1 --reads2 read1_2, read2_2, read3_2 --strandness RF --libtype paired --genome /path/to/genome.fasta --gtf /path/to/annotation.gtf --outdir uproteins_results
   ```
   ### database mode
+  During this mode, µProteInS translates the genome into the six reading frames and, if specified, the transcriptome into the three reading frames using the specified start codons. If the transcriptome database is supposed to be generated from the transcriptome generated during the assembly step, use the argument --Transcriptome YES. Otherwise, leave it out. Note that if using the transcriptome, the output directory must be the same one specified during the 'assembly' mode. Max and minsize refer to the ORF size that should be considered during the in silico translation.
   Usage example:
   ```
-  
+  $ uProteInS database --genome /path/to/genome.fasta --proteome /path/to/proteome.fasta --start ATG,GTG,TTG,ATT --Transcriptome YES --maxsize 300 --minsize 100 --outdir uproteins_results
   ```
   
   ### ms mode
+  The 'ms' mode uses MS-GF+ to perform the peptide search using Mass Spectrometry data. The files provided in <--Mass_spec> should be in the '.mzML' format. If they are in another format, try converting them using a software such as ProteoWizard (https://proteowizard.sourceforge.io/). The output directory should be the same one specified in the other modes. The usage example uses most parameters as default. To customize your search, run 
+  ```
+  $ uProteInS ms --help
+  ```
+  to check which parameters can be defined.
+  
   Usage example:
   ```
-  
+  $ uProteInS ms --Mass_spec /path/to/mzML/files --m 0 --inst 0 --e 1 --Transcriptome YES --outdir uproteins_results
   ```
   
   ### postms mode
+  This is the post-processing step. It uses percolator, free2bind, and applies µProteInS custom scripts to eliminate non-unique peptides, perform FDR cutoffs, search for Shine-Dalgarno sequences, and define start codons. 
   Usage example:
   ```
-  
+  $ uProteInS postms --Mass_spec /path/to/mzML/files --Transcriptome YES --genome /path/to/genome.fasta --proteome /path/to/proteome.fasta --start ATG,GTG,TTG,ATT --rrna /path/to/16srra.fasta --maxsize 300 --outdir uproteins_results
   ```
   
   ### validate mode
+  This modes applies µProteInS random forest model to filter out low-confidence spectra. The only argument needed is the <--outdir>, which should be the same output directory informed during the other modes.
   Usage example:
   ```
-  
+  $ uProteInS validation --outdir uproteins_results
   ```
   
+  Final results can be found at 'Genome' or 'Transcriptome' folders, in the file genome_results_05.txt or transcriptome_results_05.txt. 
   
   
   
