@@ -11,6 +11,33 @@ $ python uProteInS.py <mode> --help
  ```
 $ python uProteInS database --help
  ```
+ ## Installation
+ You can install µProteInS either downloading the .tar.gz file from the latest release featured on this github page, or by pulling its docker image. Since this is a pipeline that require many third-part software requirements, we recommend using Docker to install and run µProteInS.
+ ### Installing from source
+ Note that if you are installing from source, a Ubuntu distribution 20.04 or higher should be used. If using docker, µProteInS should be able to run in any operational system, such as Windows or any unix-based system, as long as docker compatibility goes. Note that it was tested on a Ubuntu environment though.
+ Download and untar the latest release file 
+ ```
+ $ tar -xzvf uProteInS_vX.X.tar.gz
+ ```
+ Install the third-part software\
+ 
+ Hisat2\
+ StringTie\
+ Gffread\
+ Gffcompare\
+ MS-GF+\
+ Percolator\
+ Python 3.10\
+ Pip\
+ Then, install the python packages that are used by µProteInS using the requirements.txt file that is provided in µProteInS .tar.gz file\
+ ```
+ $ python3 -m pip install requirements.txt
+ ```
+ ### Using Docker
+ Download the Docker image
+ 
+ 
+ 
  ## Testing µProteInS installation
  
  After downloading µProteInS, it is recommended to check if it is running properly. To do that, simply type at the command line:
