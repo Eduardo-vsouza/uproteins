@@ -38,7 +38,7 @@ $ python uProteInS database --help
  ```
  docker pull esvieira/uproteins:latest
  ```
- 
+  
  ## Testing µProteInS installation
  
  After downloading µProteInS, it is recommended to check if it is running properly. To do that, simply type at the command line:
@@ -68,8 +68,22 @@ $ python uProteInS database --help
   
   ## Running µProteInS
   To run the pipeline, make sure to be in hold of every mandatory file (specified in the last section). You should run every mode separately, in the following order, using th same output directory: assembly, database, ms, postms, validate.
+## Notes on running docker
+To run the docker image that contains the software, aside from the test mode, you will need to mount from one of your directories (host) into the docker image. This is necessary for the image to recognize that it is supposed to take the files from your computer, instead of looking for files inside the image - where your data is not supposed to be. To do that, simply add the following parameters when executing µProteInS with docker:
+```
+sudo docker run -it --mount type=bind,source=$PWD,target=/usrdata/
+```
+type=bind will tell docker to bind some directory to the image. source=$PWD is telling that the folder that is going to be mounted is the directory you are currently at (your working directory), and target=/usrdata/ tells docker to mount this directory and its content inside the folder /usrdata/, which will be located inside the docker image.
+So, it is important to note that everytime you are adding a file as input, you should specify that this file is inside the mounted directory. For instance:
+```
+sudo docker run -it --mount type=bind,source=$PWD,target=/usrdata/ uproteins python3 data/uProteInS_v0.1/ProteInS.py assembly --single /usrdata/RNA-seq/ERR4097495.fastq
+```
+This tells that the single end read (see assembly mode) that is going to be added is in the directory mounted from the host (your computer). The output directory also has to be informed after the /usrdata/ folder, such as:
+```
+sudo docker run -it --mount type=bind,source=$PWD,target=/usrdata/ uproteins python3 data/uProteInS_v0.1/ProteInS.py assembly --single /usrdata/RNA-seq/ERR4097495.fastq --outdir /usrdata/teste_docker_run
+```
 
-  ### assembly mode
+### assembly mode
   This modes uses reads from RNA-Seq experiments to assemble the transcriptome, discriminating between novel and annotated transcripts. The transcriptome generated during this step is going to be used during the database generation step. This step is optional, and should be specified in the other modes if executed. Quality control of the reads should be executed beforehand. The pipeline uses Hisat2, StringTie and gffread during this step.
   Usage example for single-end reads:
   ```
@@ -77,7 +91,7 @@ $ python uProteInS database --help
   ```
   For paired-end reads:
   ```
-  $ uProteInS assembly --reads1 read1_1, read2_1, read3_1 --reads2 read1_2, read2_2, read3_2 --strandness RF --libtype paired --genome /path/to/genome.fasta --gtf /path/to/annotation.gtf --outdir uproteins_results
+  $ uProteInS assembly --reads1 read1_1,read2_1,read3_1 --reads2 read1_2,read2_2,read3_2 --strandness RF --libtype paired --genome /path/to/genome.fasta --gtf /path/to/annotation.gtf --outdir uproteins_results
   ```
   ### database mode
   During this mode, µProteInS translates the genome into the six reading frames and, if specified, the transcriptome into the three reading frames using the specified start codons. If the transcriptome database is supposed to be generated from the transcriptome generated during the assembly step, use the argument --Transcriptome YES. Otherwise, leave it out. Note that if using the transcriptome, the output directory must be the same one specified during the 'assembly' mode. Max and minsize refer to the ORF size that should be considered during the in silico translation.
