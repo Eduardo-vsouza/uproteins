@@ -35,8 +35,9 @@ $ python uProteInS database --help
  ```
  ### Using Docker
  Download the Docker image
- 
- 
+ ```
+ docker push esvieira/uproteins:latest
+ ```
  
  ## Testing µProteInS installation
  
@@ -44,10 +45,15 @@ $ python uProteInS database --help
  ```
  $ python uProteInS testing --help
  ```
+ With docker:
+ ```
+ $ docker run -it uproteins testing --help
+ ```
  and it will return the commands available for the testing mode of µProteInS. You can check if each mode is running properly by specifying which ones should not be skipped during the testing. By default, no mode is going to be tested using this mode. To test the first mode, assembly, run:
  ```
  $ python uProteInS testing --skip_assembly FALSE --outdir uproteins_testing
  ```
+ To execute it with docker, add 'docker run -it' before the usual command.
   This will run test all the dependencies necessary to run the mode assembly, which is responsible for assembling the transcriptome from RNA-Seq data. You can do this for the five different modes. 'postms' requires 'ms' to be tested beforehand. It is also possible to specify to test all five modes.
   
   ## Data requirements to run µProteInS
@@ -62,6 +68,7 @@ $ python uProteInS database --help
   
   ## Running µProteInS
   To run the pipeline, make sure to be in hold of every mandatory file (specified in the last section). You should run every mode separately, in the following order, using th same output directory: assembly, database, ms, postms, validate.
+
   ### assembly mode
   This modes uses reads from RNA-Seq experiments to assemble the transcriptome, discriminating between novel and annotated transcripts. The transcriptome generated during this step is going to be used during the database generation step. This step is optional, and should be specified in the other modes if executed. Quality control of the reads should be executed beforehand. The pipeline uses Hisat2, StringTie and gffread during this step.
   Usage example for single-end reads:
