@@ -47,7 +47,7 @@ $ python uProteInS database --help
  ```
  With docker:
  ```
- $ docker run -it uproteins testing --help
+ $ docker run -it esvieira/uproteins python3 data/uProteInS_v0.1/ProteInS.py testing -h
  ```
  and it will return the commands available for the testing mode of µProteInS. You can check if each mode is running properly by specifying which ones should not be skipped during the testing. By default, no mode is going to be tested using this mode. To test the first mode, assembly, run:
  ```
