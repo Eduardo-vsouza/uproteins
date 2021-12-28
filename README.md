@@ -36,7 +36,7 @@ $ python uProteInS database --help
  ### Using Docker
  Download the Docker image
  ```
- docker push esvieira/uproteins:latest
+ docker pull esvieira/uproteins:latest
  ```
  
  ## Testing µProteInS installation
