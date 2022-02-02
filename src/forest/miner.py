@@ -96,8 +96,10 @@ class MinePredicted(object):
 
 
 class SpectrumMiner(object):
-    def __init__(self, results, predicted):
+    def __init__(self, results, predicted, testing=False):
         self.results = pd.read_csv(results, sep='\t')
+        self.testing = testing
+        self.__check_testing()
         self.unfilteredScans = self.results["ScanNum"].tolist()
         self.__rename()
 
@@ -108,9 +110,14 @@ class SpectrumMiner(object):
         self.highConfidenceFiles = self.predicted["SpecId"].tolist()
         self.__rename_predicted()
         self.fixedPredictedFiles = self.predicted["RenamedFiles"].tolist()
-        print(self.fixedPredictedFiles)
+        # print(self.fixedPredictedFiles)
         self.HCs = self.__get_hc()
         # self.results = self.results[self.results["RenamedFile"].isin(self.HCs)]
+
+    def __check_testing(self):
+        if self.testing:
+            ...
+            # self.results = self.results.head(20)
 
     def __get_hc(self):
         hcs = {}  # spectra predicted to have high confidence by the ML model
@@ -139,9 +146,24 @@ class SpectrumMiner(object):
         for hc in self.HCs:
             i += 1
             df = df.append(self.results[(self.results["ScanNum"].astype('int64').isin(self.HCs[hc])) & (self.results["RenamedFiles"] == hc)])
-            print(i, len(self.HCs))
+            # print(i, len(self.HCs))
         df = df.drop_duplicates()
         df.to_csv(f'{output}', sep='\t', index=False)
+
+    def add_lc_spectra_for_hc_orf(self, filetype, folder):
+        """ This adds all spectra for each ORF that has at least one HC spectrum """
+        self.__check_results_dir(folder)
+        four = pd.read_csv(f'{folder}/post_perc/{filetype}_results_04.txt', sep='\t')
+        five = pd.read_csv(f'{folder}/post_perc/{filetype}_results_05.txt', sep='\t')
+        hc_orfs = five["Extended Sequence"].tolist()
+        four_passed = four[four["Extended Sequence"].isin(hc_orfs)]
+        four_passed.to_csv(f'{folder}/Results/{filetype}_results.txt', sep='\t', index=False)
+
+
+    @staticmethod
+    def __check_results_dir(folder):
+        if not os.path.exists(f"{folder}/Results"):
+            os.system(f'mkdir {folder}/Results')
 
 
 # data = SpectrumMiner(predicted='../for_predicting/predicted_pin_files.txt', results='Transcriptome/transcriptome_results_04.txt')

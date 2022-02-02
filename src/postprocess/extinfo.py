@@ -73,9 +73,9 @@ class ExtendedInformation(object):
         k = 0
         for stop in self.alternatives:
             k += 1
-            print(stop)
-            print(self.alternatives[stop])
-            print(k, len(self.alternatives))
+            # print(stop)
+            # print(self.alternatives[stop])
+            print(k, len(self.alternatives), end='\r')
             # df = dfdf[dfdf["Genome Coordinates"].str.contains(str(stop))]
             # if type(stop) == str:
             #     new_stop = stop.split("_")

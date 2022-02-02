@@ -5,10 +5,12 @@ from ..sequtils.__helpers import FiletypeError
 
 
 class PostMSPipeline(object):
-    def __init__(self, args, filetype, folder):
+    def __init__(self, args, filetype, folder, qvalue=0.01, testing=False):
         self.args = args
         self.filetype = filetype
         self.folder = folder
+        self.qValue = qvalue
+        self.testing = testing
 
     def run(self):
         self._run_percolator()
@@ -39,28 +41,30 @@ class PostMSPipeline(object):
         data_filter.unique_peptides()
         data_filter.msgf_info()
         data_filter.protein_seqs()
-        data_filter.add_coordinates()
+        data_filter.add_coordinates(qvalue=self.qValue)
 
     def _select_codons(self):
         if self.filetype == 'genome':
             alts_pre_rf = AltCodons(file='Genome/post_perc/genome_results_02.txt', genome=self.args.genome,
-                                    maxsize=self.args.maxsize)
+                                    maxsize=self.args.maxsize, testing=self.testing)
         elif self.filetype == 'transcriptome':
             alts_pre_rf = AltCodons(file='Transcriptome/post_perc/transcriptome_results_02.txt',
                                     genome=self.args.genome, maxsize=self.args.maxsize,
-                                    transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta", subset="Transcriptome")
+                                    transcriptome_gff='assembled.gtf', assembly="HISAT/transcripts.fasta",
+                                    subset="Transcriptome", testing=self.testing)
         else:
             raise FiletypeError
         alts_pre_rf.extend_orfs(args=self.args)
         if self.args.rrna is not None:
             if self.filetype == 'genome':
                 genome_rbs = SDInspection(self.args, filetype="genome", folder="Genome",
-                                          alternatives=alts_pre_rf.alternatives)
+                                          alternatives=alts_pre_rf.alternatives, testing=self.testing)
             elif self.filetype == 'transcriptome':
                 genome_rbs = SDInspection(self.args, filetype='transcriptome', folder='Transcriptome',
                                           alternatives=alts_pre_rf.alternatives,
                                           transcriptome_gff='assembled.gtf',
-                                          transcripts="HISAT/transcripts.fasta", subset="Transcriptome")
+                                          transcripts="HISAT/transcripts.fasta", subset="Transcriptome",
+                                          testing=self.testing)
             else:
                 raise FiletypeError
             alts = genome_rbs.get_free_energy()

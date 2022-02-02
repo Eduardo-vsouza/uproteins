@@ -3,13 +3,18 @@ import pandas as pd
 
 
 class PreFiltering(object):
-    def __init__(self, pin_folder, results_04):
+    def __init__(self, pin_folder, results_04, testing=False):
         self.pinFolder = pin_folder
         self.pinFiles = os.listdir(self.pinFolder)
-
+        self.testing = testing
         self.results = pd.read_csv(results_04, sep='\t')
+        self.__check_testing()
         self.percolatorProteins = self.results["Protein"].tolist()
         self.proteins = []
+
+    def __check_testing(self):
+        if self.testing:
+            self.results = self.results.head(20)
 
     def filter_proteins(self):
         for prot in self.percolatorProteins:
@@ -21,13 +26,12 @@ class PreFiltering(object):
             os.system(f'mkdir {outdir}')
         i = 0
         for file in self.pinFiles:
-            if 'fixed' in file:
+            if 'fixed' in file and 'pin' in file:
                 i += 1
-                print(i, len(self.pinFiles))
+                print(i, len(self.pinFiles), end="\r")
                 df = pd.read_csv(f'{self.pinFolder}/{file}', sep='\t')
                 # ndf = pd.DataFrame(columns=df.columns)
                 df = df[df["Proteins"].str.contains('|'.join(self.proteins)).any(level=0)]
-
                 # for prot in self.proteins:
                 #     prot_df = df[df["Proteins"].str.contains(prot)]
                 #     ndf = ndf.append(prot_df)
@@ -35,17 +39,24 @@ class PreFiltering(object):
 
 
 class FeatureFishing(object):
-    def __init__(self, results, pin_folder):
+    def __init__(self, results, pin_folder, testing=False):
         """
         :param results: should be the filetype_results_02.txt from uproteins.
         :param pin_folder: the directory containing the split pin files.
         """
         self.results = pd.read_csv(results, sep='\t')
+        self.testing = testing
+        self.__check_testing()
         self.specFiles = self.results["SpecFile"].tolist()
         self.scanNum = self.results["ScanNum"].tolist()
         # self.specTags = self.__add_spec_tag()  # should be added afterwards to easily identify the predictions
         self.pinFolder = pin_folder
         self.pinFiles = os.listdir(pin_folder)
+
+    def __check_testing(self):
+        if self.testing:
+            # self.results = self.results.head(20)
+            ...
 
     def __add_spec_tag(self):
         tags = []
@@ -59,7 +70,7 @@ class FeatureFishing(object):
         j = 0
         for file in self.pinFiles:
             print(j, len(self.pinFiles))
-            if 'fixed' in file:
+            if 'fixed' in file and 'pin' in file:
                 # if 'pin' in file:
                 chunk = pd.read_csv(f'{self.pinFolder}/{file}', sep='\t')
                 chunk = chunk[chunk["ScanNr"].isin(self.scanNum)]

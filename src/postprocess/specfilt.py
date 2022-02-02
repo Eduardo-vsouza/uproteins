@@ -94,8 +94,8 @@ class PostPercolator(object):
         protein.filter_from_utp()
         protein.add_proteins(f'{self.percDir}/{self.filetype}_results_02.txt')
 
-    def add_coordinates(self):
-        coords = Coordinator(proteined=f'{self.percDir}/{self.filetype}_proteined.tsv', utps=f'{self.percDir}/{self.filetype}_utps.txt')
+    def add_coordinates(self, qvalue=0.01):
+        coords = Coordinator(proteined=f'{self.percDir}/{self.filetype}_proteined.tsv', utps=f'{self.percDir}/{self.filetype}_utps.txt', qvalue=qvalue)
         coords.add_information(f'{self.percDir}/{self.filetype}_results_02.txt')
 
 
@@ -109,17 +109,21 @@ class AnnoFilter(object):
 
 
 class Coordinator(object):
-    def __init__(self, utps, proteined):
+    def __init__(self, utps, proteined, qvalue=0.01):
         self.UTPs = pd.read_csv(utps, sep='\t')
+        print(self.UTPs)
         self.UTPs = self.UTPs[self.UTPs["q-value"] != "q-value"]
+        print(self.UTPs)
         # print(self.UTPs)
         self.UTPs["q-value"] = pd.to_numeric(self.UTPs["q-value"], downcast='float')
+        print(self.UTPs)
         # self.UTPs["q-value"] = self.UTPs["q-value"].astype(float)
         # qvs = self.UTPs["q-value"].tolist()
         # for i in qvs:
         #     if type(i) != float:
         #         print(i)
-        self.UTPs = self.UTPs[self.UTPs["q-value"] <= 0.01]
+        self.UTPs = self.UTPs[self.UTPs["q-value"] <= qvalue]
+        print(self.UTPs)
         self.proteined = pd.read_csv(proteined, sep='\t')
         self.coordinates = self._get_coordinates()
 
