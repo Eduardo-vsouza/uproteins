@@ -11,7 +11,8 @@ from ..sequtils.transcriptomics import TranscriptExtractor
 
 
 class SDInspection(object):
-    def __init__(self, args, filetype, folder, alternatives, subset="Genome", transcriptome_gff=None, transcripts=None):
+    def __init__(self, args, filetype, folder, alternatives, subset="Genome", transcriptome_gff=None, transcripts=None,
+                 testing=False):
         """
         Looks for a Shine-Dalgarno sequence using the script free_align.pl from free2bind package.
         :param args: uProteInS arguments
@@ -21,6 +22,7 @@ class SDInspection(object):
         """
         self.subset = subset
         self.tORFs = {}
+        self.testing = testing
         self.__get_transcripts(transcriptome_gff, assembly=transcripts)
         self.rRNA = self.__get_sequences(args.rrna)[::-1][:13]  # one of the RNA strings must be 3'-5'.
         self.filetype = filetype
@@ -35,6 +37,10 @@ class SDInspection(object):
 
         self.alternatives = alternatives
         self.alternatives = self.__extract_upstream()
+
+    # def __check_testing(self):
+    #     if self.testing:
+    #         self.
 
     def __get_transcripts(self, transcriptome_gff, assembly):
         """

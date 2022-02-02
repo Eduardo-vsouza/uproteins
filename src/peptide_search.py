@@ -50,7 +50,7 @@ class PeptideSearch(object):
             output = f" -o {self.args.Mass_spec}/{file}_decoy.mzid"
         ms_args = ""
         item_list = [None, "Mass_spec", "outdir", "Transcriptome", "mode", 'skip_assembly', 'skip_db', 'skip_ms',
-                     'skip_postms', 'gtf', 'single', 'reads1', 'reads2', 'strandness', 'gff_compare_path',
+                     'skip_postms', 'skip_validation', 'gtf', 'single', 'reads1', 'reads2', 'strandness', 'gff_compare_path',
                      'gffread_path', 'genome', 'proteome', 'minsize', 'maxsize', 'starts', 'stops']
         for arg in vars(self.args).items():
             if arg[0] not in item_list and arg[1] is not None:
