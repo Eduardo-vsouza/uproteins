@@ -1,4 +1,9 @@
 # μProteInS
+[![Maintained](https://img.shields.io/badge/Maintained%3F-Yes-brightgreen)](https://github.com/eduardo-vsouza/uproteins/graphs/contributors)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![status](https://img.shields.io/badge/Bioinformatics-10.1093-brightgreen.svg)](https://doi.org/10.1093/bioinformatics/btac115)
+![Python](https://img.shields.io/badge/Python3-blue.svg)
+
 Welcome to the github page of μProteInS proteogenomics pipeline.\
 Check the **full μProteInS guide** at our wiki: https://github.com/Eduardo-vsouza/uproteins/wiki 
 
