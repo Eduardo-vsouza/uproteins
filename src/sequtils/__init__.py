@@ -12,3 +12,4 @@ from .locus import StringTieGFF, GenomeCoordinates, RefSeqGFF, GenomeCoordinates
 from .unique import PercolatorUTP
 from .measures import StillCounting
 from .enrichment import Enrichment
+from .utilities import check_dir

@@ -1,3 +1,6 @@
+import os
+
+
 def find_coords(orf):
     pos = orf.rfind('_', 0, len(orf)-1)
     coords = orf[pos + 1:-1]
@@ -15,3 +18,7 @@ def findnth(string, substring, n):
     if len(parts) <= n + 1:
         return -1
     return len(string) - len(parts[-1]) - len(substring)
+
+def check_dir(folder):
+    if not os.path.exists(folder):
+        os.system(f'mkdir {folder}')
