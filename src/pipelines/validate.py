@@ -1,6 +1,8 @@
-from ..forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest, SpectrumMiner
 import os
 import sys
+
+from ..forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest, SpectrumMiner
+from ..postprocess import ResultsWrapper
 
 
 class ValidatePipeline(object):
@@ -34,6 +36,8 @@ class ValidatePipeline(object):
                                       results='Genome/post_perc/genome_results_04.txt', testing=self.testing)
         genome_mining.filter_results('Genome/post_perc/genome_results_05.txt')
         genome_mining.add_lc_spectra_for_hc_orf(filetype='genome', folder='Genome')
+        genome_results = ResultsWrapper(df='Genome/post_perc/genome_results_05.txt', folder='Genome', filetype='genome')
+        genome_results.reformat(pre_validation=False)
 
     def validate_transcriptome(self):
         if self.args.Transcriptome == "YES":
@@ -63,3 +67,6 @@ class ValidatePipeline(object):
                                                  testing=self.testing)
             transcriptome_mining.filter_results('Transcriptome/post_perc/transcriptome_results_05.txt')
             transcriptome_mining.add_lc_spectra_for_hc_orf(filetype='transcriptome', folder='Transcriptome')
+            transcriptome_results = ResultsWrapper(df='Transcriptome/post_perc/transcriptome_results_05.txt',
+                                                   folder='Transcriptome', filetype='transcriptome')
+            transcriptome_results.reformat(pre_validation=False)

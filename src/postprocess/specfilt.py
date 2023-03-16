@@ -111,19 +111,19 @@ class AnnoFilter(object):
 class Coordinator(object):
     def __init__(self, utps, proteined, qvalue=0.01):
         self.UTPs = pd.read_csv(utps, sep='\t')
-        print(self.UTPs)
+        # print(self.UTPs)
         self.UTPs = self.UTPs[self.UTPs["q-value"] != "q-value"]
-        print(self.UTPs)
+        # print(self.UTPs)
         # print(self.UTPs)
         self.UTPs["q-value"] = pd.to_numeric(self.UTPs["q-value"], downcast='float')
-        print(self.UTPs)
+        # print(self.UTPs)
         # self.UTPs["q-value"] = self.UTPs["q-value"].astype(float)
         # qvs = self.UTPs["q-value"].tolist()
         # for i in qvs:
         #     if type(i) != float:
         #         print(i)
         self.UTPs = self.UTPs[self.UTPs["q-value"] <= qvalue]
-        print(self.UTPs)
+        # print(self.UTPs)
         self.proteined = pd.read_csv(proteined, sep='\t')
         self.coordinates = self._get_coordinates()
 
@@ -224,7 +224,7 @@ class ProteinFDR(object):
         names = df["Protein"].tolist()
         renamed = []
         for name in names:
-            print(name)
+            # print(name)
             renamed.append(name.split("(")[0])
         df = df.drop(columns="Protein")
         df.insert(8, "Protein", renamed)

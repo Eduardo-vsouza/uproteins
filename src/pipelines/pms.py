@@ -1,4 +1,4 @@
-from ..postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing, AllSub, TSVConverter
+from ..postprocess import PostPercolator, ExtendedInformation, PercolatorProcessing, AllSub, TSVConverter, ResultsWrapper
 from ..sequtils.orflib import AltCodons
 from ..upstream import SDInspection
 from ..sequtils.__helpers import FiletypeError
@@ -16,13 +16,11 @@ class PostMSPipeline(object):
         self._run_percolator()
         self._process_percolator()
         self._select_codons()
+        self._reformat_results()
 
     def _run_percolator(self):
         perc = PercolatorProcessing(folder=self.folder, filetype=self.filetype)
         perc.create_metafiles().convert_to_pin()
-        all_sub = AllSub(filetype=self.filetype, folder=self.folder)
-        all_sub.modify_decoy()
-        all_sub.remove_annotated()
         perc.percolate()
 
     def _process_percolator(self):
@@ -78,4 +76,8 @@ class PostMSPipeline(object):
         ext.filter_alternatives(priorities)
         ext.extract_spectra()
 
+    def _reformat_results(self):
+        results = ResultsWrapper(df=f'{self.folder}/post_perc/{self.filetype}_results_04.txt', folder=self.folder,
+                                 filetype=self.filetype)
+        results.reformat(pre_validation=True)
 

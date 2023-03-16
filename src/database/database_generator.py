@@ -121,16 +121,17 @@ class Database(object):
         self.blast_dir = f'{path}/dependencies/blast_for_uproteins/bin'
 
     def mark_annotated(self):
-        if not os.path.exists('annotated.fasta'):
-            marked = []
-            records = SeqIO.parse(self.proteome, 'fasta')
-            for record in records:
-                marked.append(f'>{str(record.description)}_ANNO\n{str(record.seq)}\n')
-            with open('annotated.fasta', 'w') as out:
-                out.writelines(marked)
+        # if not os.path.exists('annotated.fasta'):
+        marked = []
+        records = SeqIO.parse(self.proteome, 'fasta')
+        for record in records:
+            marked.append(f'>{str(record.description)}_ANNO\n{str(record.seq)}\n')
+        with open('annotated.fasta', 'w') as out:
+            out.writelines(marked)
+        self.annotated = 'annotated.fasta'
 
     def unify(self):
-        cmd_cat = f'cat {self.orf_to_blast} {self.proteome} > {self.filetype}_database.fasta'
+        cmd_cat = f'cat {self.orf_to_blast} {self.annotated} > {self.filetype}_database.fasta'
         os.system(cmd_cat)
 
 

@@ -35,7 +35,7 @@ class PreFiltering(object):
                 # for prot in self.proteins:
                 #     prot_df = df[df["Proteins"].str.contains(prot)]
                 #     ndf = ndf.append(prot_df)
-                df.to_csv(f'{outdir}/for_predicting/filtered_{file}', sep='\t', index=False)
+                df.to_csv(f'{outdir}/filtered_{file}', sep='\t', index=False)
 
 
 class FeatureFishing(object):
@@ -69,7 +69,7 @@ class FeatureFishing(object):
         i = 0
         j = 0
         for file in self.pinFiles:
-            print(j, len(self.pinFiles))
+            print(j, len(self.pinFiles), end='\r')
             if 'fixed' in file and 'pin' in file:
                 # if 'pin' in file:
                 chunk = pd.read_csv(f'{self.pinFolder}/{file}', sep='\t')
@@ -80,7 +80,7 @@ class FeatureFishing(object):
                     i += 1
                 for spec, scan in zip(self.specFiles, self.scanNum):
                     self.__filter_by_scan(chunk, spec, scan)
-                print(j)
+                # print(j)
                 j += 1
         return self
 
