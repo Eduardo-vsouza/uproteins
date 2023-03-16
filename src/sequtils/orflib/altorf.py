@@ -8,12 +8,14 @@ from ..transcriptomics import TranscriptExtractor
 
 
 class AltCodons(object):
-    def __init__(self, file, genome, maxsize, subset="Genome", transcriptome_gff=None, assembly=None):
+    def __init__(self, file, genome, maxsize, subset="Genome", transcriptome_gff=None, assembly=None, testing=False):
         """ I hate this code """
         self.subset = subset
+        self.testing = testing
         self.tORFs = self.__check_transcriptome(transcriptome_gff, assembly)
         self.maxSize = maxsize
         self.df = pd.read_csv(file, sep='\t')
+        self.__check_testing()
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
 
@@ -32,6 +34,10 @@ class AltCodons(object):
         #     for alt in self.alternatives[stop]:
         #         print(alt.MSPeptides, alt.name)
         #         break
+
+    def __check_testing(self):
+        if self.testing:
+            self.df = self.df.head(20)
 
     def __check_transcriptome(self, gff, transcripts_fasta):
         if gff is not None and transcripts_fasta is not None:
@@ -76,7 +82,7 @@ class AltCodons(object):
         splat = entry.split("_")
         coords = splat[len(splat)-2].split("-")
         start, end = coords[0], coords[1]
-        print('transcript coordinates', entry, start, end)
+        # print('transcript coordinates', entry, start, end)
         return int(start), int(end)
 
     def __fetch_orfs(self):
@@ -95,8 +101,8 @@ class AltCodons(object):
                 name = self.__get_transcript_name(self.names[i])
 
                 start, end = self.__get_transcript_coordinates(self.names[i])
-                print(name)
-                print(start, end)
+                # print(name)
+                # print(start, end)
                 # start, end, strand = self.tORFs[name].start, self.tORFs[name].end, 'forward'
                 strand = 'forward'
                 # print(name)
@@ -514,6 +520,7 @@ class AltCodons(object):
             for alt in self.alternatives[stop]:
                 to_trans = Translator(alt.seq)
                 alt.proteinSequence = to_trans.translate()
+                alt.filter_peptides()
                 if len(orfs) > 0:
                     if len(alt.MSPeptides) > len(orfs[0].MSPeptides):
                         orfs.insert(0, alt)

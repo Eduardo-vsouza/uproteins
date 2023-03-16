@@ -10,6 +10,14 @@ class HandlerError(Error):
         super().__init__(self.message)
 
 
+class ExternalAssemblyError(Error):
+    """ Raised when only one of the two arguments required for using an external transcriptome is provided. """
+    def __init__(self, message='Only one of the two arguments required for using an external transcriptome was '
+                               'provided. Please, inform both arguments. If using --external_transcriptome, be sure to '
+                               'inform --external_gtf as well, and vice-versa.'):
+        self.message = message
+        super().__init__(self.message)
+
 class FiletypeError(Error):
     """ Raised when the filetype is incorrect. """
     def __init__(self, message='Unrecognized filetype. Please inform one of the following: genome, transcriptome.'):

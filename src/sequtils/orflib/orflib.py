@@ -37,6 +37,11 @@ class ORF(object):
         length = len(self.seq)
         return length
 
+    def filter_peptides(self):
+        for pep in self.MSPeptides:
+            if pep not in self.proteinSequence:
+                self.MSPeptides.remove(pep)
+
     def find_ms_peptides(self):
 
         # if len(self.MSPeptides) >= 1:
