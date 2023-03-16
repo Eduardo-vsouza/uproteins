@@ -1,5 +1,6 @@
 import os
 import sys
+
 from src.database import database_generator as dg
 from . import peptide_search as ps
 from . import results_new_approach as pms
@@ -15,13 +16,14 @@ from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts, ReadMapper
 from .master import Archives
 from .database import Database
-from .postprocess import PostPercolator, ExtendedInformation
+from .postprocess import PostPercolator, ExtendedInformation, ResultsWrapper
 from .sequtils.orflib import AltCodons
 from .upstream import SDInspection
 from .testing import PipelineTesting
 from .postms import TSVConverter
 from .pipelines import PostMSPipeline, ValidatePipeline
 from .forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest
+from src.sequtils.__helpers import ExternalAssemblyError
 
 
 pypath = sys.path[0]
@@ -68,7 +70,15 @@ def run_workflow(args):
 
 
         elif mode == "database":
-
+            if args.external_gtf is not None and args.external_transcriptome is not None:
+                os.system(f'cp {args.external_gtf} {args.outdir}/assembled.gtf')
+                if not os.path.exists(f'{args.outdir}/HISAT'):
+                    os.system(f'mkdir {args.outdir}/HISAT')
+                os.system(f'cp {args.external_transcriptome} {args.outdir}/HISAT/transcripts.fasta')
+            elif args.external_gtf is not None and args.external_transcriptome is None:
+                raise ExternalAssemblyError
+            elif args.external_transcriptome is not None and args.external_gtf is None:
+                raise ExternalAssemblyError
             #genome = dg.OrfPrediction(args)
             #genome.identify_orfs()
             print("Generating the genome database.")
@@ -76,13 +86,13 @@ def run_workflow(args):
             db.translate()
             # print("\nORFs identified \nNow performing steps to generate the GENOME database\n")
             genome_db = dg.Database("genome_ORFs.fasta", args.proteome, "genome")
-            # genome_db.mark_annotated()
+            genome_db.mark_annotated()
             genome_db.unify()
             print("Genome database generated.")
             if args.Transcriptome is not None:
                 print("Generating the transcriptome database.")
                 transcriptome_db = dg.Database("transcriptome_ORFs.fasta", args.proteome, "transcriptome")
-                # transcriptome_db.mark_annotated()
+                transcriptome_db.mark_annotated()
                 transcriptome_db.unify()
                 print("Transcriptome database generated.")
             print("Database generation step complete. Look for databases in %s" % args.outdir)
@@ -94,7 +104,6 @@ def run_workflow(args):
             genome_decoy.reverse_sequences().to_fasta()
             genome_decoy_search = ps.PeptideSearch("Genome", args.Mass_spec, "Genome/Percolator/Genome_decoy.fasta", args, decoy=True)
             genome_decoy_search.peptide_identification()
-            #genome.peptide_filtering()
             if args.Transcriptome is not None:
                 transcriptome = ps.PeptideSearch("Transcriptome", args.Mass_spec, "transcriptome_database.fasta", args)
                 transcriptome.peptide_identification()
@@ -102,7 +111,6 @@ def run_workflow(args):
                 transcriptome_decoy.reverse_sequences().to_fasta()
                 transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", args.Mass_spec, "Transcriptome/Percolator/Transcriptome_decoy.fasta", args, decoy=True)
                 transcriptome_decoy_search.peptide_identification()
-                #transcriptome.peptide_filtering()
 
         elif mode == "postms":
             """ newest method """
@@ -115,145 +123,19 @@ def run_workflow(args):
 
             print("DONE. Results are inside Genome or Transcriptome folders.")
 
-
-
         elif mode == "validate":
             validation = ValidatePipeline(args=args)
             validation.validate_genome()
             validation.validate_transcriptome()
-
-        elif mode == "visualization":
-            if not os.path.exists("RefSeq_Reading_Frames.ods"):
-                print(
-                    "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
-                trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
-            if args.type == "dna":
-                if not os.path.exists("dna_results_with_rfs.ods"):
-                    print("\nPreparing the genome unique ORFs for proper visualization\n")
-                    trans.find_orfs_rfs("Genome/Results/Genome_unique_results_numbers.xls", args.genome, "dna")
-                vis.prog_browser(args.type)
-            elif args.type == "both":
-                if not os.path.exists("both_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Genome/Results/Both_results_numbers.xls", args.genome, "both")
-                vis.prog_browser(args.type)
-
-            elif args.type == "rna":
-                if not os.path.exists("rna_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Transcriptome/Results/Rna_unique_results_numbers.xls", args.genome, "rna")
-                    pms.fix_frames()
-                vis.prog_browser(args.type)
-
-        elif mode == "prowser":
-            if not os.path.exists("RefSeq_Reading_Frames.ods"):
-                print(
-                    "\nWe are preparing the proteogenomics visualizer for its first time use. This will happen only once.\n")
-                trans.find_proteome_rfs(args.genome, args.genbank, args.outdir)
-            if args.type == "genome":
-                if not os.path.exists("dna_results_with_rfs.ods"):
-                    print("\nPreparing the genome unique ORFs for proper visualization\n")
-                    trans.find_orfs_rfs("Genome/Results/genome_unique_results_summarized.xls", args.genome, "dna")
-                    orfome = gorg.ORFome("dna_results_with_rfs.ods", "dna")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("dna")
-            elif args.type == "transcriptome":
-                if not os.path.exists("rna_results_with_rfs"):
-                    print("\nPreparing the transcriptome unique ORFs for browsing.\n")
-                    trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome,
-                                        "rna")
-                    pms.fix_frames()
-                    orfome = gorg.ORFome("rna_results_with_rfs.ods", "rna")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("rna")
-            elif args.type == "both":
-                if not os.path.exists("both_results_with_rfs.ods"):
-                    trans.find_orfs_rfs("Genome/Results/both_summarized_final_results.xls", args.genome, "both")
-                if not os.path.exists("both_df_to_visualize.ods"):
-                    orfome = gorg.ORFome("both_results_with_rfs.ods", "both")
-                    orfome.define_gene_names()
-                    orfome.get_gene_info()
-                    orfome.get_specs_counts()
-                    orfome.organize_df()
-                prsr.run_prowser("both")
 
 
             # elif args.type == "rna":
             #     if not os.path.exists("rna_results_with_rfs.ods"):
             #         trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome, "rna")
             #         pms.fix_frames()
-            else:
-                print("\nPlease inform a valid data subset.")
+            #else:
+            #    print("\nPlease inform a valid data subset.")
 
-        # elif mode == "orthologs":
-        #     database = phylo.BlastDB("Orthologs")
-        #     database.download_assemblies()
-        #     database.create_database()
-        #     rna = phylo.Orthologs(args.organism, args, "transcriptome")
-        #     rna.blast_sequences()
-        #     rna.identify_hits()
-        #     both = phylo.Orthologs(args.organism, args, "both")
-        #     both.blast_sequences()
-        #     both.identify_hits()
-        #     dna = phylo.Orthologs(args.organism, args, "genome")
-        #     dna.blast_sequences()
-        #     dna.identify_hits()
-        #     results = phylo.Motifs(args)
-        #     results.find_motifs()
-
-        #
-        # elif mode == "digestion":
-        #     if not args.coverage and not args.ups:
-        #         print("\nPlease choose either --coverage and/or --ups in order to perform these analyzes. You may choose "
-        #               "both.\n")
-        #     else:
-        #         peptides = Digestion("genome_database_no_anno.fasta")
-        #         peptides.digest_orfs(args.enzymes)
-        #         genome_trypsin = Digested("genome_database_no_anno_0/", "genome",
-        #                                   "genome_database_no_anno.fasta", "Trypsin", args.proteome)
-        #         genome_lysc = Digested("genome_database_no_anno_1/", "genome",
-        #                                "genome_database_no_anno.fasta", "Lys_C", args.proteome)
-        #         genome_argc = Digested("genome_database_no_anno_2/", "genome",
-        #                                "genome_database_no_anno.fasta", "Arg_C", args.proteome)
-        #         genome_gluc = Digested("genome_database_no_anno_3/", "genome",
-        #                                "genome_database_no_anno.fasta", "Glu_C", args.proteome)
-        #         enzymes = args.enzymes.split(",")
-        #         if args.coverage is True:
-        #             if "0" in enzymes:
-        #                 genome_trypsin.virtual_coverage("genome_database_no_anno_3")
-        #             if "1" in enzymes:
-        #                 genome_lysc.virtual_coverage()
-        #             if "2" in enzymes:
-        #                 genome_argc.virtual_coverage()
-        #             if "3" in enzymes:
-        #                 genome_gluc.virtual_coverage()
-        #         if args.ups is True:
-        #             if "0" in enzymes:
-        #                 genome_trypsin.ups_per_orf()
-        #             if "1" in enzymes:
-        #                 genome_lysc.ups_per_orf()
-        #             if "2" in enzymes:
-        #                 genome_argc.ups_per_orf()
-        #             if "3" in enzymes:
-        #                 genome_gluc.ups_per_orf()
-        #         enzymes = PlotData(args.enzymes)
-        #         enzymes.plot_up_orf()
-        #         enzymes.plot_mixed_data()
-        #         enzymes.plot_coverage_data()
-        #
-        # elif mode == "runs":
-        #     genome = OrganizePlot(
-        #         "Genome/Results/genome_unique_results_summarized.xls")
-        #     genome.plot_data()
-        #     if args.Transcriptome is not None:
-        #         rna = OrganizePlot("Transcriptome/Results/transcriptome_unique_results_summarized.xls")
-        #         rna.plot_data()
-        #         both = OrganizePlot("Genome/Results/Summarized_final_results.ods")
-        #         both.plot_data()
 
         else:
             print("Invalid mode. Please choose a valid mode.")

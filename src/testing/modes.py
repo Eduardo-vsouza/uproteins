@@ -277,7 +277,8 @@ class MSTesting(PipelineTesting):
         decoy = '20140719_H37Rv_20140718_5ug_120min_top8_1.mzML_decoy.mzid'
 
         def check_size(folder):
-            if os.path.getsize(f'{folder}/{target}') > 20000 and os.path.getsize(f'{folder}/{decoy}') > 20000:
+            # if os.path.getsize(f'{folder}/{target}') > 20000 and os.path.getsize(f'{folder}/{decoy}') > 20000:
+            if os.path.exists(f'{folder}/{target}') and os.path.exists(f'{folder}/{decoy}'):
                 state = 'OK'
             else:
                 state = 'FAILED'

@@ -34,7 +34,7 @@ class PeptideSearch(object):
         #                  % (sys.path[0], arg_string, os.path.abspath(self.orf_file), self.ms_files_folder)
         # os.system(cmd_pep_search)
         self.loop_search()
-        cmd_move = 'mv %s*.mzid %s/' % (self.ms_files_folder, self.database_type)
+        cmd_move = 'mv %s*/.mzid %s/' % (self.ms_files_folder, self.database_type)
         os.system(cmd_move)
 
     def loop_search(self):
@@ -51,7 +51,7 @@ class PeptideSearch(object):
         ms_args = ""
         item_list = [None, "Mass_spec", "outdir", "Transcriptome", "mode", 'skip_assembly', 'skip_db', 'skip_ms',
                      'skip_postms', 'skip_validation', 'gtf', 'single', 'reads1', 'reads2', 'strandness', 'gff_compare_path',
-                     'gffread_path', 'genome', 'proteome', 'minsize', 'maxsize', 'starts', 'stops']
+                     'gffread_path', 'genome', 'proteome', 'minsize', 'maxsize', 'starts', 'stops', 'threads']
         for arg in vars(self.args).items():
             if arg[0] not in item_list and arg[1] is not None:
                 ms_args += f" -{arg[0]} {arg[1]}"

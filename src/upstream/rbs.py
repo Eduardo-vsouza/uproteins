@@ -221,7 +221,7 @@ class SDInspection(object):
         elif float(rbs) <= -8.4:
             sd_seq = "Present. Strong binding."
         else:
-            sd_seq = "Leaderless"
+            sd_seq = "SD absent"
         return sd_seq
 
     def save_data(self):
