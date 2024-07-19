@@ -18,3 +18,6 @@ For any technical difficulties, open an issue on this GitHub page (https://githu
 Please consider citing our manuscript if the software was used during your analysis.
 
 Eduardo Vieira de Souza, Pedro Ferrari Dalberto, Vinicius Pellisoli Machado, Adriana Canedo Miranda, Alan Saghatelian, Pablo Machado, Luiz Augusto Basso, Cristiano Valim Bizarro, µProteInS - a proteogenomics pipeline for finding novel bacterial microproteins encoded by small ORFs, Bioinformatics, 2022;, btac115, https://doi.org/10.1093/bioinformatics/btac115
+
+We have also published a chapter in Methods in Molecular Biology (Protein Informatics) describing the usage of this pipeline on publicly available data (https://link.springer.com/protocol/10.1007/978-1-0716-4007-4_2). If the tutorial was useful, please consider also citing it in your research:
+de Souza EV, Bizarro CV. Identification of Novel Bacterial Microproteins Encoded by Small Open Reading Frames Using a Computational Proteogenomics Workflow. InProtein Bioinformatics 2024 Jul 13 (pp. 19-34). New York, NY: Springer US.
