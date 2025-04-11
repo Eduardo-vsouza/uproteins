@@ -34,7 +34,7 @@ class PeptideSearch(object):
         #                  % (sys.path[0], arg_string, os.path.abspath(self.orf_file), self.ms_files_folder)
         # os.system(cmd_pep_search)
         self.loop_search()
-        cmd_move = 'mv %s*/.mzid %s/' % (self.ms_files_folder, self.database_type)
+        cmd_move = 'mv %s/*.mzid %s/' % (self.ms_files_folder, self.database_type)
         os.system(cmd_move)
 
     def loop_search(self):
@@ -56,7 +56,7 @@ class PeptideSearch(object):
             if arg[0] not in item_list and arg[1] is not None:
                 ms_args += f" -{arg[0]} {arg[1]}"
         db = os.path.abspath(self.orf_file)
-        cmd = f'java -Xmx12G -jar {self.path}/dependencies/MSGF/MSGFPlus.jar -d {db}{output} -tda 0 -s {os.path.abspath(self.args.Mass_spec)}/{file} -addFeatures 1{ms_args}'
+        cmd = f'java -Xmx48G -jar {self.path}/dependencies/MSGF/MSGFPlus.jar -d {db}{output} -tda 0 -s {os.path.abspath(self.args.Mass_spec)}/{file} -addFeatures 1{ms_args}'
         os.system(cmd)
         return self
 

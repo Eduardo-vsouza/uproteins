@@ -196,7 +196,7 @@ class CompareTranscripts(object):
         os.system(cmd_read)
         return 'HISAT/transcripts.fasta'
 
-#
+
 # class Transcript(object):
 #     def __init__(self, seqname, start, end, strand, attributes):
 #         self.name = seqname

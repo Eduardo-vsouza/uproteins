@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from matplotlib_venn import venn2, venn2_circles
 
+
 class Results(object):
     def __init__(self, folder, filetype, orf_db):
         self.folder = folder
@@ -52,6 +53,7 @@ class Results(object):
                 entries.append(">" + ids[i] + "\n" + seqs[i] + "\n")
             fa.writelines(entries)
 
+
 def create_venn():
     # Transcriptome data
     rna_df = pd.read_csv("Transcriptome/Results/results_with_seqs", sep='\t')
@@ -65,4 +67,3 @@ def create_venn():
     venn2([set(rna_seqs), set(dna_seqs)])
     plt.title('Shared ORFs')
     matplotlib.pyplot.savefig('venn.png')
-

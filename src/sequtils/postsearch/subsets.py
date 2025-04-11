@@ -10,6 +10,7 @@ class SequenceFinder(object):
         self.df = self.df[self.df["Protein"].str.contains("contaminant", regex=False) == False]
         self.df = self.df[self.df["Protein"].str.contains("lcl|", regex=False) == False]
         self.df = self.df[self.df["Protein"].str.contains("decoy", regex=False) == False]
+        self.df = self.df[self.df["Protein"].str.contains("sp|", regex=False) == False]
         self.proteins = self.df["Protein"].tolist()
         self.fasta = fasta_db
         self.proteinDict = self.__get_db_proteins()

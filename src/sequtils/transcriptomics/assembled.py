@@ -21,4 +21,3 @@ class TranscriptExtractor(object):
             if gene not in rnas:
                 rnas[gene] = str(record.seq)
         return rnas
-

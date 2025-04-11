@@ -9,17 +9,16 @@ class RefSeqGFF(object):
         self.gff = gff
 
     def __read_gff(self):
-        df = pd.read_csv(self.gff, sep='\t', header=8)
+        df = pd.read_csv(self.gff, sep='\t', header=1)
 
         df.columns = ['seqname', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'attributes']
 
-        df = df[df["source"] == "RefSeq"]
+        df = df[df["source"].isin(["RefSeq", "ena"])]
         starts = df["start"].tolist()
         ends = df["end"].tolist()
         strands = df["strand"].tolist()
         attrs = df["attributes"].tolist()
         orf_list = []
-
         for i in range(len(attrs)):
             name = attrs[i].split(";")[1][12:]
             start = starts[i]
@@ -67,12 +66,14 @@ class StringTieGFF(object):
         orf_list = []
 
         for i in range(len(attrs)):
-            name = attrs[i].split(";")[0][9:-1]
-            if 'ref_gene_id' in attrs[i]:
-                name = attrs[i].split(";")[1][21:-1]
-
-                if 'rna-' in attrs[i]:
-                    name = attrs[i].split(";")[1][20:-1]
+            name = attrs[i].split(";")[1].split(" ")[-1].replace("\"", "")
+            if 'uproteins' in name:
+                name = '.'.join(name.split(".")[:2])
+            # if 'ref_gene_id' in attrs[i]:
+            #     name = attrs[i].split(";")[1][21:-1]
+            #
+            #     if 'rna-' in attrs[i]:
+            #         name = attrs[i].split(";")[1][20:-1]
 
             start = starts[i]
             end = ends[i]
@@ -100,7 +101,7 @@ class GenomeCoordinatesRNA(object):
         self.stringTieDict = string_dict
         self.refSeqDict = ref_dict
         self.coordinates = []
-        print(self.stringTieDict)
+        # print(self.stringTieDict)
 
     def get_proteins(self):
         coordinates = []
@@ -155,7 +156,7 @@ class GenomeCoordinatesRNA(object):
                         start = orf.start - 1
                         end = orf.end
                         coords = f'{start}-{end}'
-                        print(orf, start, end, coords)
+                        # print(orf, start, end, coords)
                         if len(coord_set) > 0:
                             coord_set += f',{coords}'
                         else:

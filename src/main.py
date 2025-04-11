@@ -4,11 +4,11 @@ import sys
 from src.database import database_generator as dg
 from . import peptide_search as ps
 from . import results_new_approach as pms
-#from . import the_visualizer as vis
+# from . import the_visualizer as vis
 # from . import orthologs as phylo
 from . import f_translation as trans
-#from .working_runs import OrganizePlot
-#from .Digestion_sets import Digestion, Digested, PlotData
+# from .working_runs import OrganizePlot
+# from .Digestion_sets import Digestion, Digested, PlotData
 # import prowser.gene_organizer as gorg
 # import prowser.browser_gui_v16 as prsr
 # from .testing import uproteins_testing as test
@@ -16,7 +16,7 @@ from .percolator import Decoy
 from .assembly import TranscriptAssembly, CompareTranscripts, ReadMapper
 from .master import Archives
 from .database import Database
-from .postprocess import PostPercolator, ExtendedInformation, ResultsWrapper
+from .postprocess import PostPercolator, ExtendedInformation, ResultsWrapper, ResultsSummarizer
 from .sequtils.orflib import AltCodons
 from .upstream import SDInspection
 from .testing import PipelineTesting
@@ -24,6 +24,7 @@ from .postms import TSVConverter
 from .pipelines import PostMSPipeline, ValidatePipeline
 from .forest import ProteinFixer, PreFiltering, FeatureFishing, SpectralForest
 from src.sequtils.__helpers import ExternalAssemblyError
+from src.metrics import Metrics
 
 
 pypath = sys.path[0]
@@ -79,8 +80,8 @@ def run_workflow(args):
                 raise ExternalAssemblyError
             elif args.external_transcriptome is not None and args.external_gtf is None:
                 raise ExternalAssemblyError
-            #genome = dg.OrfPrediction(args)
-            #genome.identify_orfs()
+            # genome = dg.OrfPrediction(args)
+            # genome.identify_orfs()
             print("Generating the genome database.")
             db = Database(args)
             db.translate()
@@ -127,15 +128,19 @@ def run_workflow(args):
             validation = ValidatePipeline(args=args)
             validation.validate_genome()
             validation.validate_transcriptome()
+            summ = ResultsSummarizer()
+            summ.get_results()
+            summ.save()
 
-
-            # elif args.type == "rna":
-            #     if not os.path.exists("rna_results_with_rfs.ods"):
-            #         trans.find_orfs_rfs("Transcriptome/Results/transcriptome_unique_results_summarized.xls", args.genome, "rna")
-            #         pms.fix_frames()
-            #else:
-            #    print("\nPlease inform a valid data subset.")
-
+        elif mode == 'metrics':
+            metrics = Metrics(args=args)
+            metrics.count_sequences()
+            metrics.plot_aa_dist()
+            metrics.plot_orf_numbers()
+            metrics.plot_energies()
+            metrics.plot_rbs()
+            metrics.generate_fasta()
+            # metrics.plot_venn_2()
 
         else:
             print("Invalid mode. Please choose a valid mode.")

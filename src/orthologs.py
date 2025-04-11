@@ -61,7 +61,6 @@ class Orthologs(object):
         self.outdir = args.outdir
         self.blast_dir = f'{path}/dependencies/blast_for_uproteins'
 
-
     def blast_sequences(self):
         pypath = main.pypath
         pipe_database = os.path.abspath(".fasta")
@@ -128,8 +127,5 @@ class Motifs(object):
             self.run_interpro("both")
 
 
-
-#
 # wtf = Orthologs("Mycobacterium smegmatis,Mycolicibacterium smegmatis", "blipblop", "both")
 # wtf.identify_hits()
-

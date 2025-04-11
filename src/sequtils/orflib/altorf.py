@@ -44,14 +44,21 @@ class AltCodons(object):
             self.subset = "Transcriptome"
             assembly = TranscriptExtractor(assembly=transcripts_fasta)
             transcripts = assembly.get_transcripts()
+            # print(transcripts)
             gff = StringTieGFF(gff)
             orf_dict = gff.get_dict()
+            # print(orf_dict)
             for gene in orf_dict:
                 orf = orf_dict[gene]
-                print(orf, orf.name)
+                # print(orf, orf.name)
 
                 # orf.transcript = transcripts[orf.name]
-                orf.transcript = transcripts[orf.name]
+                if 'uproteins' in orf.name:
+                    rna = '.'.join(orf.name.split(".")[:2])
+                    print(rna)
+                else:
+                    rna = orf.name
+                orf.transcript = transcripts[rna]
 
             return orf_dict
 
@@ -68,6 +75,7 @@ class AltCodons(object):
         return int(start), int(end), strand
 
     def __get_transcript_name(self, entry):
+        # print(entry)
         gene = entry.split("_")[1]
         if 'gene' in gene:
             name = gene[5:]
@@ -75,7 +83,8 @@ class AltCodons(object):
             name = gene[4:]
         else:
             splat = gene.split(".")
-            name = f'{splat[0]}.{splat[1]}'
+            # name = f'{splat[0]}.{splat[1]}'
+            name = '.'.join(splat[:2])
         return name
 
     def __get_transcript_coordinates(self, entry):
@@ -107,6 +116,8 @@ class AltCodons(object):
                 strand = 'forward'
                 # print(name)
                 # print(self.tORFs)
+                # print(self.tORFs)
+                print(name)
                 transcript = self.tORFs[name].transcript
                 # print(transcript)
             if strand == 'forward':

@@ -12,13 +12,14 @@ class ValidatePipeline(object):
         self.testing = testing
 
     def validate_genome(self):
+        if not os.path.exists("Genome/Percolator/for_predicting"):
+            os.mkdir('Genome/Percolator/for_predicting')
+
         genome_pin = ProteinFixer(pin_folder='Genome/Percolator')
         genome_pin.fix_files(outdir='Genome/Percolator')
         genome_prefiltering = PreFiltering(pin_folder='Genome/Percolator',
                                            results_04='Genome/post_perc/genome_results_04.txt', testing=self.testing)
         genome_prefiltering.filter_proteins()
-        if not os.path.exists("Genome/Percolator/for_predicting"):
-            os.system('mkdir Genome/Percolator/for_predicting')
         genome_prefiltering.filter_pin_files('Genome/Percolator/for_predicting')
         genome_fishing = FeatureFishing(results='Genome/post_perc/genome_results_04.txt',
                                         pin_folder='Genome/Percolator/for_predicting',
@@ -41,14 +42,15 @@ class ValidatePipeline(object):
 
     def validate_transcriptome(self):
         if self.args.Transcriptome == "YES":
+            if not os.path.exists('Transcriptome/Percolator/for_predicting'):
+                os.system('mkdir Transcriptome/Percolator/for_predicting')
             transcriptome_pin = ProteinFixer(pin_folder='Transcriptome/Percolator')
             transcriptome_pin.fix_files(outdir='Transcriptome/Percolator')
             transcriptome_prefiltering = PreFiltering(pin_folder='Transcriptome/Percolator',
                                                       results_04='Transcriptome/post_perc/transcriptome_results_04.txt',
                                                       testing=self.testing)
             transcriptome_prefiltering.filter_proteins()
-            if not os.path.exists('Transcriptome/Percolator/for_predicting'):
-                os.system('mkdir Transcriptome/Percolator/for_predicting')
+
             transcriptome_prefiltering.filter_pin_files('Transcriptome/Percolator/for_predicting')
             transcriptome_fishing = FeatureFishing(results='Transcriptome/post_perc/transcriptome_results_04.txt',
                                                    pin_folder='Transcriptome/Percolator/for_predicting', testing=self.testing)
