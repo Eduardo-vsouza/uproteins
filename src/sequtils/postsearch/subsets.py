@@ -30,13 +30,13 @@ class SequenceFinder(object):
             seq_set = ""
             for protein in protein_set:
                 if 'decoy' not in protein:
-                    print(protein)
+                    # print(protein)
                     # if ')' not in protein:
-                    pos = protein.rfind("(")
+                    pos = protein.rfind("(pre")
                     fixed = protein[:pos]
                     # fixed = protein
                     seq = self.proteinDict[fixed]
-                    print(seq)
+                    # print(seq)
                     if len(seq_set) > 0:
                         seq_set += f",{seq}"
                     else:
