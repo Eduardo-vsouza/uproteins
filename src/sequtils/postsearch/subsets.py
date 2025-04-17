@@ -20,7 +20,7 @@ class SequenceFinder(object):
         records = SeqIO.parse(self.fasta, 'fasta')
         for record in records:
             if record.description not in protein_dict:
-                protein_dict[record.description] = record.seq
+                protein_dict[record.description.split(" ")[0]] = record.seq
         return protein_dict
 
     def df_proteins(self):
