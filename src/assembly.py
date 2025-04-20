@@ -171,7 +171,7 @@ class CompareTranscripts(object):
         if self.args.gff_compare_path is not None:
             gff_path = self.args.gff_compare_path
         else:
-            gff_path = '/data/gffcompare-0.12.6.Linux_x86_64/gffcompare'
+            gff_path = 'gffcompare'
         return gff_path
 
     def index_genome(self):
