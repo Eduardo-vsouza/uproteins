@@ -56,6 +56,10 @@ class AltCodons(object):
                 if 'uproteins' in orf.name:
                     rna = '.'.join(orf.name.split(".")[:2])
                     print(rna)
+                elif 'gene' in orf.name:
+                    rna = orf.name[5:]
+                elif 'rna' in orf.name:
+                    rna = orf.name[4:]
                 else:
                     rna = orf.name
                 orf.transcript = transcripts[rna]
@@ -78,9 +82,11 @@ class AltCodons(object):
         # print(entry)
         gene = entry.split("_")[1]
         if 'gene' in gene:
-            name = gene[5:]
+            # name = gene[5:]
+            name = gene
         elif 'rna' in gene:
-            name = gene[4:]
+            # name = gene[4:]
+            name = gene
         else:
             splat = gene.split(".")
             # name = f'{splat[0]}.{splat[1]}'
@@ -117,7 +123,7 @@ class AltCodons(object):
                 # print(name)
                 # print(self.tORFs)
                 # print(self.tORFs)
-                print(name)
+                # print(name)
                 transcript = self.tORFs[name].transcript
                 # print(transcript)
             if strand == 'forward':
