@@ -13,7 +13,7 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     
-    main_parser.add_argument('-v', '--version', action='version', version='$(prog)s 1.3.2 (GPL-3.0-or-later)')
+    main_parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.3.2 (GPL-3.0-or-later)')
 
     mode_parser = main_parser.add_argument_group("Mode input options")
     mode_parser.add_argument("mode", metavar="Mode", help="Mode to run the pipeline for.\nList of Modes: assembly, "
