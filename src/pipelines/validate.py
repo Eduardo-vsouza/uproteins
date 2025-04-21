@@ -57,7 +57,7 @@ class ValidatePipeline(object):
             transcriptome_fishing.add_features()
             transcriptome_fishing.save_table(
                 'Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
-            #
+
             transcriptome_sf = SpectralForest(model_pickle=f'{self.pypath}/src/model/model.pkl',
                                               results='Transcriptome/Percolator/for_predicting/transcriptome_results_with_features.txt')
             transcriptome_sf.predict()

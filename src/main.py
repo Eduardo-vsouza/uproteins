@@ -128,7 +128,7 @@ def run_workflow(args):
             validation = ValidatePipeline(args=args)
             validation.validate_genome()
             validation.validate_transcriptome()
-            summ = ResultsSummarizer()
+            summ = ResultsSummarizer(args.Transcriptome)
             summ.get_results()
             summ.save()
 

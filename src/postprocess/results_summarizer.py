@@ -5,17 +5,22 @@ import pandas as pd
 
 
 class ResultsSummarizer:
-    def __init__(self):
+    def __init__(self, transcriptome):
         self.transcriptomeResults = f'Transcriptome/Results'
         self.genomeResults = f'Genome/Results'
+        self.transcriptome = transcriptome
 
         self.outfile = {'ORFs': [], 'Unique microprotein sequences': [], 'RBS': [], 'Subset': []}
 
     def get_results(self):
-        subsets = {'Transcriptome LC': f'{self.transcriptomeResults}/transcriptome_pre_validation_results.txt',
-                   'Transcriptome HC': f'{self.transcriptomeResults}/transcriptome_post_validation_results.txt',
-                   'Genome LC': f'{self.genomeResults}/genome_pre_validation_results.txt',
-                   'Genome HC': f'{self.genomeResults}/genome_post_validation_results.txt'}
+        subsets = {
+            'Genome LC': f'{self.genomeResults}/genome_pre_validation_results.txt',
+            'Genome HC': f'{self.genomeResults}/genome_post_validation_results.txt'
+        }
+        if self.transcriptome == 'YES':
+            subsets['Transcriptome LC'] = f'{self.transcriptomeResults}/transcriptome_pre_validation_results.txt'
+            subsets['Transcriptome HC'] = f'{self.transcriptomeResults}/transcriptome_post_validation_results.txt'
+
         for subset in subsets:
             counter = self.count_orfs(file=subsets[subset])
             self.outfile['ORFs'].append(len(counter['orfs']))
