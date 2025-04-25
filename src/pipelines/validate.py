@@ -41,7 +41,7 @@ class ValidatePipeline(object):
         genome_results.reformat(pre_validation=False)
 
     def validate_transcriptome(self):
-        if self.args.Transcriptome == "YES":
+        if self.args.transcriptome:
             if not os.path.exists('Transcriptome/Percolator/for_predicting'):
                 os.system('mkdir Transcriptome/Percolator/for_predicting')
             transcriptome_pin = ProteinFixer(pin_folder='Transcriptome/Percolator')

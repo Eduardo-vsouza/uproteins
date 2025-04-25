@@ -1,7 +1,8 @@
 import os
+import pathlib
+import subprocess
 
-from Bio import SeqIO
-import pandas as pd
+import cli
 
 
 class Error(Exception):
@@ -20,34 +21,15 @@ class ReadMapper(object):
         self.args = args
         self.gtf = args.gtf
         self.genome = args.genome
-        self.__check_read_type()
-        self.libtype = None
+        self.is_paired = self._check_read_type()
         self.strandness = self.args.strandness
 
-    def __check_read_type(self):
-        if self.args.reads1 is not None and self.args.single is None:
-            self.__get_paired_reads()
-        elif self.args.reads1 is None and self.args.single is not None:
-            self.__get_single_reads()
-        # elif self.args.reads1 is None and self.args.singles is None:
-        #     raise ReadError
-        else:
-            raise ReadError
-
-    def __get_single_reads(self):
-        reads = self.args.single.split(",")
-        read_list = []
-        # for read in reads:
-        #         read_list.append(os.path.abspath(read))
-        self.libtype = "single"
-        self.reads = reads
-
-    def __get_paired_reads(self):
-        reads1 = self.args.reads1.split(",")
-        reads2 = self.args.reads2.split(",")
-        self.libtype = "paired"
-        self.reads1 = reads1
-        self.reads2 = reads2
+    def _check_read_type(self):
+        # We assume validate_assembly made sure that only --single OR
+        # (--reads1 --reads2) was given
+        if self.args.single is None:
+            return True
+        return False
 
     def create_indexes(self):
         cmd_index = f'hisat2-build {self.genome} genome'
@@ -55,44 +37,47 @@ class ReadMapper(object):
         return self
 
     def align_reads(self):
-        if not os.path.exists("HISAT"):
-            cmd_dir = 'mkdir HISAT'
-            os.system(cmd_dir)
-        if not os.path.exists("HISAT/sam"):
-            cmd_dir2 = 'mkdir HISAT/sam'
-            os.system(cmd_dir2)
-        # if self.libtype == "single":
-        print('alright')
-        i = 0
-        for read in self.reads:
+        pathlib.Path('HISAT/sam').mkdir(exist_ok=True, parents=True)
+
+        reads = self.args.single
+        if self.is_paired:
+            reads = zip(self.args.reads1, self.args.reads2)
+
+        # read_data is either a tuple of paths (-1 and -2) or a single path
+        for i, read_data in enumerate(reads):
             read_name = f'aligned_{i}'
-            cmd_hisat = f'hisat2 -x genome -U {read} --dta --rna-strandness {self.strandness} -S HISAT/sam/{read_name}.sam'
-            os.system(cmd_hisat)
-            self.__sort_aln(i)
-            i += 1
-        # elif self.libtype == "paired":
-        #     i = 0
-        #     for read1, read2 in zip(self.reads1, self.reads2):
-        #         i += 1
-        #         name1 = read1.find("_")
-        #         read1_name = f"aligned_{i}"
-        #         cmd_hisat = f'hisat2 -x genome -1 {read1} -2 {read2} --dta --rna-strandness {self.strandness} -S' \
-        #                     f' HISAT/sam/{read1_name}.sam'
-        #         os.system(cmd_hisat)
-        #         self.sort_aln(i)
+
+            hisat_strandness = f'--rna-strandness {self.strandness} ' \
+                if self.strandness is not None else ''
+
+            hisat_input = f'-U {read_data}'
+            if self.is_paired:
+                read_one, read_two = read_data
+                hisat_input = f'-1 {read_one} -2 {read_two}'
+
+            cmd_hisat = (
+                f'hisat2 -x genome {hisat_input} --dta {hisat_strandness} '
+                f'-S HISAT/sam/{read_name}.sam'
+            )
+
+            result = subprocess.run(cmd_hisat)
+            if result.returncode != 0:
+                cli.exit(
+                    3,
+                    'hisat2 finished with non-zero return value: '
+                    f'{result.returncode}'
+                )
+
+            self._sort_alignment(read_name)
+
         return self
 
-    def __sort_aln(self, i):
+    def _sort_alignment(self, read_name: str):
         """ Uses samtools to sort the alignments in the SAM file. """
-        # files = os.listdir("HISAT/sam")
-        if not os.path.exists("HISAT/bam"):
-            cmd_dir = 'mkdir HISAT/bam'
-            os.system(cmd_dir)
-
-        # for file in files:
-        cmd_sam = f'samtools view -Su HISAT/sam/aligned_{i}.sam | samtools sort -o HISAT/bam/aligned_{i}.bam'
+        pathlib.Path("HISAT/bam").mkdir(exist_ok=True, parents=True)
+        cmd_sam = f'samtools view -Su HISAT/sam/{read_name}.sam | samtools sort -o HISAT/bam/{read_name}.bam'
         os.system(cmd_sam)
-        cmd_rv = f'rm HISAT/sam/aligned_{i}.sam'
+        cmd_rv = f'rm HISAT/sam/{read_name}.sam'
         os.system(cmd_rv)
         return self
 
@@ -102,17 +87,16 @@ class TranscriptAssembly(object):
         self.args = args
         self.threads = args.threads
         self.gtf = self.args.gtf
-        self.strandness = self.check_strand()
+        self.strandness = self._check_strand()
 
-    def check_strand(self):
+    def _check_strand(self):
         if self.args.strandness == "RF":
+            # or `self.args.strandness == 'R'`?
             strandness = "--rf "
-        elif self.args.strandness == "FR":
-            strandness = "--fr "
-        elif self.args.strandness == 'F':
+        elif self.args.strandness == "FR" or self.args.strandness == 'F':
             strandness = "--fr "
         else:
-            strandness = self.args.strandness
+            strandness = ''
         return strandness
 
     def assemble(self):
@@ -125,6 +109,7 @@ class TranscriptAssembly(object):
             cmd_dir2 = 'mkdir StringTie/gtf_intermediates'
             os.system(cmd_dir2)
         for file in files:
+            # self.strandness already has a trailing space
             cmd_str = f'stringtie HISAT/bam/{file} -o StringTie/gtf_intermediates/{file[:-3]}gtf -p {self.threads} -G {self.gtf} ' \
                       f'{self.strandness}-l uproteins -m 30 -A StringTie/gene_abundances.txt'
             os.system(cmd_str)

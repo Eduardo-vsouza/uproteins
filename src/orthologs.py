@@ -122,7 +122,7 @@ class Motifs(object):
 
     def find_motifs(self):
         self.run_interpro('genome')
-        if self.args.Transcriptome == "YES":
+        if self.args.transcriptome:
             self.run_interpro("transcriptome")
             self.run_interpro("both")
 

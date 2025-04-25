@@ -185,11 +185,11 @@ class DatabaseTesting(PipelineTesting):
     def _fix_args(self):
         self.args.genome = f'{self.testFolder}/genome_for_database.fasta'
         self.args.proteome = f'{self.testFolder}/proteome_for_database.fasta'
-        self.args.Transcriptome = "YES"
+        self.args.transcriptome = True
         self.args.minsize = 30
         self.args.maxsize = 300
-        self.args.starts = 'ATG,ATT,TTG,GTG'
-        self.args.stops = "TAA,TAG,TGA"
+        self.args.starts = ['ATG', 'ATT', 'TTG', 'GTG']
+        self.args.stops = ['TAA', 'TAG', 'TGA']
 
     def test(self):
         if self.args.skip_db != 'TRUE':
@@ -201,7 +201,7 @@ class DatabaseTesting(PipelineTesting):
             # genome_db.mark_annotated()
             genome_db.unify()
             print("Genome database generated.")
-            if self.args.Transcriptome is not None:
+            if self.args.transcriptome:
                 print("Generating the transcriptome database.")
                 transcriptome_db = dg.Database("transcriptome_ORFs.fasta", self.args.proteome, "transcriptome")
                 # transcriptome_db.mark_annotated()
@@ -240,7 +240,7 @@ class MSTesting(PipelineTesting):
 
     def _fix_args(self):
         self.args.Mass_spec = f'{self.testFolder}/mzml/'
-        self.args.Transcriptome = 'YES'
+        self.args.transcriptome = True
 
     def __move_test_files(self):
         files = ['genome_database.fasta', 'transcriptome_database.fasta']
@@ -256,7 +256,7 @@ class MSTesting(PipelineTesting):
             genome_decoy_search = ps.PeptideSearch("Genome", self.args.Mass_spec, "Genome/Percolator/Genome_decoy.fasta",
                                                    self.args, decoy=True)
             genome_decoy_search.peptide_identification()
-            if self.args.Transcriptome is not None:
+            if self.args.transcriptome:
                 transcriptome = ps.PeptideSearch("Transcriptome", self.args.Mass_spec, "transcriptome_database.fasta", self.args)
                 transcriptome.peptide_identification()
                 transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
@@ -307,11 +307,11 @@ class PostMSTesting(PipelineTesting):
         self.args.gff = f'{self.testFolder}/test_gff.gff'
         self.args.pep = 0.5
         self.args.qvalue = 0.5
-        self.args.starts = 'ATG,TTG,ATT,GTG'
-        self.args.stops = 'TAA,TAG,TGA'
+        self.args.starts = ['ATG', 'TTG', 'ATT', 'GTG']
+        self.args.stops = ['TAA', 'TAG', 'TGA']
         self.args.maxsize = 300
         self.args.rrna = f'{self.testFolder}/rrna.fna'
-        self.args.Transcriptome = 'YES'
+        self.args.transcriptome = True
         self.newArgs = self.args
 
     def __check_folders(self):
@@ -346,7 +346,7 @@ class PostMSTesting(PipelineTesting):
         if self.args.skip_postms == 'FALSE':
             genome = PostMSPipeline(args=self.args, filetype='genome', folder='Genome', qvalue=0.27, testing=True)
             genome.run()
-            if self.args.Transcriptome == 'YES':
+            if self.args.transcriptome:
                 transcriptome = PostMSPipeline(args=self.newArgs, filetype='transcriptome', folder='Transcriptome',
                                                qvalue=0.27, testing=True)
                 transcriptome.run()
@@ -356,7 +356,7 @@ class PostMSTesting(PipelineTesting):
             # all_sub.modify_decoy()
             # all_sub.remove_annotated()
             # genome_perc.percolate()
-            # if self.args.Transcriptome is not None:
+            # if self.args.transcriptome:
             #     rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
             #     rna_perc.create_metafiles().convert_to_pin()
             #     rna_all_sub = AllSub(filetype='transcriptome', folder='Transcriptome')
@@ -365,7 +365,7 @@ class PostMSTesting(PipelineTesting):
             #     rna_perc.percolate()
             # genome_tsv = TSVConverter("Genome")
             # genome_tsv.convert_files()
-            # if self.args.Transcriptome is not None:
+            # if self.args.transcriptome:
             #     transcriptome_tsv = TSVConverter("Transcriptome")
             #     transcriptome_tsv.convert_files()
             # genome_filter = PostPercolator(self.args, "Genome", filetype='genome')
@@ -392,7 +392,7 @@ class PostMSTesting(PipelineTesting):
             # ext = ExtendedInformation(folder='Genome', filetype='genome', alternatives=genome_alts_pre_rf.alternatives)
             # ext.filter_alternatives(priorities)
             # ext.extract_spectra()
-            # if self.args.Transcriptome is not None:
+            # if self.args.transcriptome:
             #     transcriptome_filter = PostPercolator(self.args, 'Transcriptome', filetype='transcriptome')
             #     transcriptome_filter.convert_output()
             #     transcriptome_filter.get_coordinates_rna()
@@ -524,7 +524,7 @@ class PipelineTestingOld(object):
         os.system(cmd_cat_entries)
         genome_db.remove_entries()
         genome_db.create_custom()
-        if args.Transcriptome is not None:
+        if args.transcriptome:
             print("\nGenome database generated. Now performing steps to generate the TRANSCRIPTOME database.\n")
             transcriptome_db = dg.Database("transcriptome_ORFs.fasta", args.proteome, "transcriptome")
             transcriptome_db.blast_to_Proteome()
@@ -543,7 +543,7 @@ class PipelineTestingOld(object):
         genome = ps.PeptideSearch("Genome", ms_folder, "genome_database.fasta", args)
         # genome.peptide_identification()
         genome.peptide_filtering()
-        if args.Transcriptome is not None:
+        if args.transcriptome:
             transcriptome = ps.PeptideSearch("Transcriptome", ms_folder, "transcriptome_database.fasta", args)
             # transcriptome.peptide_identification()
             transcriptome.peptide_filtering()
@@ -572,7 +572,7 @@ class PipelineTestingOld(object):
             genome_ncrnas = pms.GenomicContext(args, "genome", "Genome")
             genome_ncrnas.match_features()
             genome_ncrnas.add_to_df()
-        if args.Transcriptome == "YES":
+        if args.transcriptome:
             transcriptome_results = pms.Results("Transcriptome", "transcriptome",
                                                 "transcriptome_database.fasta")
             transcriptome_results.rename_files()

@@ -9,7 +9,6 @@ from Bio import SeqIO
 from venn import venn
 
 
-
 class Metrics:
     def __init__(self, args):
         self.workingDir = os.getcwd()
@@ -19,7 +18,7 @@ class Metrics:
         self.args = args
         self.transcriptomeDir = f'{self.outdir}/Transcriptome'
         self.genomeDir = f'{self.outdir}/Genome'
-        self.maxsize = args.maxSize
+        self.maxsize = args.maxsize
         self.metricsDir = f'{self.outdir}/metrics'
         self.__check_dirs([self.metricsDir])
         self.RBS = {}

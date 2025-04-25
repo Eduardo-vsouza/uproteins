@@ -52,7 +52,7 @@ class GenomeReader(object):
         self.fasta = fasta
         self.orfs = []
         self.starts = starts
-        self.ends = ends
+        self.stops = ends
         self.sequence = []
         self.entries = []
         self.c_entries = []
@@ -81,19 +81,17 @@ class GenomeReader(object):
 
     def three_frame_tr(self, entries, sequences, strand):
         self.orfs = []
-        starts = self.starts.split(",")
-        stops = self.ends.split(",")
         for seq in tqdm(range(len(sequences))):
             orf_number = 0
             for i in range(len(sequences[seq])):
-                if sequences[seq][i:i + 3] in starts:
+                if sequences[seq][i:i + 3] in self.starts:
                     orf = ""
                     orf += sequences[seq][i:i + 3]
                     j = 3
                     cod = sequences[seq][i + j:i + 3 + j]
                     orf += cod
                     # if len(self.orfs) == 2000 or i == len(sequences[seq]):
-                    while cod not in stops and len(cod) == 3:
+                    while cod not in self.stops and len(cod) == 3:
                         # print(cod)
                         if j > len(sequences[seq]):
                             break
@@ -107,10 +105,10 @@ class GenomeReader(object):
                     # if orf[len(orf) - 3:] not in stops:
                     #     orf = ""
                     #
-                    if orf[-3:] not in stops:
+                    if orf[-3:] not in self.stops:
                         orf = ""
-                    for k in range(len(stops)):
-                        if orf.endswith(stops[k]):
+                    for k in range(len(self.stops)):
+                        if orf.endswith(self.stops[k]):
                             orf = orf[:-3]
 
                     if len(orf) >= self.args.minsize and len(orf) <= self.args.maxsize:

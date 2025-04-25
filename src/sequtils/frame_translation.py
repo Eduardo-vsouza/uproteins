@@ -15,7 +15,7 @@ class FrameTranslator(object):
         self.form = form
         self.frames = frames
         self.minSize = minsize
-        self.maxSize = maxsize
+        self.maxsize = maxsize
         self.orfs = []
 
     def read_genome(self):
@@ -151,7 +151,7 @@ class FrameTranslator(object):
 
     def __within_limits(self, orf):
         """ Checks if the predicted ORF is within the size constraints specified by 'minsize' and 'maxsize'. """
-        if self.minSize <= len(orf) <= self.maxSize:
+        if self.minSize <= len(orf) <= self.maxsize:
             return True
         else:
             return False

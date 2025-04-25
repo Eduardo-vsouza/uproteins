@@ -102,7 +102,7 @@ def run_workflow(args):
         # os.system(cmd_cat_entries)
         # genome_db.remove_entries()
         # genome_db.create_custom()
-        # if args.Transcriptome is not None:
+        # if args.transcriptome:
         #     print("\nGenome database generated. Now performing steps to generate the TRANSCRIPTOME database.\n")
         #     transcriptome_db = dg.Database("transcriptome_ORFs.fasta", args.proteome, "transcriptome")
         #     transcriptome_db.blast_to_Proteome()
@@ -115,19 +115,19 @@ def run_workflow(args):
         # print("Database generation step complete. Look for databases in %s" % args.outdir)
 
     elif mode == "ms":
-        #genome = ps.PeptideSearch("Genome", args.Mass_spec, "genome_database.fasta", args)
+        #genome = ps.PeptideSearch("Genome", args.mass_spec, "genome_database.fasta", args)
         #genome.peptide_identification()
         #genome_decoy = Decoy(db="genome_database.fasta", db_type="Genome")
         #genome_decoy.reverse_sequences().to_fasta()
-        #genome_decoy_search = ps.PeptideSearch("Genome", args.Mass_spec, "Percolator/Genome_decoy.fasta", args, decoy=True)
+        #genome_decoy_search = ps.PeptideSearch("Genome", args.mass_spec, "Percolator/Genome_decoy.fasta", args, decoy=True)
         #genome_decoy_search.peptide_identification()
         # genome.peptide_filtering()
-        if args.Transcriptome is not None:
-            transcriptome = ps.PeptideSearch("Transcriptome", args.Mass_spec, "transcriptome_database.fasta", args)
+        if args.transcriptome:
+            transcriptome = ps.PeptideSearch("Transcriptome", args.mass_spec, "transcriptome_database.fasta", args)
             transcriptome.peptide_identification()
             transcriptome_decoy = Decoy(db="transcriptome_database.fasta", db_type="Transcriptome")
             transcriptome_decoy.reverse_sequences().to_fasta()
-            transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", args.Mass_spec, "Percolator/Transcriptome_decoy.fasta", args, decoy=True)
+            transcriptome_decoy_search = ps.PeptideSearch("Transcriptome", args.mass_spec, "Percolator/Transcriptome_decoy.fasta", args, decoy=True)
             transcriptome_decoy_search.peptide_identification()
             # transcriptome.peptide_filtering()
 
@@ -135,7 +135,7 @@ def run_workflow(args):
         #genome_perc = PercolatorProcessing("Genome", filetype="genome")
         #genome_perc.create_metafiles().convert_to_pin()
         #genome_perc.percolate()
-        if args.Transcriptome is not None:
+        if args.transcriptome:
             rna_perc = PercolatorProcessing("Transcriptome", filetype="transcriptome")
             rna_perc.create_metafiles().convert_to_pin()
             rna_perc.percolate()
@@ -161,7 +161,7 @@ def run_workflow(args):
         #     genome_ncrnas = pms.GenomicContext(args, "genome", "Genome")
         #     genome_ncrnas.match_features()
         #     genome_ncrnas.add_to_df()
-        # if args.Transcriptome == "YES":
+        # if args.transcriptome:
         #     transcriptome_results = pms.Results("Transcriptome", "transcriptome",
         #                                         "transcriptome_database.fasta")
         #     transcriptome_results.rename_files()
@@ -209,7 +209,7 @@ def run_workflow(args):
     #     genome.Identify_ORFs()
     #     Cmd2 = 'Rscript replace_fr2.R'
     #     os.system(Cmd2)
-    #     if args.Transcriptome is not None:
+    #     if args.transcriptome:
     #         transcriptome = dg.OrfPrediction(args)
     #         Cmd_Replace_RNA = 'Rscript replace_RNA.R'
     #         os.system(Cmd_Replace_RNA)
@@ -219,7 +219,7 @@ def run_workflow(args):
     #     genome_db.blast_to_Proteome()
     #     genome_db.extract_entries()
     #     genome_db.remove_entries()
-    #     if args.Transcriptome is not None:
+    #     if args.transcriptome:
     #         print("\nGenome database generated. Now performing steps to generate the TRANSCRIPTOME database.\n")
     #         transcriptome_db = dg.Database("RNA_ORFs_replaced.fasta", args.proteome, "transcriptome")
     #         transcriptome_db.blast_to_Proteome()
@@ -229,7 +229,7 @@ def run_workflow(args):
     #     genome = ps.PeptideSearch("Genome", args.Mass_spec, "genome_database.fasta")
     #     genome.peptide_identification()
     #     genome.peptide_filtering()
-    #     if args.Transcriptome is not None:
+    #     if args.transcriptome:
     #         transcriptome = ps.PeptideSearch("Transcriptome", args.Mass_spec, "transcriptome_database.fasta")
     #         transcriptome.peptide_identification()
     #         transcriptome.peptide_filtering()
@@ -242,7 +242,7 @@ def run_workflow(args):
     #     genome.orf_pep_to_genome()
     #     genome.write_results()
     #     genome.add_pep_spec()
-    #     if args.Transcriptome is not None:
+    #     if args.transcriptome:
     #         transcriptome = pms.PostMS("Transcriptome", args.genome, "transcriptome")
     #         transcriptome.cluster_peptides()
     #         transcriptome.pep_to_fasta()
@@ -381,7 +381,7 @@ def run_workflow(args):
         genome = OrganizePlot(
             "Genome/Results/genome_unique_results_summarized.xls")
         genome.plot_data()
-        if args.Transcriptome is not None:
+        if args.transcriptome:
             rna = OrganizePlot("Transcriptome/Results/transcriptome_unique_results_summarized.xls")
             rna.plot_data()
             both = OrganizePlot("Genome/Results/Summarized_final_results.ods")
