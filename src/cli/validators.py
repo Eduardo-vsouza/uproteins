@@ -12,6 +12,20 @@ def validate_assembly(
     args: argparse.Namespace,
     parser: argparse.ArgumentParser
 ) -> None:
+    """Make sure that the assembly args were correctly given.
+
+    This function exists the cli with an error message if no read is present,
+    both a single read and any of --reads1 or --reads2 aer present, or if any
+    of --reads1 or --reads2 is present without the other.
+
+    Arguments
+    ---------
+    args : Namespace
+        The namespace containing the args, generated from the assembly parser.
+    parser : ArgumentParser
+        A reference to the assembly parser to invoke
+            :class:`ArgumentParser`.:func:`error` from.
+    """
     single_present = args.single is not None
     reads1_present = args.reads1 is not None
     reads2_present = args.reads2 is not None
@@ -26,7 +40,7 @@ def validate_assembly(
             '--reads1 and --reads2 must be given together'
         )
 
-    elif single_present and reads1_present or reads2_present:
+    elif single_present and (reads1_present or reads2_present):
         parser.error(
             'argument --single: '
             'not allowed with arguments --reads1 and --reads2'
@@ -37,6 +51,19 @@ def validate_database(
     args: argparse.Namespace,
     parser: argparse.ArgumentParser
 ) -> None:
+    """Make sure that the datanase args were correctly given.
+
+    This function exists the cli with an error message if either --external-gtf
+    or --external-transcriptome is given without the other.
+
+    Arguments
+    ---------
+    args : Namespace
+        The namespace containing the args, generated from the database parser.
+    parser : ArgumentParser
+        A reference to the database parser to invoke
+            :class:`ArgumentParser`.:func:`error` from.
+    """
     # This check only pass if one is None and the other isn't
     if (args.external_gtf is None) != (args.external_transcriptome is None):
         parser.error(

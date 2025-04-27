@@ -42,6 +42,19 @@ _modes = _parser.add_subparsers(
 _assembly_parser = _modes.add_parser('assembly')
 # Reserving '-s' for a future '--silently'
 _assembly_parser.add_argument(
+    "--genome", "-g",
+    help="Path to the reference genome.",
+    required=True,
+    type=_types.FilePath
+)
+_assembly_parser.add_argument(
+    "--gtf", "-G",
+    help="Path to the GTF file. It does not accept a GFF3 format. If you "
+    "only have a GFF file, convert it to GTF using gffread.",
+    required=True,
+    type=_types.FilePath
+)
+_assembly_parser.add_argument(
     '--single', '-S',
     nargs='+',
     type=_types.FilePath,
@@ -72,19 +85,6 @@ _assembly_parser.add_argument(
     "--threads",
     help="Number of threads to be used during parallel search.",
     type=int
-)
-_assembly_parser.add_argument(
-    "--genome", "-g",
-    help="Path to the reference genome.",
-    required=True,
-    type=_types.FilePath
-)
-_assembly_parser.add_argument(
-    "--gtf", "-G",
-    help="Path to the GTF file. It does not accept a GFF3 format. If you "
-    "only have a GFF file, convert it to GTF using gffread.",
-    required=True,
-    type=_types.FilePath
 )
 _assembly_parser.add_argument(
     "--gffcompare-path",

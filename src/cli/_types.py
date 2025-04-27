@@ -8,7 +8,6 @@ pertinent type and return it. Pathes are returned in their absolute forms.
 All functions can receive a None value, in which case they just return None.
 """
 
-import argparse
 import pathlib
 import shutil
 import re
@@ -24,7 +23,7 @@ def Executable(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
 
     which = shutil.which(val)
     if which is None:
-        raise argparse.ArgumentError
+        raise TypeError
     return pathlib.Path(which).absolute()
 
 
@@ -37,7 +36,7 @@ def FilePath(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
 
     path = pathlib.Path(val)
     if not (path.exists() and path.is_file()):
-        raise argparse.ArgumentError
+        raise TypeError
     return path.absolute()
 
 
@@ -52,8 +51,8 @@ def FileName(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
         return val
 
     path = pathlib.Path(val)
-    if path.is_file() or not path.exists():
-        raise argparse.ArgumentError
+    if path.exists() and not path.is_file():
+        raise TypeError
     return path.absolute()
 
 
@@ -66,7 +65,7 @@ def DirectoryPath(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
 
     path = pathlib.Path(val)
     if not (path.exists() and path.is_dir()):
-        raise argparse.ArgumentError
+        raise TypeError
     return path.absolute()
 
 
@@ -82,7 +81,7 @@ def DirectoryName(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
 
     path = pathlib.Path(val)
     if path.exists() and not path.is_dir():
-        raise argparse.ArgumentError
+        raise TypeError
     return path.absolute()
 
 
@@ -97,5 +96,5 @@ def Codon(val: t.Optional[str]) -> t.Optional[str]:
         return val
 
     if re.fullmatch(r'[ATCG]{3}', val) is None:
-        raise argparse.ArgumentError
+        raise TypeError
     return val
