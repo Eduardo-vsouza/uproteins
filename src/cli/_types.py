@@ -12,9 +12,10 @@ import argparse
 import pathlib
 import shutil
 import re
+import typing as t
 
 
-def Executable(val: str | None) -> pathlib.Path | None:
+def Executable(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
     """Receive a str path and raise an :exc:`ArgumentError` if the value is not
     a valid executable, else return a :obj:`Path` object.
     """
@@ -27,7 +28,7 @@ def Executable(val: str | None) -> pathlib.Path | None:
     return pathlib.Path(which).absolute()
 
 
-def FilePath(val: str | None) -> pathlib.Path | None:
+def FilePath(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
     """Receive a str path and raise an :exc:`ArgumentError` if the value is not
     the path to a file, else return a :obj:`Path` object.
     """
@@ -40,7 +41,7 @@ def FilePath(val: str | None) -> pathlib.Path | None:
     return path.absolute()
 
 
-def FileName(val: str | None) -> pathlib.Path | None:
+def FileName(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
     """Receive a str path and raise an :exc:`ArgumentError` if the value is not
     a filename, else return a :obj:`Path` object.
 
@@ -56,7 +57,7 @@ def FileName(val: str | None) -> pathlib.Path | None:
     return path.absolute()
 
 
-def DirectoryPath(val: str | None) -> pathlib.Path | None:
+def DirectoryPath(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
     """Receive a str path and raise an :exc:`ArgumentError` if the value is not
     a valid directory, else return a :obj:`Path` object.
     """
@@ -69,7 +70,7 @@ def DirectoryPath(val: str | None) -> pathlib.Path | None:
     return path.absolute()
 
 
-def DirectoryName(val: str | None) -> pathlib.Path | None:
+def DirectoryName(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
     """Receive a str path and raise an :exc:`ArgumentError` if the value is not
     a valid directoryname, else return a :obj:`Path` object.
 
@@ -85,7 +86,7 @@ def DirectoryName(val: str | None) -> pathlib.Path | None:
     return path.absolute()
 
 
-def Codon(val: str | None) -> str | None:
+def Codon(val: t.Optional[str]) -> t.Optional[str]:
     """Receive a str val and raise an :exc:`ArgumentError` if the value is not
     a valid codon, else return the str untouched.
 

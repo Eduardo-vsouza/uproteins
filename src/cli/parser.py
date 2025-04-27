@@ -1,4 +1,5 @@
 import argparse
+import sys
 import os
 import typing as t
 
@@ -425,9 +426,15 @@ def get_parsers() -> tuple[
     return _parser, subparsers
 
 
-def exit(status: int = 0, message: str | None = None) -> t.NoReturn:
+def exit(status: int = 0, message: t.Optional[str] = None) -> t.NoReturn:
     _parser.exit(status, message)
 
 
 def error(message: str) -> t.NoReturn:
+    """Print to stderr, then exit with return value 2."""
     _parser.error(message)
+
+
+def stderr(message: str, end: t.Optional[str]) -> None:
+    """Print to stderr."""
+    print(message, file=sys.stderr, end=end)
