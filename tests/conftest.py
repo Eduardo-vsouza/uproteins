@@ -31,29 +31,21 @@ def assembly_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
     <b>Equivalent to the command-line input:</b>
     .. code-block:: text
         --outdir tmp_path assembly --genome tmp_file --gtf tmp_file
-        --gffcompare py --gffread py
     """
-    tmp_path = str(tmp_path)
-    tmp_file = str(tmp_file)
-
     args = [
-        '--outdir', tmp_path,
+        '--outdir', str(tmp_path),
         'assembly',
-        '--genome', tmp_file,
-        '--gtf', tmp_file,
-        '--gffcompare', 'py',
-        '--gffread', 'py',
+        '--genome', str(tmp_file),
+        '--gtf', str(tmp_file),
     ]
 
     def reset():
         nonlocal args
         args = [
-            '--outdir', tmp_path,
+            '--outdir', str(tmp_path),
             'assembly',
-            '--genome', tmp_file,
-            '--gtf', tmp_file,
-            '--gffcompare', 'py',
-            '--gffread', 'py',
+            '--genome', str(tmp_file),
+            '--gtf', str(tmp_file),
         ]
 
     yield args
@@ -68,23 +60,20 @@ def database_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
     .. code-block:: text
         --outdir tmp_path database --genome tmp_file --proteome tmp_file
     """
-    tmp_path = str(tmp_path)
-    tmp_file = str(tmp_file)
-
     args = [
-        '--outdir', tmp_path,
+        '--outdir', str(tmp_path),
         'database',
-        '--genome', tmp_file,
-        '--proteome', tmp_file,
+        '--genome', str(tmp_file),
+        '--proteome', str(tmp_file),
     ]
 
     def reset():
         nonlocal args
         args = [
-            '--outdir', tmp_path,
+            '--outdir', str(tmp_path),
             'database',
-            '--genome', tmp_file,
-            '--proteome', tmp_file,
+            '--genome', str(tmp_file),
+            '--proteome', str(tmp_file),
         ]
 
     yield args

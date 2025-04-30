@@ -1,4 +1,5 @@
 import itertools
+import pathlib
 
 import pytest
 
@@ -86,32 +87,38 @@ class TestTypes:
         'ATGA'
     ]
 
-    def test_Executable(self, tmp_path):
-        _types.Executable('py')
+    def test_Executable(self, inexistent_path):
+        exec = _types.Executable('exec')
+        assert exec('exec') == pathlib.Path('exec')
         with pytest.raises(TypeError):
-            _types.Executable(str(tmp_path))
+            exec(str(inexistent_path))
 
     def test_DirectoryName(self, tmp_path, tmp_file, inexistent_path):
-        _types.DirectoryName(str(tmp_path))
-        _types.DirectoryName(str(inexistent_path))
+        assert _types.DirectoryName(str(tmp_path)) == tmp_path.absolute()
+        assert (
+            _types.DirectoryName(str(inexistent_path)) ==
+            inexistent_path.absolute()
+        )
         with pytest.raises(TypeError):
             _types.DirectoryName(str(tmp_file))
 
     def test_DirectoryPath(self, tmp_path, inexistent_path, tmp_file):
-        _types.DirectoryPath(str(tmp_path))
+        assert _types.DirectoryPath(str(tmp_path)) == tmp_path.absolute()
         with pytest.raises(TypeError):
             _types.DirectoryPath(str(inexistent_path))
         with pytest.raises(TypeError):
             _types.DirectoryPath(str(tmp_file))
 
     def test_FileName(self, tmp_path, inexistent_path, tmp_file):
-        _types.FileName(str(inexistent_path))
-        _types.FileName(str(tmp_file))
+        assert (
+            _types.FileName(str(inexistent_path)) == inexistent_path.absolute()
+        )
+        assert _types.FileName(str(tmp_file)) == tmp_file.absolute()
         with pytest.raises(TypeError):
             _types.FileName(str(tmp_path))
 
     def test_FilePath(self, tmp_path, inexistent_path, tmp_file):
-        _types.FilePath(str(tmp_file))
+        assert _types.FilePath(str(tmp_file)) == tmp_file.absolute()
         with pytest.raises(TypeError):
             _types.FilePath(str(inexistent_path))
         with pytest.raises(TypeError):
@@ -119,7 +126,7 @@ class TestTypes:
 
     @pytest.mark.parametrize('codon', codons)
     def test_Codon(self, codon):
-        _types.Codon(codon)
+        assert _types.Codon(codon) == codon
 
     @pytest.mark.parametrize('codon', bad_codons)
     def test_bad_Codon(self, codon):
