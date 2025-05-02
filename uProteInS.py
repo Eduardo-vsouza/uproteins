@@ -1,9 +1,10 @@
 #!/usr/bin/python3
+import typing as t
 
 from src import cli, main
 
 
-def uproteins():
+def uproteins(args: t.Optional[t.Sequence[str]] = None):
     try:
         from pyfiglet import Figlet
         f = Figlet()
@@ -12,7 +13,7 @@ def uproteins():
         pass
 
     parser, subparsers = cli.get_parsers()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     main.run_workflow(args, subparsers[args.mode])
 
 
