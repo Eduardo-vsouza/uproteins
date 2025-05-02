@@ -14,17 +14,48 @@ import re
 import typing as t
 
 
-def Executable(val: t.Optional[str]) -> t.Optional[pathlib.Path]:
-    """Receive a str path and raise an :exc:`ArgumentError` if the value is not
-    a valid executable, else return a :obj:`Path` object.
-    """
-    if val is None:
-        return val
+class Executable:
+    def __init__(self, default: t.Optional[str]) -> None:
+        """Executable type. This type is a callable class. Initialize it at the
+        type field with the default value. The type checking won't fail even
+        if it's not an Executable.
 
-    which = shutil.which(val)
-    if which is None:
-        raise TypeError
-    return pathlib.Path(which).absolute()
+        When called
+        -----------
+        Receive a str path and raise an :exc:`ArgumentError` if the value
+        is not a valid executable, else return a :obj:`Path` object.
+
+        Create an :obj:`Executable` with `'exec'` as default.
+        Passing 'exec' won't raise even if `'exec'` is not an executable.
+        >>> exec = Executable('exec')
+        >>> exec('exec')
+        Path('path/to/exec')
+
+        But passing another invalid executable raises.
+        >>> exec('foo')
+        TypeError
+
+        If the arg is a valid executable, it doesn't raise.
+        >>> exec('valid')
+        Path('path/to/valid.exe')
+        """
+        self.default = default
+
+    def __call__(self, val: t.Optional[str]) -> t.Optional[pathlib.Path]:
+        """Receive a str path and raise an :exc:`ArgumentError` if the value
+        is not a valid executable, else return a :obj:`Path` object.
+        """
+        if val is None:
+            return val
+
+        if val == self.default:
+            return pathlib.Path(val)
+
+        which = shutil.which(val)
+        if which is None:
+            raise TypeError
+
+        return pathlib.Path(which).absolute()
 
 
 def FilePath(val: t.Optional[str]) -> t.Optional[pathlib.Path]:

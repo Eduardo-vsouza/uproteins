@@ -91,14 +91,14 @@ _assembly_parser.add_argument(
     help="Path to gffcompare executable. If not provided, be sure to "
     "have it on your PATH, else the pipeline raises an error.",
     default='gffcompare',
-    type=_types.Executable
+    type=_types.Executable('gffcompare')
 )
 _assembly_parser.add_argument(
     "--gffread-path",
     help="Path to gffread executable. If not provided, be sure to "
     "have it on your PATH, else the pipeline raises an error.",
     default='gffread',
-    type=_types.Executable
+    type=_types.Executable('gffread')
 )
 _assembly_parser.add_argument(
     "--step",
