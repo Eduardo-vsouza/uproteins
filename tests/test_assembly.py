@@ -1,10 +1,6 @@
+import pathlib
+
 from src import uproteins, cli, assembly  # noqa: F401
-
-
-# TODO
-# def test_assembly(assembly_args, tmp_file):
-#     assembly_args += ['--single', str(tmp_file)]
-#     uproteins(assembly_args)
 
 
 def test_assembly_parser(assembly_args, tmp_file):
@@ -44,5 +40,7 @@ def test_assembly_mode(tmp_path):
         '--strandness', 'F',
     ]
     uproteins(args)
-    assert (tmp_path / 'assembled.gtf').is_file()
-    assert (tmp_path / 'transcripts.fasta').is_file()
+    assembled: pathlib.Path = tmp_path / 'assembled.gtf'
+    transcripts: pathlib.Path = tmp_path / 'HISAT' / 'transcripts.fasta'
+    assert assembled.is_file()
+    assert transcripts.is_file()

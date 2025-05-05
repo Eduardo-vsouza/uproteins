@@ -36,7 +36,7 @@ class ReadMapper:
         return False
 
     def create_indexes(self):
-        cmd_index = f'hisat2-build {self.genome} genome'
+        cmd_index = f'hisat2-build {self.genome} genome'.split(' ')
         result = subprocess.run(cmd_index)
         if (code := result.returncode) != 0:
             err = f'hisat2-build finished with non-zero return value: {code}'
@@ -65,7 +65,7 @@ class ReadMapper:
             cmd_hisat = (
                 f'hisat2 -x genome {hisat_input} --dta {hisat_strandness} '
                 f'-S HISAT/sam/{read_name}.sam'
-            )
+            ).split(' ')
 
             result = subprocess.run(cmd_hisat)
             if (code := result.returncode) != 0:
@@ -81,7 +81,7 @@ class ReadMapper:
         pathlib.Path("HISAT/bam").mkdir(exist_ok=True, parents=True)
 
         # run samtools view and pipe it to samtools sort
-        cmd_view = f'samtools view -Su HISAT/sam/{read_name}.sam'
+        cmd_view = f'samtools view -Su HISAT/sam/{read_name}.sam'.split(' ')
         view_result = subprocess.run(
             cmd_view,
             stdout=subprocess.PIPE,
@@ -90,7 +90,7 @@ class ReadMapper:
             err = f'samtools view finished with non-zero return value: {code}'
             cli.exit(3, err)
 
-        cmd_sort = f'samtools sort -o HISAT/bam/{read_name}.bam'
+        cmd_sort = f'samtools sort -o HISAT/bam/{read_name}.bam'.split(' ')
         sort_result = subprocess.run(
             cmd_sort,
             input=view_result.stdout,
@@ -131,7 +131,7 @@ class TranscriptAssembly:
                 f'StringTie/gtf_intermediates/{file[:-3]}gtf -p '
                 f'{self.threads} -G {self.gtf} {self.strandness}-l uproteins '
                 '-m 30 -A StringTie/gene_abundances.txt'
-            )
+            ).split(' ')
             result = subprocess.run(cmd_str)
             if (code := result.returncode) != 0:
                 err = f'stringtie finished with non-zero return value: {code}'
@@ -152,7 +152,7 @@ class TranscriptAssembly:
         cmd_str = (
             'stringtie --merge StringTie/gtf_list.txt -o assembled.gtf -G '
             f'{self.gtf} -m 30 -l uproteins'
-        )
+        ).split(' ')
         result = subprocess.run(cmd_str)
         if (code := result.returncode) != 0:
             err = f'stringtie finished with non-zero return value: {code}'
@@ -174,7 +174,7 @@ class CompareTranscripts:
         shutil.copy(self.args.genome, './genome.fasta')
 
     def index_genome(self):
-        cmd_sam = 'samtools faidx genome.fasta'
+        cmd_sam = 'samtools faidx genome.fasta'.split(' ')
         result = subprocess.run(cmd_sam)
         if (code := result.returncode) != 0:
             err = f'samtools faidx finished with non-zero status code: {code}'
@@ -186,7 +186,7 @@ class CompareTranscripts:
             f'{self.gffcompare_path} -r {self.args.gtf} '
             f'{self.assembled_gtf} -o '
             'RNA_comparisons/compared_assembly -s genome.fasta'
-        )
+        ).split(' ')
         result = subprocess.run(cmd_compare)
         if (code := result.returncode) != 0:
             err = f'gffcompare finished with non-zero return code: {code}'
@@ -197,7 +197,7 @@ class CompareTranscripts:
         cmd_read = (
             f'{self.gffread_path} -w HISAT/transcripts.fasta -g '
             f'genome.fasta {self.assembled_gtf}'
-        )
+        ).split(' ')
         result = subprocess.run(cmd_read)
         if (code := result.returncode) != 0:
             err = f'gffread finished with non-zero return code: {code}'
