@@ -1,12 +1,10 @@
-import importlib.resources
 import pathlib
-from importlib import resources
+from importlib import resources as rsrc
 
 import pandas as pd
 
 from src import uproteins, cli, assembly  # noqa: F401
-from tests.resources import results
-from tests.resources.results import HISAT
+from tests import resources
 
 
 def test_assembly_parser(assembly_args, tmp_file):
@@ -49,13 +47,16 @@ def test_assembly_mode(tmp_path):
     assembled_path: pathlib.Path = tmp_path / 'assembled.gtf'
     transcripts_path: pathlib.Path = tmp_path / 'HISAT' / 'transcripts.fasta'
 
+    # Make sure the expected files exist
     assert assembled_path.is_file()
     assert transcripts_path.is_file()
 
-    with resources.path(results, 'assembled.gtf') as ok_assembled_path:
+    # Make sure they have the expected results
+    with rsrc.path(resources, 'results') as results:
+        ok_assembled_path = results / 'assembled.gtf'
+        ok_transcripts_path = results / 'HISAT' / 'transcripts.fasta'
+
         assembled = pd.read_csv(assembled_path, comment='#', header=1)
         ok_assembled = pd.read_csv(ok_assembled_path, comment='#', header=1)
         assert assembled.equals(ok_assembled)
-    
-    with resources.path(HISAT, 'transcripts.fasta') as ok_transcripts_path:
         assert transcripts_path.read_text() == ok_transcripts_path.read_text()
