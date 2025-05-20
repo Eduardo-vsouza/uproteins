@@ -37,7 +37,10 @@ def test_assembly_mode(tmp_path):
     args = [
         '--outdir', str(tmp_path),
         'assembly',
-        '--single', 'tests/resources/testing_reads.fastq',
+        '--single',
+            'tests/resources/ERR262980.fastq',
+            'tests/resources/ERR262982.fastq',
+            'tests/resources/ERR262983.fastq',
         '--genome', 'tests/resources/testing_genome.fasta',
         '--gtf', 'tests/resources/test_gtf.gtf',
         '--strandness', 'F',
