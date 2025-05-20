@@ -41,8 +41,8 @@ def test_assembly_mode(tmp_path):
             'tests/resources/ERR262980.fastq',
             'tests/resources/ERR262982.fastq',
             'tests/resources/ERR262983.fastq',
-        '--genome', 'tests/resources/testing_genome.fasta',
-        '--gtf', 'tests/resources/test_gtf.gtf',
+        '--genome', 'tests/resources/genome.fasta',
+        '--gtf', 'tests/resources/mtb.gtf',
         '--strandness', 'F',
     ]
     uproteins(args)
