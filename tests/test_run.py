@@ -58,20 +58,28 @@ def test_full_run(tmp_path):
 
     # Paths to the output
     genome_pre: pathlib.Path = (
-        tmp_path / 'Genome' / 'genome_pre_validation_results.txt'
+        tmp_path
+        / 'Genome'
+        / 'Results'
+        / 'genome_pre_validation_results.txt'
     )
     genome_post: pathlib.Path = (
-        tmp_path / 'Genome' / 'genome_post_validation_results.txt'
+        tmp_path
+        / 'Genome'
+        / 'Results'
+        / 'genome_post_validation_results.txt'
     )
     
     transcriptome_pre: pathlib.Path = (
         tmp_path
         / 'Transcriptome'
+        / 'Results'
         / 'transcriptome_pre_validation_results.txt'
     )
     transcriptome_post: pathlib.Path = (
         tmp_path
         / 'Transcriptome'
+        / 'Results'
         / 'transcriptome_post_validation_results.txt'
     )
 
@@ -86,22 +94,26 @@ def test_full_run(tmp_path):
         ok_genome_pre = (
             results
             / 'Genome'
+            / 'Results'
             / 'genome_pre_validation_results.txt'
         )
         ok_genome_post = (
             results
             / 'Genome'
+            / 'Results'
             / 'genome_post_validation_results.txt'
         )
         
         ok_transcriptome_pre = (
             results
             / 'Transcriptome'
+            / 'Results'
             / 'transcriptome_pre_validation_results.txt'
         )
         ok_transcriptome_post = (
             results
             / 'Transcriptome'
+            / 'Results'
             / 'transcriptome_post_validation_results.txt'
         )
 

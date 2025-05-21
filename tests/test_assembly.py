@@ -59,7 +59,24 @@ def test_assembly_mode(tmp_path):
         ok_assembled_path = results / 'assembled.gtf'
         ok_transcripts_path = results / 'HISAT' / 'transcripts.fasta'
 
-        assembled = pd.read_csv(assembled_path, comment='#', header=1)
-        ok_assembled = pd.read_csv(ok_assembled_path, comment='#', header=1)
+        # Down the pipeline, the assembled file has the column labels inserted
+        # into it. For the equals method to work, we need those labels.
+        assembled = pd.read_csv(
+            assembled_path,
+            comment='#',
+            names=[
+                'seqname',
+                'source',
+                'feature',
+                'start',
+                'end',
+                'score',
+                'strand',
+                'frame',
+                'attributes'
+            ],
+            sep='\t'
+        )
+        ok_assembled = pd.read_csv(ok_assembled_path, comment='#', sep='\t')
         assert assembled.equals(ok_assembled)
         assert transcripts_path.read_text() == ok_transcripts_path.read_text()
