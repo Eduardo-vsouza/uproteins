@@ -34,15 +34,21 @@ def test_read_type(assembly_args, tmp_file):
 
 
 def test_assembly_mode(tmp_path):
+    genome = rsrc.files(resources).joinpath("genome.fasta")
+    gtf = rsrc.files(resources).joinpath("mtb.gtf")
+    read1 = rsrc.files(resources).joinpath("ERR262980.fastq")
+    read2 = rsrc.files(resources).joinpath("ERR262982.fastq")
+    read3 = rsrc.files(resources).joinpath("ERR262983.fastq")
+
     args = [
         '--outdir', str(tmp_path),
         'assembly',
         '--single',
-            'tests/resources/ERR262980.fastq',
-            'tests/resources/ERR262982.fastq',
-            'tests/resources/ERR262983.fastq',
-        '--genome', 'tests/resources/genome.fasta',
-        '--gtf', 'tests/resources/mtb.gtf',
+            str(read1),
+            str(read2),
+            str(read3),
+        '--genome', str(genome),
+        '--gtf', str(gtf),
         '--strandness', 'F',
     ]
     uproteins(args)
