@@ -13,8 +13,8 @@ def uproteins(args: t.Optional[t.Sequence[str]] = None):
         pass
 
     parser, subparsers = cli.get_parsers()
-    args = parser.parse_args(args)
-    main.run_workflow(args, subparsers[args.mode])
+    args_namespace = parser.parse_args(args)
+    main.run_workflow(args_namespace, subparsers[args_namespace.mode])
 
 
 if __name__ == "__main__":
