@@ -34,7 +34,7 @@ class PeptideSearch(object):
         #                  % (sys.path[0], arg_string, os.path.abspath(self.orf_file), self.ms_files_folder)
         # os.system(cmd_pep_search)
         self.loop_search()
-        cmd_move = 'mv %s*/.mzid %s/' % (self.ms_files_folder, self.database_type)
+        cmd_move = 'mv %s/*.mzid %s/' % (self.ms_files_folder, self.database_type)
         os.system(cmd_move)
 
     def loop_search(self):
@@ -47,23 +47,23 @@ class PeptideSearch(object):
         self._check_folder()
         output = ""
         if self.decoy:
-            output = f" -o {self.args.Mass_spec}/{file}_decoy.mzid"
+            output = f" -o {self.args.mass_spec}/{file}_decoy.mzid"
         ms_args = ""
-        item_list = [None, "Mass_spec", "outdir", "Transcriptome", "mode", 'skip_assembly', 'skip_db', 'skip_ms',
-                     'skip_postms', 'skip_validation', 'gtf', 'single', 'reads1', 'reads2', 'strandness', 'gff_compare_path',
+        item_list = [None, "mass_spec", "outdir", "transcriptome", "mode", 'skip_assembly', 'skip_db', 'skip_ms',
+                     'skip_postms', 'skip_validation', 'gtf', 'single', 'reads1', 'reads2', 'strandness', 'gffcompare_path',
                      'gffread_path', 'genome', 'proteome', 'minsize', 'maxsize', 'starts', 'stops', 'threads']
         for arg in vars(self.args).items():
             if arg[0] not in item_list and arg[1] is not None:
                 ms_args += f" -{arg[0]} {arg[1]}"
         db = os.path.abspath(self.orf_file)
-        cmd = f'java -Xmx12G -jar {self.path}/dependencies/MSGF/MSGFPlus.jar -d {db}{output} -tda 0 -s {os.path.abspath(self.args.Mass_spec)}/{file} -addFeatures 1{ms_args}'
+        cmd = f'java -Xmx48G -jar {self.path}/dependencies/MSGF/MSGFPlus.jar -d {db}{output} -tda 0 -s {self.args.mass_spec}/{file} -addFeatures 1{ms_args}'
         os.system(cmd)
         return self
 
     def _check_folder(self):
         if not os.path.exists('mzid'):
             os.system('mkdir mzid')
-        if self.args.Transcriptome == 'YES' and not os.path.exists('mzid/Transcriptome'):
+        if self.args.transcriptome and not os.path.exists('mzid/Transcriptome'):
             os.system('mkdir mzid/Transcriptome')
         if not os.path.exists('mzid/Genome'):
             os.system('mkdir mzid/Genome')

@@ -5,7 +5,7 @@ class LinkData(object):
     def __init__(self, cat_msgf, peptide):
         """ cat_msgf is a table cointaining the concatenated MSGF plus results, after converting them from mzID to
         tsv. Peptide is the table containing the percolator output, after aplying the UTP identification method. """
-        pd.set_option('max_columns', None)
+        pd.set_option('display.max_columns', None)
 
         self.catDataFrame = pd.read_csv(cat_msgf, sep="\t")
         self.catDataFrame.columns = ['SpecFile', 'SpecID', 'ScanNum', 'FragMethod',	'Precursor', 'IsotopeError',

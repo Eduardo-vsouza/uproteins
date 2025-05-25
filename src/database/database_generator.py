@@ -74,7 +74,7 @@ class OrfPrediction(object):
         genome.three_frame_tr(genome.entries, genome.sequence, "+")
         genome.three_frame_tr(genome.c_entries, genome.c_seqs, "-")
         genome.translate()
-        if self.args.Transcriptome is not None:
+        if self.args.transcriptome:
             transcriptome = tr("trinity/Trinity.fasta", starts=self.args.starts, ends=self.args.ends,
                                             filetype="transcriptome", args=self.args)
             transcriptome.get_sequence()
@@ -92,7 +92,7 @@ class OrfPrediction(object):
     #         tab = self.args.table
     #     if self.args.circular is not None:
     #         circ = self.args.circular
-    #     if self.args.Transcriptome is not None:
+    #     if self.args.transcriptome:
     #         Cmd_T_2 = 'getorf -sequence trinity/Trinity.fasta -outseq primary_RNA_ORFs.fasta -table %s -scircular1 NO ' \
     #                   '-find 1 -methionine NO -reverse NO -minsize 10 -maxsize %s' % (tab, max_size)
     #         os.system(Cmd_T_2)

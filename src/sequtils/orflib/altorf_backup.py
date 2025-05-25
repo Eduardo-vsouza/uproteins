@@ -8,7 +8,7 @@ from ..conversion import Translator
 class AltCodons(object):
     def __init__(self, file, genome, maxsize):
         """ I hate this code """
-        self.maxSize = maxsize
+        self.maxsize = maxsize
         self.df = pd.read_csv(file, sep='\t')
         self.coordinates = self.df["Genome Coordinates"].tolist()
         self.names = self.df["Protein"].tolist()
@@ -180,7 +180,7 @@ class AltCodons(object):
                         # print(s_codon)
                         real_start = self.genome_seq[0][alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
                         # at the STOP codon, the real START codon should be 3 nucleotides downstream from that STOP
-                        if real_start in args.starts.split(","):
+                        if real_start in args.starts:
                             extended = real_start
                             position = alt.start - i
 
@@ -188,7 +188,7 @@ class AltCodons(object):
                             # print('forward_seq')
                             # new_alts  = self.__check_length(seq, alt, new_alts, i)
                             self.__add_extended(new_alts, position, alt, extended, seq)
-                        if s_codon in args.stops.split(","):
+                        if s_codon in args.stops:
                             extend = False
 
                             if extended != 'same':
@@ -211,12 +211,12 @@ class AltCodons(object):
                         # print(ex_start)
                         i += 3
                         # print(f'codon: {ex_codon}')
-                        if ex_codon in args.starts.split(","):
+                        if ex_codon in args.starts:
                             # new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
                             self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq, start_pos=alt.start +i-6)
                             # print(alt.start+i-3, alt.end)
                             # print(ex_seq)
-                        if ex_codon in args.stops.split(","):
+                        if ex_codon in args.stops:
                             extend = False
 
 
@@ -239,7 +239,7 @@ class AltCodons(object):
                     #         real_start += nucs[nuc]
                     #     print(real_start)
                     #
-                    #     if real_start in args.starts.split(","):
+                    #     if real_start in args.starts:
                     #         extended = real_start
                     #         position = alt.start - i
                     #         extended = real_start
@@ -254,9 +254,9 @@ class AltCodons(object):
                     #         print(seq)
                     #         new_alts, extend = self.__check_length(seq, alt, new_alts, i)
                     #         self.__add_extended(new_alts, position, alt, extended, seq)
-                    #     if real_start in args.starts.split(","):
+                    #     if real_start in args.starts:
                     #         ...
-                    #     if s_codon in args.stops.split(","):
+                    #     if s_codon in args.stops:
                     #         print(f'stop: {s_codon}')
                     #         extend = False
                     #         print(f'real start: {real_start}')
@@ -291,7 +291,7 @@ class AltCodons(object):
 
     def __check_length(self, seq, alt, new_alts, i):
         # extend = True
-        if i > self.maxSize:
+        if i > self.maxsize:
             # extend = False
             orf = ORF(name='Discard', end=alt.end, start=alt.start, seq=seq, strand=alt.strand)
             orf.shineDalgarno = alt.shineDalgarno

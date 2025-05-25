@@ -66,7 +66,7 @@ class PostPercolator(object):
         """ Adds MSGF info to percolator's output. """
         print('Adding MSGF info\n')
         os.system(f'cat {self.folder}/tsv_msgf/*.tsv > {self.percDir}/{self.filetype}_search.tsv')
-        if self.args.Transcriptome == "YES" and self.filetype == 'transcriptome':
+        if self.args.transcriptome and self.filetype == 'transcriptome':
             chunks = TSVChunks(folder='Transcriptome', filetype='transcriptome')
             chunks.filter_search()
         if self.filetype == 'genome':

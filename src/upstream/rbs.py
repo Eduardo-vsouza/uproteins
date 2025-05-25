@@ -58,7 +58,15 @@ class SDInspection(object):
                         # self.transcripts = transcripts
             for i in torfs:
                 orf = torfs[i]
-                orf.transcript = transcripts[orf.name]
+                if 'gene' in orf.name:
+                    name = orf.name[5:]
+                elif 'rna' in orf.name:
+                    name = orf.name[4:]
+                else:
+                    splat = orf.name.split(".")
+                    # name = f'{splat[0]}.{splat[1]}'
+                    name = '.'.join(splat[:2])
+                orf.transcript = transcripts[name]
                 self.tORFs[orf.name] = orf
         return self
 

@@ -10,6 +10,7 @@ class SequenceFinder(object):
         self.df = self.df[self.df["Protein"].str.contains("contaminant", regex=False) == False]
         self.df = self.df[self.df["Protein"].str.contains("lcl|", regex=False) == False]
         self.df = self.df[self.df["Protein"].str.contains("decoy", regex=False) == False]
+        self.df = self.df[self.df["Protein"].str.contains("sp|", regex=False) == False]
         self.proteins = self.df["Protein"].tolist()
         self.fasta = fasta_db
         self.proteinDict = self.__get_db_proteins()
@@ -19,7 +20,7 @@ class SequenceFinder(object):
         records = SeqIO.parse(self.fasta, 'fasta')
         for record in records:
             if record.description not in protein_dict:
-                protein_dict[record.description] = record.seq
+                protein_dict[record.description.split(" ")[0]] = record.seq
         return protein_dict
 
     def df_proteins(self):
@@ -29,13 +30,13 @@ class SequenceFinder(object):
             seq_set = ""
             for protein in protein_set:
                 if 'decoy' not in protein:
-                    print(protein)
+                    # print(protein)
                     # if ')' not in protein:
-                    pos = protein.rfind("(")
+                    pos = protein.rfind("(pre")
                     fixed = protein[:pos]
                     # fixed = protein
                     seq = self.proteinDict[fixed]
-                    print(seq)
+                    # print(seq)
                     if len(seq_set) > 0:
                         seq_set += f",{seq}"
                     else:

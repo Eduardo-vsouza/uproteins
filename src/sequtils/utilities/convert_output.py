@@ -84,7 +84,7 @@ class PercolatorConverter(object):
                     proteins = sep.join(proteins)
                     proteins = proteins.rstrip()
                     ids.append(proteins)
-        print(self.dataFrame)
+        # print(self.dataFrame)
         self.dataFrame.insert(5, "proteinIds", ids)
 
     def convert_entries(self, sep='\t', **kwargs):

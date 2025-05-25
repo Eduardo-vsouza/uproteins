@@ -124,7 +124,6 @@ class ReadingFrame(object):
         return reading_frame
 
 
-
 def find_orfs_rfs(file, genome, filetype):
     with open(genome, 'r') as genome_file:
 

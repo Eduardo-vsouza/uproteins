@@ -13,7 +13,7 @@ class AltCodons(object):
         self.subset = subset
         self.testing = testing
         self.tORFs = self.__check_transcriptome(transcriptome_gff, assembly)
-        self.maxSize = maxsize
+        self.maxsize = maxsize
         self.df = pd.read_csv(file, sep='\t')
         self.__check_testing()
         self.coordinates = self.df["Genome Coordinates"].tolist()
@@ -44,14 +44,25 @@ class AltCodons(object):
             self.subset = "Transcriptome"
             assembly = TranscriptExtractor(assembly=transcripts_fasta)
             transcripts = assembly.get_transcripts()
+            # print(transcripts)
             gff = StringTieGFF(gff)
             orf_dict = gff.get_dict()
+            # print(orf_dict)
             for gene in orf_dict:
                 orf = orf_dict[gene]
-                print(orf, orf.name)
+                # print(orf, orf.name)
 
                 # orf.transcript = transcripts[orf.name]
-                orf.transcript = transcripts[orf.name]
+                if 'uproteins' in orf.name:
+                    rna = '.'.join(orf.name.split(".")[:2])
+                    print(rna)
+                elif 'gene' in orf.name:
+                    rna = orf.name[5:]
+                elif 'rna' in orf.name:
+                    rna = orf.name[4:]
+                else:
+                    rna = orf.name
+                orf.transcript = transcripts[rna]
 
             return orf_dict
 
@@ -68,14 +79,18 @@ class AltCodons(object):
         return int(start), int(end), strand
 
     def __get_transcript_name(self, entry):
+        # print(entry)
         gene = entry.split("_")[1]
         if 'gene' in gene:
-            name = gene[5:]
+            # name = gene[5:]
+            name = gene
         elif 'rna' in gene:
-            name = gene[4:]
+            # name = gene[4:]
+            name = gene
         else:
             splat = gene.split(".")
-            name = f'{splat[0]}.{splat[1]}'
+            # name = f'{splat[0]}.{splat[1]}'
+            name = '.'.join(splat[:2])
         return name
 
     def __get_transcript_coordinates(self, entry):
@@ -107,6 +122,8 @@ class AltCodons(object):
                 strand = 'forward'
                 # print(name)
                 # print(self.tORFs)
+                # print(self.tORFs)
+                # print(name)
                 transcript = self.tORFs[name].transcript
                 # print(transcript)
             if strand == 'forward':
@@ -282,7 +299,7 @@ class AltCodons(object):
                         # print(s_codon)
                         real_start = sequence[alt.start + 2 - i: alt.start - i + 5]  # as we stop the loop
                         # at the STOP codon, the real START codon should be 3 nucleotides downstream from that STOP
-                        if real_start in args.starts.split(","):
+                        if real_start in args.starts:
                             extended = real_start
                             position = alt.start - i
                             # print('transcript:', alt.transcriptName, transcript)
@@ -294,7 +311,7 @@ class AltCodons(object):
                             self.__add_extended(new_alts, position, alt, extended, seq, transcript=transcript,
                                                 transcript_name=alt.transcriptName)
 
-                        if s_codon in args.stops.split(","):
+                        if s_codon in args.stops:
                             extend = False
 
                             if extended != 'same':
@@ -318,13 +335,13 @@ class AltCodons(object):
                         # print(ex_start)
                         i += 3
                         # print(f'codon: {ex_codon}')
-                        if ex_codon in args.starts.split(","):
+                        if ex_codon in args.starts:
                             # new_alts = self.__check_length(alt=alt, new_alts=new_alts, i=i, seq=ex_seq)
                             self.__add_extended(alt=alt, new_alts=new_alts, s_codon=ex_codon, seq=ex_seq,
                                                 start_pos=alt.start +i-6, transcript=transcript)
                             # print(alt.start+i-3, alt.end)
                             # print(ex_seq)
-                        if ex_codon in args.stops.split(","):
+                        if ex_codon in args.stops:
                             extend = False
 
                     # i = 6
@@ -346,7 +363,7 @@ class AltCodons(object):
                     #         real_start += nucs[nuc]
                     #     print(real_start)
                     #
-                    #     if real_start in args.starts.split(","):
+                    #     if real_start in args.starts:
                     #         extended = real_start
                     #         position = alt.start - i
                     #         extended = real_start
@@ -361,9 +378,9 @@ class AltCodons(object):
                     #         print(seq)
                     #         new_alts, extend = self.__check_length(seq, alt, new_alts, i)
                     #         self.__add_extended(new_alts, position, alt, extended, seq)
-                    #     if real_start in args.starts.split(","):
+                    #     if real_start in args.starts:
                     #         ...
-                    #     if s_codon in args.stops.split(","):
+                    #     if s_codon in args.stops:
                     #         print(f'stop: {s_codon}')
                     #         extend = False
                     #         print(f'real start: {real_start}')
@@ -400,7 +417,7 @@ class AltCodons(object):
     def __check_length(self, seq, alt, new_alts, i):
         """ Deprecated """
         # extend = True
-        if i > self.maxSize:
+        if i > self.maxsize:
             # extend = False
             orf = ORF(name='Discard', end=alt.end, start=alt.start, seq=seq, strand=alt.strand)
             orf.shineDalgarno = alt.shineDalgarno

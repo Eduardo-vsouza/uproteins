@@ -98,5 +98,3 @@ class Adjacent(object):
 #                 loci.append(str(feature.location))
 #                 names.append(feature.qualifiers.get("product"))
 #
-
-
