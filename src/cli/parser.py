@@ -18,7 +18,7 @@ _parser = argparse.ArgumentParser(
 _parser.add_argument(
     '-V', '--version',
     action='version',
-    version='%(prog)s 1.3.2 (GPL-3.0-or-later)'
+    version='%(prog)s 1.4.0 (GPL-3.0-or-later)'
 )
 
 _parser.add_argument(
