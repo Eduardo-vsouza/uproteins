@@ -1,3 +1,4 @@
+import argparse
 import itertools
 import pathlib
 
@@ -44,7 +45,11 @@ def good_validate_assembly(request, assembly_args, tmp_file):
     return args
 
 
-@pytest.fixture(params=[['--external-transcriptome'], ['--external-gtf']])
+@pytest.fixture(params=[
+    ['--external-transcriptome'],
+    ['--external-gtf'],
+    ['--starts', 'ATC,ATG', '--stops', 'ATA,ATG']
+])
 def bad_validate_database(request, database_args, tmp_file):
     args = database_args
     tmp_file = str(tmp_file)
@@ -55,7 +60,13 @@ def bad_validate_database(request, database_args, tmp_file):
     return args
 
 
-@pytest.fixture(params=[[], ['--external-gtf', '--external-transcriptome']])
+@pytest.fixture(params=[
+    [],
+    ['--external-gtf', '--external-transcriptome'],
+    ['--starts', 'ATC'],
+    ['--stops', 'ATC'],
+    ['--starts', 'ATC', '--stops', 'ATG'],
+])
 def good_validate_database(request, database_args, tmp_file):
     args = database_args
     tmp_file = str(tmp_file)
@@ -86,6 +97,8 @@ class TestTypes:
         'AA',
         'ATGA'
     ]
+    yes = ['yes'[:i] for i in range(1, 4)] + ['YES'[:i] for i in range(1, 4)]
+    no = ['no'[:i] for i in range(1, 3)] + ['NO'[:i] for i in range(1, 3)]
 
     def test_Executable(self, inexistent_path):
         exec = _types.Executable('exec')
@@ -132,6 +145,39 @@ class TestTypes:
     def test_bad_Codon(self, codon):
         with pytest.raises(TypeError):
             _types.Codon(codon)
+
+    def test_CommaList(self, tmp_path, inexistent_path):
+        DirList = _types.CommaList(_types.DirectoryPath)
+        path_list = DirList(str(tmp_path) + ',' + str(tmp_path))
+        assert path_list is not None
+        for path in path_list:
+            assert path == tmp_path.absolute()
+        with pytest.raises(argparse.ArgumentTypeError):
+            DirList(str(tmp_path) + ',' + str(inexistent_path))
+
+    @pytest.mark.parametrize('yes', yes)
+    def test_yes_YesOrNoBooleanAction(self, yes):
+        parser = argparse.ArgumentParser()
+        namespace = argparse.Namespace()
+        yes_or_no = _types.YesOrNoBooleanAction('act', 'act')
+        yes_or_no(parser, namespace, yes)
+        assert namespace.act
+
+    @pytest.mark.parametrize('no', no)
+    def test_no_YesOrNoBooleanAction(self, no):
+        parser = argparse.ArgumentParser()
+        namespace = argparse.Namespace()
+        yes_or_no = _types.YesOrNoBooleanAction('act', 'act')
+        yes_or_no(parser, namespace, no)
+        assert not namespace.act
+
+    def test_bad_YesOrNoBooleanAction(self):
+        parser = argparse.ArgumentParser()
+        namespace = argparse.Namespace()
+        yes_or_no = _types.YesOrNoBooleanAction('act', 'act')
+        with pytest.raises(SystemExit) as excinfo:
+            yes_or_no(parser, namespace, 'B')
+        assert excinfo.value.code == 2
 
 
 class TestValidate:

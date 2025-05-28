@@ -30,9 +30,10 @@ def assembly_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
 
     <b>Equivalent to the command-line input:</b>
     .. code-block:: text
-        --outdir tmp_path assembly --genome tmp_file --gtf tmp_file
+        assembly --outdir tmp_path --genome tmp_file --gtf tmp_file
     """
     args = [
+        'assembly',
         '--outdir', str(tmp_path),
         'assembly',
         '--genome', str(tmp_file),
@@ -42,8 +43,8 @@ def assembly_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
     def reset():
         nonlocal args
         args = [
-            '--outdir', str(tmp_path),
             'assembly',
+            '--outdir', str(tmp_path),
             '--genome', str(tmp_file),
             '--gtf', str(tmp_file),
         ]
@@ -58,11 +59,11 @@ def database_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
 
     <b>Equivalent to the command-line input:</b>
     .. code-block:: text
-        --outdir tmp_path database --genome tmp_file --proteome tmp_file
+        database --outdir tmp_path --genome tmp_file --proteome tmp_file
     """
     args = [
-        '--outdir', str(tmp_path),
         'database',
+        '--outdir', str(tmp_path),
         '--genome', str(tmp_file),
         '--proteome', str(tmp_file),
     ]
@@ -70,8 +71,8 @@ def database_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
     def reset():
         nonlocal args
         args = [
-            '--outdir', str(tmp_path),
             'database',
+            '--outdir', str(tmp_path),
             '--genome', str(tmp_file),
             '--proteome', str(tmp_file),
         ]

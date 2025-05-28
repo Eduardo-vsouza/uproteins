@@ -10,7 +10,7 @@ def uproteins(args: t.Optional[t.Sequence[str]] = None):
         f = Figlet()
         print(f.renderText('uProteInS'))
     except ModuleNotFoundError:
-        pass
+        print('uProteInS')
 
     parser, subparsers = cli.get_parsers()
     args_namespace = parser.parse_args(args)

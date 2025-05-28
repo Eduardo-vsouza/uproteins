@@ -17,8 +17,8 @@ def test_full_run(tmp_path):
     rrna = rsrc.files(resources).joinpath("rrna.fna")
 
     assembly_args = [
-        '--outdir', str(tmp_path),
         'assembly',
+        '--outdir', str(tmp_path),
         '--single',
             str(read1),  # noqa: E131
             str(read2),  # noqa: E131
@@ -30,36 +30,36 @@ def test_full_run(tmp_path):
     uproteins(assembly_args)
 
     database_args = [
-        '--outdir', str(tmp_path),
         'database',
+        '--outdir', str(tmp_path),
         '--genome', str(genome),
         '--proteome', str(proteome),
-        '--starts', 'ATG', 'GTG', 'TTG', 'CTG',
+        '--starts', 'ATG,GTG,TTG,CTG',
         '--minsize', '30',
         '--maxsize', '300',
-        '--transcriptome'
+        '--Transcriptome', 'YES'
     ]
     uproteins(database_args)
 
     ms_args = [
-        '--outdir', str(tmp_path),
         'ms',
-        '--mass-spec', str(mzml),
+        '--outdir', str(tmp_path),
+        '--Mass_spec', str(mzml),
         '--inst', '2',
         '--t', '800ppm',
-        '--transcriptome'
+        '--Transcriptome', 'YES'
     ]
     uproteins(ms_args)
 
     postms_args = [
-        '--outdir', str(tmp_path),
         'postms',
+        '--outdir', str(tmp_path),
         '--genome', str(genome),
         '--proteome', str(proteome),
         '--rrna', str(rrna),
         '--gff', str(gtf),
-        '--mass-spec', str(mzml),
-        '--transcriptome'
+        '--Mass_spec', str(mzml),
+        '--Transcriptome', 'YES'
     ]
     uproteins(postms_args)
 

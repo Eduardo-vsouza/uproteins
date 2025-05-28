@@ -44,9 +44,9 @@ def test_assembly_mode(tmp_path):
         '--outdir', str(tmp_path),
         'assembly',
         '--single',
-            str(read1),
-            str(read2),
-            str(read3),
+            str(read1) +  # noqa: E131
+            str(read2) +  # noqa: E131
+            str(read3),   # noqa: E131
         '--genome', str(genome),
         '--gtf', str(gtf),
         '--strandness', 'F',
