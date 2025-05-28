@@ -35,7 +35,6 @@ def assembly_args(tmp_path, tmp_file) -> t.Generator[list[str], None, None]:
     args = [
         'assembly',
         '--outdir', str(tmp_path),
-        'assembly',
         '--genome', str(tmp_file),
         '--gtf', str(tmp_file),
     ]

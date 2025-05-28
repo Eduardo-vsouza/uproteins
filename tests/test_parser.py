@@ -18,36 +18,43 @@ from src.cli import _types
 
 @pytest.fixture(params=[
     [],
-    ['--reads1'],
-    ['--reads2'],
-    ['--single', '--reads1'],
-    ['--single', '--reads2'],
-    ['--single', '--reads1', '--reads2'],
+    ['--reads1', 'tmp_file'],
+    ['--reads2', 'tmp_file'],
+    ['--single', 'tmp_file', '--reads1', 'tmp_file'],
+    ['--single', 'tmp_file', '--reads2', 'tmp_file'],
+    ['--single', 'tmp_file', '--reads1', 'tmp_file', '--reads2', 'tmp_file']
 ])
 def bad_validate_assembly(request, assembly_args, tmp_file):
     args = assembly_args
     tmp_file = str(tmp_file)
 
     for arg in request.param:
-        args.append(arg)
-        args.append(tmp_file)
+        if arg == 'tmp_file':
+            args.append(tmp_file)
+        else:
+            args.append(arg)
     return args
 
 
-@pytest.fixture(params=[['--reads1', '--reads2'], ['--single']])
+@pytest.fixture(params=[
+    ['--reads1', 'tmp_file', '--reads2', 'tmp_file'],
+    ['--single', 'tmp_file']
+])
 def good_validate_assembly(request, assembly_args, tmp_file):
     args = assembly_args
     tmp_file = str(tmp_file)
 
     for arg in request.param:
-        args.append(arg)
-        args.append(tmp_file)
+        if arg == 'tmp_file':
+            args.append(tmp_file)
+        else:
+            args.append(arg)
     return args
 
 
 @pytest.fixture(params=[
-    ['--external-transcriptome'],
-    ['--external-gtf'],
+    ['--external_transcriptome', 'tmp_file'],
+    ['--external_gtf', 'tmp_file'],
     ['--starts', 'ATC,ATG', '--stops', 'ATA,ATG']
 ])
 def bad_validate_database(request, database_args, tmp_file):
@@ -55,25 +62,31 @@ def bad_validate_database(request, database_args, tmp_file):
     tmp_file = str(tmp_file)
 
     for arg in request.param:
-        args.append(arg)
-        args.append(tmp_file)
+        if arg == 'tmp_file':
+            args.append(tmp_file)
+        else:
+            args.append(arg)
     return args
 
 
 @pytest.fixture(params=[
     [],
-    ['--external-gtf', '--external-transcriptome'],
+    ['--external_gtf', 'tmp_file', '--external_transcriptome', 'tmp_file'],
+    ['--starts', 'ATC,ATG'],
     ['--starts', 'ATC'],
-    ['--stops', 'ATC'],
-    ['--starts', 'ATC', '--stops', 'ATG'],
+    ['--stops', 'ATC,ATG'],
+    ['--stops', 'ATG'],
+    ['--starts', 'ATC,ATA', '--stops', 'ATG,CTC'],
 ])
 def good_validate_database(request, database_args, tmp_file):
     args = database_args
     tmp_file = str(tmp_file)
 
     for arg in request.param:
-        args.append(arg)
-        args.append(tmp_file)
+        if arg == 'tmp_file':
+            args.append(tmp_file)
+        else:
+            args.append(arg)
     return args
 
 

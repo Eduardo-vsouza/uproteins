@@ -201,7 +201,7 @@ class YesOrNoBooleanAction(argparse.Action):
         if 'YES'.startswith(values.upper()):
             setattr(namespace, self.dest, True)
         elif 'NO'.startswith(values.upper()):
-            setattr(namespace, self.dest, True)
+            setattr(namespace, self.dest, False)
         else:
             parser.error(
                 f"argument {self.option_strings[0]}: invalid choice: "

@@ -159,15 +159,15 @@ _database_parser.add_argument(
     type=int
 )
 _database_parser.add_argument(
-    "--external-transcriptome",
+    "--external_transcriptome",
     help="Fasta file containing the transcripts sequences from a "
     "transcriptome assembly that was done elsewhere. Also implies "
-    "--external-gtf.",
+    "--external_gtf.",
     type=_types.FilePath
 )
 _database_parser.add_argument(
-    "--external-gtf",
-    help="If --external-transcriptome is provided, this argument should "
+    "--external_gtf",
+    help="If --external_transcriptome is provided, this argument should "
     "contain the path to a GTF file originated from the same "
     "transcriptome assembly",
     type=_types.FilePath
