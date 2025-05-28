@@ -188,7 +188,7 @@ _ms_parser.add_argument(
 _ms_parser.add_argument(
     "--Transcriptome", "-T",
     dest='transcriptome',
-    action='store_true',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
@@ -329,7 +329,7 @@ _postms_parser.add_argument(
 _postms_parser.add_argument(
     "--Transcriptome", "-T",
     dest='transcriptome',
-    action='store_true',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
@@ -408,7 +408,7 @@ _validate_parser.add_argument(
 _validate_parser.add_argument(
     "--Transcriptome", "-T",
     dest='transcriptome',
-    action='store_true',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
