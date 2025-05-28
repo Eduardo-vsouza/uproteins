@@ -41,8 +41,8 @@ def test_assembly_mode(tmp_path):
     read3 = rsrc.files(resources).joinpath("ERR262983.fastq")
 
     args = [
-        '--outdir', str(tmp_path),
         'assembly',
+        '--outdir', str(tmp_path),
         '--single',
             str(read1) +  # noqa: E131
             str(read2) +  # noqa: E131

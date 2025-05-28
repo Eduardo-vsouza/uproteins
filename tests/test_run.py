@@ -20,9 +20,9 @@ def test_full_run(tmp_path):
         'assembly',
         '--outdir', str(tmp_path),
         '--single',
-            str(read1),  # noqa: E131
-            str(read2),  # noqa: E131
-            str(read3),  # noqa: E131
+            str(read1) +  # noqa: E131
+            str(read2) +  # noqa: E131
+            str(read3),   # noqa: E131
         '--genome', str(genome),
         '--gtf', str(gtf),
         '--strandness', 'F',
@@ -64,8 +64,8 @@ def test_full_run(tmp_path):
     uproteins(postms_args)
 
     validate_args = [
-        '--outdir', str(tmp_path),
         'validate',
+        '--outdir', str(tmp_path),
         '--transcriptome'
     ]
     # uproteins(validate_args)
