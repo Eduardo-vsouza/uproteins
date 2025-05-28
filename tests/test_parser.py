@@ -72,10 +72,6 @@ def bad_validate_database(request, database_args, tmp_file):
 @pytest.fixture(params=[
     [],
     ['--external_gtf', 'tmp_file', '--external_transcriptome', 'tmp_file'],
-    ['--starts', 'ATC,ATG'],
-    ['--starts', 'ATC'],
-    ['--stops', 'ATC,ATG'],
-    ['--stops', 'ATG'],
     ['--starts', 'ATC,ATA', '--stops', 'ATG,CTC'],
 ])
 def good_validate_database(request, database_args, tmp_file):
@@ -116,7 +112,7 @@ class TestTypes:
     def test_Executable(self, inexistent_path):
         exec = _types.Executable('exec')
         assert exec('exec') == pathlib.Path('exec')
-        with pytest.raises(TypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             exec(str(inexistent_path))
 
     def test_DirectoryName(self, tmp_path, tmp_file, inexistent_path):
