@@ -18,14 +18,7 @@ _parser = argparse.ArgumentParser(
 _parser.add_argument(
     '-V', '--version',
     action='version',
-    version='%(prog)s 1.3.2 (GPL-3.0-or-later)'
-)
-
-_parser.add_argument(
-    '-o', '--outdir',
-    help='Inform output directory',
-    type=_types.DirectoryName,
-    required=True
+    version='%(prog)s 1.4.0 (GPL-3.0-or-later)'
 )
 
 # Subparsers
@@ -40,7 +33,12 @@ _modes = _parser.add_subparsers(
 # ASSEMBLY MODE
 # =============
 _assembly_parser = _modes.add_parser('assembly')
-# Reserving '-s' for a future '--silently'
+_assembly_parser.add_argument(
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
 _assembly_parser.add_argument(
     "--genome", "-g",
     help="Path to the reference genome.",
@@ -54,24 +52,22 @@ _assembly_parser.add_argument(
     required=True,
     type=_types.FilePath
 )
+# Reserving '-s' for a future '--silently'
 _assembly_parser.add_argument(
     '--single', '-S',
-    nargs='+',
-    type=_types.FilePath,
-    help="Single-end reads. Space separated list."
+    type=_types.CommaList(_types.FilePath),
+    help="Single-end reads. Comma separated list."
 )
 _assembly_parser.add_argument(
     '--reads1', '-1',
-    nargs='+',
-    type=_types.FilePath,
-    help="Paired-end reads. Inform your reads2 as well. Space separated "
+    type=_types.CommaList(_types.FilePath),
+    help="Paired-end reads. Inform your reads2 as well. Comma separated "
     "list."
 )
 _assembly_parser.add_argument(
     '--reads2', '-2',
-    nargs='+',
-    type=_types.FilePath,
-    help="Paired-end reads. Inform your reads1 as well. Space separated "
+    type=_types.CommaList(_types.FilePath),
+    help="Paired-end reads. Inform your reads1 as well. Comma separated "
     "list."
 )
 _assembly_parser.add_argument(
@@ -87,14 +83,14 @@ _assembly_parser.add_argument(
     type=int
 )
 _assembly_parser.add_argument(
-    "--gffcompare-path",
+    "--gffcompare_path",
     help="Path to gffcompare executable. If not provided, be sure to "
     "have it on your PATH, else the pipeline raises an error.",
     default='gffcompare',
     type=_types.Executable('gffcompare')
 )
 _assembly_parser.add_argument(
-    "--gffread-path",
+    "--gffread_path",
     help="Path to gffread executable. If not provided, be sure to "
     "have it on your PATH, else the pipeline raises an error.",
     default='gffread',
@@ -112,6 +108,12 @@ _assembly_parser.add_argument(
 # =============
 _database_parser = _modes.add_parser('database')
 _database_parser.add_argument(
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
+_database_parser.add_argument(
     "--genome", "-g",
     help="Genome fasta file to be translated to the six reading frames",
     required=True,
@@ -125,25 +127,24 @@ _database_parser.add_argument(
 )
 _database_parser.add_argument(
     "--starts",
-    nargs='+',
     help="The start codons that should be used for the six and three "
     "frame translation. By default, the NCBI bacterial genetic code is "
     "used. Space separated list.",
-    type=_types.Codon,
-    default=['TTG', 'CTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG']
+    type=_types.CommaList(_types.Codon),
+    default='TTG,CTG,ATT,ATC,ATA,ATG,GTG'
 )
 _database_parser.add_argument(
     "--stops",
-    nargs='+',
     help="The stop codons that should be used for the six and three frame "
     "translation. Space separated list.",
-    type=_types.Codon,
-    default=['TAA', 'TAG', 'TGA']
+    type=_types.CommaList(_types.Codon),
+    default='TAA,TAG,TGA'
 )
 _database_parser.add_argument(
-    "--transcriptome", "-T",
-    action='store_true',
-    help="Generate transcriptome database"
+    "--Transcriptome", "-T",
+    action=_types.YesOrNoBooleanAction,
+    dest='transcriptome',
+    help="Generate transcriptome database. A YES or NO action. Default: NO."
 )
 _database_parser.add_argument(
     "--maxsize",
@@ -158,15 +159,15 @@ _database_parser.add_argument(
     type=int
 )
 _database_parser.add_argument(
-    "--external-transcriptome",
+    "--external_transcriptome",
     help="Fasta file containing the transcripts sequences from a "
     "transcriptome assembly that was done elsewhere. Also implies "
-    "--external-gtf.",
+    "--external_gtf.",
     type=_types.FilePath
 )
 _database_parser.add_argument(
-    "--external-gtf",
-    help="If --external-transcriptome is provided, this argument should "
+    "--external_gtf",
+    help="If --external_transcriptome is provided, this argument should "
     "contain the path to a GTF file originated from the same "
     "transcriptome assembly",
     type=_types.FilePath
@@ -179,13 +180,21 @@ _database_parser.add_argument(
 # The problem is they are from another CLI application
 _ms_parser = _modes.add_parser('ms')
 _ms_parser.add_argument(
-    "--transcriptome", "-T",
-    action='store_true',
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
+_ms_parser.add_argument(
+    "--Transcriptome", "-T",
+    dest='transcriptome',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
 _ms_parser.add_argument(
-    "--mass-spec", "-M",
+    "--Mass_spec", "-M",
+    dest='mass_spec',
     help="Inform the directory containing all your .mzML files.",
     required=True,
     type=os.path.abspath
@@ -306,13 +315,21 @@ _ms_parser.add_argument(
 # ===========
 _postms_parser = _modes.add_parser('postms')
 _postms_parser.add_argument(
-    "--mass-spec", "-M",
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
+_postms_parser.add_argument(
+    "--Mass_spec", "-M",
+    dest='mass_spec',
     help="Inform the directory informed in the Peptide search step",
     type=_types.DirectoryPath
 )
 _postms_parser.add_argument(
-    "--transcriptome", "-T",
-    action='store_true',
+    "--Transcriptome", "-T",
+    dest='transcriptome',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
@@ -353,20 +370,18 @@ _postms_parser.add_argument(
 )
 _postms_parser.add_argument(
     "--starts",
-    nargs='+',
     help="The start codons that should be used for the six and three "
     "frame translation. By default, the NCBI bacterial genetic code is "
     "used. Space separated list.",
-    type=_types.Codon,
-    default=['TTG', 'CTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG']
+    type=_types.CommaList(_types.Codon),
+    default='TTG,CTG,ATT,ATC,ATA,ATG,GTG'
     )
 _postms_parser.add_argument(
     "--stops",
-    nargs='+',
     help="The stop codons that should be used for the six and three frame "
     "translation. Space separated list.",
-    type=_types.Codon,
-    default=['TAA', 'TAG', 'TGA']
+    type=_types.CommaList(_types.Codon),
+    default='TAA,TAG,TGA'
 )
 _postms_parser.add_argument(
     "--rrna",
@@ -385,8 +400,15 @@ _postms_parser.add_argument(
 # =============
 _validate_parser = _modes.add_parser('validate')
 _validate_parser.add_argument(
-    "--transcriptome", "-T",
-    action='store_true',
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
+_validate_parser.add_argument(
+    "--Transcriptome", "-T",
+    dest='transcriptome',
+    action=_types.YesOrNoBooleanAction,
     help="Whether transcriptome database was generated or not. If the "
     "transcriptome database was not generated, ignore this."
 )
@@ -395,6 +417,12 @@ _validate_parser.add_argument(
 # METRICS MODE
 # ============
 _metrics_parser = _modes.add_parser('metrics')
+_metrics_parser.add_argument(
+    '-o', '--outdir',
+    help='Inform output directory',
+    type=_types.DirectoryName,
+    required=True
+)
 _metrics_parser.add_argument("--non-redundant", action="store_true")
 _metrics_parser.add_argument("--maxsize", type=int, default=100)
 

@@ -56,6 +56,9 @@ def validate_database(
     This function exists the cli with an error message if either --external-gtf
     or --external-transcriptome is given without the other.
 
+    This function exists the cli with an error message a codons appears as
+    both a start codon and an end codon.
+
     Arguments
     ---------
     args : Namespace
@@ -69,4 +72,38 @@ def validate_database(
         parser.error(
             '--external-transcriptome and '
             '--external-gtf must be given together'
+        )
+
+    # We check if there is an intersection and capture it to use on the error
+    # message
+    if shared := set(args.starts).intersection(set(args.stops)):
+        parser.error(
+            "argument --starts: not allowed to share codons with argument "
+            f"--stops: '{','.join(shared)}'"
+        )
+
+
+def validate_postms(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser
+) -> None:
+    """Make sure that the postms args were correctly given.
+
+    This function exists the cli with an error message a codons appears as
+    both a start codon and an end codon.
+
+    Arguments
+    ---------
+    args : Namespace
+        The namespace containing the args, generated from the database parser.
+    parser : ArgumentParser
+        A reference to the database parser to invoke
+            :class:`ArgumentParser`.:func:`error` from.
+    """
+    # We check if there is an intersection and capture it to use on the error
+    # message
+    if shared := set(args.starts).intersection(set(args.stops)):
+        parser.error(
+            "argument --starts: not allowed to share codons with argument "
+            f"--stops: '{','.join(shared)}'"
         )

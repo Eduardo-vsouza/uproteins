@@ -90,7 +90,6 @@ def run_workflow(
             transcriptome_db.mark_annotated()
             transcriptome_db.unify()
             print("Transcriptome database generated.")
-        print("Database generation step complete. Look for databases in %s" % args.outdir)
 
     elif mode == "ms":
         genome = ps.PeptideSearch("Genome", args.mass_spec, "genome_database.fasta", args)
@@ -109,14 +108,14 @@ def run_workflow(
 
     elif mode == "postms":
         """ newest method """
+        validators.validate_postms(args, subparser)
+
         genome = PostMSPipeline(args=args, filetype='genome', folder='Genome')
         genome.run()
         if args.transcriptome:
             transcriptome = PostMSPipeline(args=args, filetype='transcriptome', folder='Transcriptome')
             transcriptome.run()
         """ new method """
-
-        print("DONE. Results are inside Genome or Transcriptome folders.")
 
     elif mode == "validate":
         validation = ValidatePipeline(args=args)
@@ -136,5 +135,4 @@ def run_workflow(
         metrics.generate_fasta()
         # metrics.plot_venn_2()
 
-    else:
-        print("Invalid mode. Please choose a valid mode.")
+    print(f'uProteInS {mode} step completed.')
