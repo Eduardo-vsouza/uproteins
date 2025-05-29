@@ -178,6 +178,25 @@ def Codon(val: t.Optional[str]) -> t.Optional[str]:
     return val
 
 
+def PositiveInt(val: t.Optional[str]) -> t.Optional[int]:
+    if val is None:
+        return val
+
+    n = int(val)
+    if n < 1:
+        raise TypeError
+    return n
+
+
+def Memory(val: t.Optional[str]) -> t.Optional[str]:
+    if val is None:
+        return val
+
+    if re.fullmatch(r'[0-9]*[1-9]+[0-9]*[kKgGmM]', val) is None:
+        raise TypeError
+    return val
+
+
 class YesOrNoBooleanAction(argparse.Action):
     def __init__(
         self,

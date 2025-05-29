@@ -79,8 +79,14 @@ _assembly_parser.add_argument(
 )
 _assembly_parser.add_argument(
     "--threads",
-    help="Number of threads to be used during parallel search.",
-    type=int
+    help="Number of threads for samtools and stringtie to use.",
+    type=_types.PositiveInt
+)
+_assembly_parser.add_argument(
+    '--memory',
+    help="Maximum memory per thread for samtools sort to use.",
+    type=_types.Memory
+
 )
 _assembly_parser.add_argument(
     "--gffcompare_path",
@@ -454,15 +460,23 @@ def get_parsers() -> tuple[
     return _parser, subparsers
 
 
-def exit(status: int = 0, message: t.Optional[str] = None) -> t.NoReturn:
+def exit(
+    status: int = 0,
+    message: t.Optional[str] = None,
+    end: t.Optional[str] = "\n"
+) -> t.NoReturn:
+    if end is not None and message is not None:
+        message += end
     _parser.exit(status, message)
 
 
-def error(message: str) -> t.NoReturn:
+def error(message: str, end: t.Optional[str] = "\n") -> t.NoReturn:
     """Print to stderr, then exit with return value 2."""
+    if end is not None:
+        message += end
     _parser.error(message)
 
 
-def stderr(message: str, end: t.Optional[str]) -> None:
+def stderr(message: str, end: t.Optional[str] = "\n") -> None:
     """Print to stderr."""
     print(message, file=sys.stderr, end=end)
