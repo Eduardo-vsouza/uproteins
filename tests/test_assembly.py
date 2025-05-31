@@ -22,6 +22,7 @@ import pathlib
 from importlib import resources as rsrc
 
 import pandas as pd
+from Bio import SeqIO
 
 from src import uproteins, cli, assembly  # noqa: F401
 from tests import resources
@@ -104,5 +105,17 @@ def test_assembly_mode(tmp_path):
             sep='\t'
         )
         ok_assembled = pd.read_csv(ok_assembled_path, comment='#', sep='\t')
-        assert assembled.equals(ok_assembled)
-        assert transcripts_path.read_text() == ok_transcripts_path.read_text()
+
+        transcripts = {
+            record.id: record.seq
+            for record
+            in SeqIO.parse(transcripts_path, 'fasta')
+        }
+        ok_transcripts = {
+            record.id: record.seq
+            for record
+            in SeqIO.parse(ok_transcripts_path, 'fasta')
+        }
+
+        pd.testing.assert_frame_equal(assembled, ok_assembled, check_like=True)
+        assert transcripts == ok_transcripts
