@@ -1,3 +1,23 @@
+# Copyright © 2021-2025 Eduardo Vieira de Souza
+# Copyright © 2021-2025 Adriana Canedo
+# Copyright © 2021-2025 Cristiano Valim Bizarro
+# Copyright © 2025 Bruno Maestri A Becker
+#
+# This file is part of uProteInS.
+#
+# uProteInS is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# uProteInS is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# uProteInS. If not, see <https://www.gnu.org/licenses/>.
+
+
 import os
 import pathlib
 import shutil
@@ -25,6 +45,8 @@ class ReadMapper:
         self.args = args
         self.gtf = args.gtf
         self.genome = args.genome
+        self.threads = self.args.threads
+        self.memory = self.args.memory
         self.is_paired = self._check_read_type()
         self.strandness = self.args.strandness
 
@@ -36,7 +58,7 @@ class ReadMapper:
         return False
 
     def create_indexes(self):
-        cmd_index = f'hisat2-build {self.genome} genome'.split(' ')
+        cmd_index = ['hisat2-build', str(self.genome), 'genome']
         result = subprocess.run(cmd_index)
         if (code := result.returncode) != 0:
             err = f'hisat2-build finished with non-zero return value: {code}'
@@ -54,18 +76,21 @@ class ReadMapper:
         for i, read_data in enumerate(reads):
             read_name = f'aligned_{i}'
 
-            hisat_strandness = f'--rna-strandness {self.strandness} ' \
-                if self.strandness is not None else ''
+            cmd_hisat = [
+                'hisat2',
+                '-x', 'genome',
+                '--dta',
+                '-S', f'HISAT/sam/{read_name}.sam'
+            ]
 
-            hisat_input = f'-U {read_data}'
+            if self.strandness is not None:
+                cmd_hisat.extend(['--rna-strandness', self.strandness])
+
+            hisat_input = ['-U', str(read_data)]
             if self.is_paired:
                 read_one, read_two = read_data
-                hisat_input = f'-1 {read_one} -2 {read_two}'
-
-            cmd_hisat = (
-                f'hisat2 -x genome {hisat_input} --dta {hisat_strandness} '
-                f'-S HISAT/sam/{read_name}.sam'
-            ).split(' ')
+                hisat_input = ['-1', str(read_one), '-2', str(read_two)]
+            cmd_hisat.extend(hisat_input)
 
             result = subprocess.run(cmd_hisat)
             if (code := result.returncode) != 0:
@@ -81,20 +106,32 @@ class ReadMapper:
         pathlib.Path("HISAT/bam").mkdir(exist_ok=True, parents=True)
 
         # run samtools view and pipe it to samtools sort
-        cmd_view = f'samtools view -Su HISAT/sam/{read_name}.sam'.split(' ')
-        view_result = subprocess.run(
-            cmd_view,
-            stdout=subprocess.PIPE,
-        )
+        cmd_view = [
+            'samtools',
+            'view',
+            '-Su',
+            f'HISAT/sam/{read_name}.sam'
+        ]
+        if self.threads is not None:
+            cmd_view.extend(['-@', str(self.threads)])
+
+        view_result = subprocess.run(cmd_view, stdout=subprocess.PIPE)
         if (code := view_result.returncode) != 0:
             err = f'samtools view finished with non-zero return value: {code}'
             cli.exit(3, err)
 
-        cmd_sort = f'samtools sort -o HISAT/bam/{read_name}.bam'.split(' ')
-        sort_result = subprocess.run(
-            cmd_sort,
-            input=view_result.stdout,
-        )
+        cmd_sort = [
+            'samtools',
+            'sort',
+            '-o',
+            f'HISAT/bam/{read_name}.bam'
+        ]
+        if self.threads is not None:
+            cmd_sort.extend(['-@', str(self.threads)])
+        if self.memory is not None:
+            cmd_sort.extend(['-m', self.memory])
+
+        sort_result = subprocess.run(cmd_sort, input=view_result.stdout)
         if (code := sort_result.returncode) != 0:
             err = f'samtools sort finished with non-zero return value: {code}'
             cli.exit(3, err)
@@ -114,9 +151,9 @@ class TranscriptAssembly:
     def _check_strand(self):
         if self.args.strandness == "RF":
             # or `self.args.strandness == 'R'`?
-            return "--rf "
+            return "--rf"
         elif self.args.strandness == "FR" or self.args.strandness == 'F':
-            return "--fr "
+            return "--fr"
         return ''
 
     def assemble(self):
@@ -125,13 +162,19 @@ class TranscriptAssembly:
         path.mkdir(exist_ok=True, parents=True)
         files = os.listdir("HISAT/bam")
         for file in files:
-            # self.strandness already has a trailing space
-            cmd_str = (
-                f'stringtie HISAT/bam/{file} -o '
-                f'StringTie/gtf_intermediates/{file[:-3]}gtf -p '
-                f'{self.threads} -G {self.gtf} {self.strandness}-l uproteins '
-                '-m 30 -A StringTie/gene_abundances.txt'
-            ).split(' ')
+            cmd_str = [
+                'stringtie',
+                f'HISAT/bam/{file}',
+                '-o', f'StringTie/gtf_intermediates/{file[:-3]}gtf',
+                '-G', str(self.gtf),
+                self.strandness,
+                '-l', 'uproteins',
+                '-m', '30',
+                '-A', 'StringTie/gene_abundances.txt'
+            ]
+            if self.threads is not None:
+                cmd_str.extend(['-p', str(self.threads)])
+
             result = subprocess.run(cmd_str)
             if (code := result.returncode) != 0:
                 err = f'stringtie finished with non-zero return value: {code}'
@@ -149,13 +192,24 @@ class TranscriptAssembly:
         return self
 
     def merge_transcripts(self):
-        cmd_str = (
-            'stringtie --merge StringTie/gtf_list.txt -o assembled.gtf -G '
-            f'{self.gtf} -m 30 -l uproteins'
-        ).split(' ')
+        cmd_str = [
+            'stringtie',
+            '--merge',
+            'StringTie/gtf_list.txt',
+            '-o', 'assembled.gtf',
+            '-G', str(self.gtf),
+            '-m', '30',
+            '-l', 'uproteins'
+        ]
+        if self.threads is not None:
+            cmd_str.extend(['-p', str(self.threads)])
+
         result = subprocess.run(cmd_str)
         if (code := result.returncode) != 0:
-            err = f'stringtie finished with non-zero return value: {code}'
+            err = (
+                'stringtie --merge finished with non-zero '
+                f'return value: {code}'
+            )
             cli.exit(3, err)
         gtf_path = 'assembled.gtf'
         return gtf_path
@@ -174,7 +228,7 @@ class CompareTranscripts:
         shutil.copy(self.args.genome, './genome.fasta')
 
     def index_genome(self):
-        cmd_sam = 'samtools faidx genome.fasta'.split(' ')
+        cmd_sam = ['samtools', 'faidx', 'genome.fasta']
         result = subprocess.run(cmd_sam)
         if (code := result.returncode) != 0:
             err = f'samtools faidx finished with non-zero status code: {code}'
@@ -182,11 +236,14 @@ class CompareTranscripts:
 
     def run_gffcompare(self):
         pathlib.Path('RNA_comparisons').mkdir(exist_ok=True)
-        cmd_compare = (
-            f'{self.gffcompare_path} -r {self.args.gtf} '
-            f'{self.assembled_gtf} -o '
-            'RNA_comparisons/compared_assembly -s genome.fasta'
-        ).split(' ')
+        cmd_compare = [
+            str(self.gffcompare_path),
+            '-r', str(self.args.gtf),
+            str(self.assembled_gtf),
+            '-o', 'RNA_comparisons/compared_assembly',
+            '-s', 'genome.fasta'
+        ]
+
         result = subprocess.run(cmd_compare)
         if (code := result.returncode) != 0:
             err = f'gffcompare finished with non-zero return code: {code}'
@@ -194,10 +251,12 @@ class CompareTranscripts:
         return 'RNA_comparisons'
 
     def extract_sequences(self):
-        cmd_read = (
-            f'{self.gffread_path} -w HISAT/transcripts.fasta -g '
-            f'genome.fasta {self.assembled_gtf}'
-        ).split(' ')
+        cmd_read = [
+            str(self.gffread_path),
+            '-w', 'HISAT/transcripts.fasta',
+            '-g', 'genome.fasta',
+            str(self.assembled_gtf)
+        ]
         result = subprocess.run(cmd_read)
         if (code := result.returncode) != 0:
             err = f'gffread finished with non-zero return code: {code}'

@@ -1,3 +1,23 @@
+# Copyright © 2025 Eduardo Vieira de Souza
+# Copyright © 2025 Adriana Canedo
+# Copyright © 2025 Cristiano Valim Bizarro
+# Copyright © 2025 Bruno Maestri A Becker
+#
+# This file is part of uProteInS.
+#
+# uProteInS is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# uProteInS is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# uProteInS. If not, see <https://www.gnu.org/licenses/>.
+
+
 """Utilitarian module containing a number of helper functions designed to serve
 as values for the :param:`type` parameter of the :mod:`argparse` module.
 
@@ -174,6 +194,25 @@ def Codon(val: t.Optional[str]) -> t.Optional[str]:
         return val
 
     if re.fullmatch(r'[ATCG]{3}', val) is None:
+        raise TypeError
+    return val
+
+
+def PositiveInt(val: t.Optional[str]) -> t.Optional[int]:
+    if val is None:
+        return val
+
+    n = int(val)
+    if n < 1:
+        raise TypeError
+    return n
+
+
+def Memory(val: t.Optional[str]) -> t.Optional[str]:
+    if val is None:
+        return val
+
+    if re.fullmatch(r'[0-9]*[1-9]+[0-9]*[kKgGmM]', val) is None:
         raise TypeError
     return val
 
