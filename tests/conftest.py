@@ -21,8 +21,37 @@
 import pathlib
 import random
 import typing as t
+import shutil
+from importlib import resources as rsrc
 
 import pytest
+
+from tests import resources
+
+
+@pytest.fixture(scope='module')
+def data(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path:
+    """Return a module-scoped temp path to a dir containing test data.
+    The organization is as follows:
+    .. code-block:: text
+        data/
+        ├─ results/
+        ├─ mzml/
+        ├─ assembled.gtf
+        ├─ ERR262980.fastq
+        ├─ ERR262982.fastq
+        ├─ ERR262983.fastq
+        ├─ genome.fasta
+        ├─ mtb.gb
+        ├─ mtb.gtf
+        ├─ proteome.fasta
+        ├─ rrna.fna
+        └─ transcripts.fasta
+    """
+    data = rsrc.files(resources)
+    data_dir = tmp_path_factory.mktemp('data')
+    shutil.copytree(data, data_dir, dirs_exist_ok=True)  # pyright: ignore
+    return data_dir
 
 
 @pytest.fixture
@@ -33,10 +62,10 @@ def tmp_file(tmp_path: pathlib.Path) -> pathlib.Path:
 
 
 @pytest.fixture
-def inexistent_path() -> pathlib.Path:
+def inexistent_path(tmp_path) -> pathlib.Path:
     while True:
         random_nums = [str(random.randint(1, 10)) for _ in range(10)]
-        path = pathlib.Path(''.join(random_nums))
+        path = tmp_path / pathlib.Path(''.join(random_nums))
         if not path.exists():
             return path
 

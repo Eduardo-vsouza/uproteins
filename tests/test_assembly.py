@@ -22,12 +22,14 @@ import pathlib
 from importlib import resources as rsrc
 
 import pandas as pd
+import pytest
 from Bio import SeqIO
 
 from src import uproteins, cli, assembly  # noqa: F401
 from tests import resources
 
 
+@pytest.mark.assembly
 def test_assembly_parser(assembly_args, tmp_file):
     assembly_args += ['--single', str(tmp_file)]
     parser, subparsers = cli.get_parsers()
@@ -35,6 +37,7 @@ def test_assembly_parser(assembly_args, tmp_file):
     cli.validate_assembly(args, subparsers['assembly'])
 
 
+@pytest.mark.assembly
 def test_read_type(assembly_args, tmp_file):
     single = [*assembly_args, '--single', str(tmp_file)]
     paired = [
@@ -54,6 +57,7 @@ def test_read_type(assembly_args, tmp_file):
     assert paired_mapper.is_paired
 
 
+@pytest.mark.assembly
 def test_assembly_mode(tmp_path):
     genome = rsrc.files(resources).joinpath("genome.fasta")
     gtf = rsrc.files(resources).joinpath("mtb.gtf")

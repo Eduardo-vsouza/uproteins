@@ -106,6 +106,7 @@ def good_validate_database(request, database_args, tmp_file):
     return args
 
 
+@pytest.mark.parser
 class TestTypes:
     # For those functions, argparse deals with raising a SystemExit with
     # exitcode 2 (what we want) if they simply raise TypeError, so we just make
@@ -209,6 +210,7 @@ class TestTypes:
         assert excinfo.value.code == 2
 
 
+@pytest.mark.parser
 class TestValidate:
     def test_good_validate_assembly(self, good_validate_assembly):
         parser, subparsers = cli.get_parsers()

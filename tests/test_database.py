@@ -18,9 +18,12 @@
 # uProteInS. If not, see <https://www.gnu.org/licenses/>.
 
 
+import pytest
+
 from src import uproteins, cli, assembly  # noqa: F401
 
 
+@pytest.mark.database
 def test_database_parser(database_args, tmp_file):
     database_args += ['--genome', str(tmp_file), '--proteome', str(tmp_file)]
     parser, subparsers = cli.get_parsers()

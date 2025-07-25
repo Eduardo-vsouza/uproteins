@@ -33,6 +33,20 @@ test = [
 [tool.poetry]
 package-mode = false
 
+
+[tool.pytest.ini_options]
+testpaths = [ "tests" ]
+markers = [
+    "assembly: mark as assembly step test",
+    "database: mark as database step test",
+    "ms: mark as ms step test",
+    "postms: mark as postms step test",
+    "validate: mark as validate step test",
+    "fullrun: mark as a full run test",
+    "parser: mark as a parser test",
+]
+
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
